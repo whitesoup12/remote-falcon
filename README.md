@@ -17,9 +17,9 @@ Before you can do anything it's pretty important to get the code. You'll need to
 
 ### How do I run it?
 Inside this monorepo is 3 individual repositories, one for the Web application, one for the API, and one for the database. If you're starting fresh, I recommend reading and executing each README in this order:
-1. <a href="https://github.com/whitesoup12/remote-falcon/remote-falcon-sql/README.md" target="_blank">Remote Falcon SQL</a>
-2. <a href="https://github.com/whitesoup12/remote-falcon/remote-falcon-api/README.md" target="_blank">Remote Falcon API</a>
-3. <a href="https://github.com/whitesoup12/remote-falcon/remote-falcon-web/README.md" target="_blank">Remote Falcon Web</a>
+1. <a href="https://github.com/whitesoup12/remote-falcon/tree/main/remote-falcon-sql#readme" target="_blank">Remote Falcon SQL</a>
+2. <a href="https://github.com/whitesoup12/remote-falcon/tree/main/remote-falcon-api#readme" target="_blank">Remote Falcon API</a>
+3. <a href="https://github.com/whitesoup12/remote-falcon/tree/main/remote-falcon-web#readme" target="_blank">Remote Falcon Web</a>
 
 ### I Need Help!
 If you need help, have a question, or notice an issue with the local development setup READMEs, please utilize this repositories <a href="https://github.com/whitesoup12/remote-falcon/discussions" target="_blank">GitHub Discussions page</a>.
