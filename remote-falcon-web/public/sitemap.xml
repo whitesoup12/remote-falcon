@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+		<!--	created with www.mysitemapgenerator.com	-->
+		<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+	<loc>https://remotefalcon.com/</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://remotefalcon.com/signin</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://remotefalcon.com/signup</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://remotefalcon.com/forgot</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://remotefalcon.com/control-panel</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://remotefalcon.com/control-panel/account-settings</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://remotefalcon.com/control-panel/dashboard</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://remotefalcon.com/control-panel/remote-falcon-settings</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://remotefalcon.com/control-panel/viewer-page</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://remotefalcon.com/control-panel/sequences</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://remotefalcon.com/control-panel/viewer-page-templates</loc>
+	<lastmod>2023-05-21T16:23:14+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+</urlset>
