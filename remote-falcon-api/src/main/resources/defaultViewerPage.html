@@ -1,0 +1,648 @@
+<!--
+   This HTML template has been provided by Rick Harris and contains everything you should need 
+   to get started!
+   
+   Since this will be embedded in the page, there is no need to add any html or body tags. 
+   Simply add and/or modify elements you want and they will be added.
+   
+   The following are the variables used to populate your lists so DON'T MODIFY THESE!!:
+   {PLAYLISTS} - Displays the list of your sequences for the viewer to request.
+   {NOW_PLAYING} - Displays the currently playing sequence.
+   {NEXT_PLAYLIST} - Displays the next sequence in the queue.
+   {QUEUE_SIZE} - Displays the current number of songs in the queue when using Jukebox mode.
+   {QUEUE_DEPTH} - Displays the size that you have configured for your queue. This can be used in error messages or your instructions if you want.
+   {LOCATION_CODE} - Displays the input field used to capture the location code.
+   {JUKEBOX_QUEUE} - Displays the list of sequences currently in the jukebox queue.
+   
+   Feel free to modify this HTML page as much as you need. All I ask is that you follow this one simple rule...
+   Do NOT add ANY scripts or ANY reference to scripts. NONE! ZILCH! NADA!
+   Other than that, get creative with it!
+
+   This page is designed to make modifying the looks of your page somewhat straight forward. 
+   The <style> section is where you will changes the properties to change the appearance of your page.
+   You can move the sections as you need
+-->
+
+<!--
+    The section between the <style type="text/css"> and </style> is used to customize your viewer page.
+    Do not delete any items in this section unless you know what they are doing.
+    This section is where you can custom design your webpage the way you want it by changing the values for the particular section. 
+-->
+
+<style type="text/css">
+
+    /***************
+        Base Config-- This section defines the base configuration for your page, the font and font color
+    *******************/
+
+    * {
+        box-sizing: border-box;
+        font-family: Ubuntu, Helvetica, Arial, sans-serif;
+        color: red;
+        text-align: center;
+    }
+
+    /*******************************
+        The body section is for configuring the overall looks of the page such as the background color
+        and background image. If you want to use a background image
+        delete the comments and it is recommended to set a size to ensure if fits how you intend it.
+        If you want the image to tile to fill the whole page then set the background-repeat to repeat.
+    *******************************/
+
+    body {
+        /** 
+        background-image: url(yourBackgroundImage.html);
+        background-repeat: repeat;
+        background-size: 300px 100px;
+        **/
+        background-color: #000000; /** sets the overall background color **/
+    }
+
+    /*******************************
+        The div section is for configuring looks of the div sections
+    *******************************/
+
+    div {
+        font-size: 11px;
+        line-height: 1.5;
+        text-align: center;
+        /** only needed if you want a different text color
+        color: #000000; 
+        **/
+    }
+
+    /*******************************
+        The #header_Img_Content section is for configuring looks for that section
+    *******************************/
+
+    #header_Img_Content {
+        /** only needed if you want a different background color for that section
+        background-color: #000000;
+        **/
+        margin: auto;
+        width: 90%;
+        text-align: center;
+    }
+
+
+    /***************
+        the body text is the generic style for your normal text areas
+    *****************/
+
+    .body_text {
+        /** only needed if you want a different background color for all of the body text sections
+        background-color: #000000;
+        **/
+        margin: auto;
+        width: 90%;
+        color: #7e8c8d;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    /*************
+        The body_text will provide the format for all the text areas, but if you need more control
+        of that specific section, then you can configure it in this section
+    ****************/
+
+    /*********************
+        #instructional-text{
+            background-color: #000000;
+            margin: auto;
+            width: 90%;
+            color: #7e8c8d;
+            text-align: center;
+            font-size: 18px;
+        }
+    **********************/
+
+    /*****************
+        This will format the footer
+    **************************/
+
+    #footer {
+        background-color: #D0021B;
+        margin: auto;
+        width: 90%;
+        color: #ffffff;;
+        text-align: center;
+        font-size: 18px;
+    }
+
+
+    /*******************************
+        The #intro section is for configuring looks for that section
+    *******************************/
+
+    #intro {
+
+        /** only needed if you want a different background color for all of the body text sections
+        background-color: #000000;
+        **/
+        margin: auto;
+        width: 90%;
+        text-align: center;
+        font-size: 30px;
+    }
+
+    /*******************************
+        The hr.separator is used to configure the separator bar
+    *******************************/
+
+    hr.separator {
+        border-radius: 5px;
+        margin-top: 10px;
+        margin-right: auto;
+        margin-left: auto;
+        width: 90%;
+        height: 8px;
+        border: 0;
+        background-color: #009C00;
+        padding: 0px;
+    }
+
+    /*******************************
+        The location_code_text is used to configure the section where the
+        location code text lives
+    *******************************/
+
+    #location_code_text {
+        /** only needed if you want a different background color for all of the body text sections
+        background-color: #000000;
+        **/
+        margin: auto;
+        width: 90%;
+        color: #7e8c8d;
+        text-align: center;
+        font-size: 18px;
+        margin-top: 10px;
+    }
+
+    /*******************************
+        The location_code_container is used to configure the section where the
+        location code lives
+    *******************************/
+
+    #location_code_container {
+        margin: auto;
+        width: 25%;
+        color: #D0021B;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    /*******************************
+        The playlists-container is used to configure the section where the
+        list of your songs is shown
+    *******************************/
+
+    #playlists_container {
+        /** only needed if you want a different background color for this section
+        background-color: #000000;
+        **/
+        margin: auto;
+        width: 90%;
+        color: #D0021B;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    /*******************************
+        The rf-titles is used to configure the title above the RF imported data
+    *******************************/
+
+    .rf-titles {
+        /** only needed if you want a different background color for for this section
+        background-color: #000000;
+        **/
+        border-bottom: 5px solid red;
+        margin-top: 10px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 70%;
+        color: #d60000;
+        text-align: center;
+        font-size: 30px;
+        font-weight: bold;
+    }
+
+    /*******************************
+        The playing-now class is used to configure the text that shows what is currently playing
+    *******************************/
+
+    .playing-now {
+        /*text-align: left; */
+        margin-top: 10px;
+        color: white;
+        font-size: 20px;
+    }
+
+    /*******************************
+        The rtable is used to configure table where the rf lists will show
+        You shouldn't modify this
+    *******************************/
+
+    .rtable {
+        display: flex;
+        flex-wrap: wrap;
+        margin: auto;
+        text-align: center;
+        width: 90%;
+        padding: 0;
+    }
+
+    /*******************************
+        The cell-vote-playlist is used to configure the table where the rf lists will show when you are using the voting mode
+        You shouldn't modify this with the exception of the font-size, border and cursor properties
+    *******************************/
+
+    .cell-vote-playlist {
+        flex-grow: 1;
+        width: 85%;
+        font-weight: bold;
+        overflow: hidden;
+        list-style: none;
+        font-size: 20px;
+        border: solid white;
+        border-width: 2px 2px 1px 2px;
+        cursor: pointer;
+    }
+
+    /*******************************
+        The cell-vote is used to configure the table where the rf lists will show when you are using the voting mode
+        You shouldn't modify this with the exception of the font-size, border and cursor properties
+    *******************************/
+
+    .cell-vote {
+        flex-grow: 1;
+        width: 15%;
+        font-weight: bold;
+        overflow: hidden;
+        list-style: none;
+        font-size: 20px;
+        border: solid white;
+        border-width: 2px 2px 1px 0px;
+
+    }
+
+    /*******************************
+        The jukebox-list is used to configure the table where the rf lists will show when you are using the jukebox mode
+        You shouldn't modify this with the exception of the font-size, border and cursor properties
+    *******************************/
+
+
+    .jukebox-list {
+        width: 100%;
+        font-size: 24px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        /**border-width: 2px 2px 1px 2px; **/
+        /**cursor:grabbing ; **/
+
+    }
+
+    /*******************************
+        The jukebox-queue is used to configure the list of current jukebox requests
+    *******************************/
+
+    .jukebox-queue {
+        text-align: center;
+        color: white;
+        font-size: 20px;
+    }
+
+    /*******************************
+        The sequence image class is to style the image that appears next to the sequence name
+    *******************************/
+
+    .sequence-image {
+        height: 40px;
+        width: auto;
+        padding-right: 20px;
+    }
+
+
+    /*******************************
+        The jukebox-queue container is the wrapper container for the jukebox queue list
+    *******************************/
+
+    .jukebox-queue-container {
+        overflow: auto;
+        height: 150px;
+        width: 70%;
+        margin: 0 auto;
+    }
+
+    /*******************************
+        The after-hours class is used to configure a message to be displayed when
+        you don't have a scheduled playlist playing
+    *******************************/
+
+    .after-hours {
+        width: 90%;
+        font-size: 24px;
+        border: none;
+        font-weight: bold;
+        margin: auto;
+    }
+
+    /*******************************
+        The button is used to configure your buttons
+    *******************************/
+
+    .button {
+        background-color: #D0021B;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 24px;
+        margin: 4px 2px;
+        cursor: pointer;
+    }
+
+    #submit {
+        background-color: #d60000;
+        padding: 1em;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 20px;
+        font-weight: bold;
+        text-decoration: none;
+        border: none;
+    }
+
+    #submit:hover {
+        border: none;
+        background: #e60000;
+        box-shadow: 0px 0px 1px #777;
+    }
+
+    /*******************************
+        The innerRequestSuccessful is used to configure the message for successful requests
+    *******************************/
+
+    .innerRequestSuccessful {
+        background-color: #009C00;
+        margin: auto;
+        width: 80%;
+        color: #ecf0f1;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    /*******************************
+        The failed_Info_Box is used to configure the message for unsuccessful requests
+    *******************************/
+    .failed_Info_Box {
+        background-color: #FF7400;
+        margin: auto;
+        width: 80%;
+        color: #ecf0f1;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+    }
+</style>
+
+<h1>Enter your show title</h1>
+
+<!-- if you want a picture in your header, you will have to store it on a secure server or it
+might not display correctly. Sample image is scaled to 10% width, so your image might need to 
+be adjusted.
+-->
+
+<div id="header_Img_Content">
+    <img src="https://remotefalcon.com/jukebox-v1-rf-only-cropped.png" style="max-width: 10%;height:auto;margin: auto;">
+</div>
+
+
+<div id="intro">
+    Your intro title<br/>
+    2020 Christmas Light show
+</div>
+
+<div class="body_text" id="intro-text">
+    A description of your show and any other info you want to provide.<br/>
+    Some more info on your show.<br/>
+</div>
+
+<hr class="separator">
+
+<!-- This section is what shows what is currently playing Don't delete -->
+
+<div class="rf-titles">
+    Playing Now
+</div>
+
+<div class="playing-now">
+    {NOW_PLAYING}
+</div>
+
+<!-- This section will display a message if your show isn't
+playing a scheduled playlist-->
+
+<div {after-hours-message}>
+    <div class="after-hours">
+        Our show hours are <br/>
+        Sunday through Thursday from Sunset to 10:00 P.M.
+        Friday and Saturday from sunset to 11:00 P.M.
+    </div>
+</div>
+
+<!-- The section below will only display if your show is set for Jukebox mode, there
+is no need to delete it if you are using the Voting mode, and you might change your
+mind on the selection method later! -->
+
+<div {jukebox-dynamic-container}>
+    <p class="rf-titles">Next Selection</p>
+    <div style="text-align: center; color: white; font-size: 20px;">
+        {NEXT_PLAYLIST}
+    </div>
+    <p class="rf-titles"># Selected Songs</p>
+    <div style="text-align: center; color: white;font-size: 20px;">
+        {QUEUE_SIZE}
+    </div>
+
+    <p class="rf-titles">Current Queue</p>
+    <div style="text-align: center; color: white;font-size: 20px;">
+        <div class="jukebox-queue-container">
+            {JUKEBOX_QUEUE}
+        </div>
+    </div>
+
+</div>
+
+<!-- This section is used for the instructions that you want if you are using the Jukebox mode. 
+If you are using the voting mode, then it will not show.
+Note that you can use the {QUEUE_SIZE} in your instructions, You shouldn't delete this if you are using the voting mode
+because you might change your mind later.
+Modify this to provide the instructions you want for your audience-->
+
+<div class="body_text" id="instructional-text" {jukebox-dynamic-container}>
+    <H2>Pick your Favorite</H2>
+    Select the song that you would like to play from the list below.
+    Your selection will be added to the end of the list of the songs that are already selected. The list is limited to
+    {QUEUE_DEPTH}
+    songs. Songs will be played in the order that they are selected
+</div>
+
+<!-- This section is used for the instructions that you want if you are using the Voting mode. 
+If you are using the jukebox mode, then it will not show.
+You shouldn't delete this if you are using the voting mode
+because you might change your mind later.
+Modify this to provide the instructions you want for your audience-->
+
+<div class="body_text" id="instructional-text" {playlist-voting-dynamic-container}>
+    <H2>Vote for your Favorite</H2>
+    Vote for your favorite song from the list below. Your vote will be added to the
+    song you chose. The song with the most votes will play
+    when the current song is finished.<br/>
+    You can only vote one time per round and the voting will start over once the
+    song with the highest votes starts to play. <br/>
+    Merry Christmas
+</div>
+
+<!--
+  This is the section for the location code for the viewer to enter, if you have
+  location code enabled. It appears twice here, once for jukebox and once for 
+  voting. 
+-->
+<div {location-code-dynamic-container}>
+    <div id="location_code_text">
+        Enter the code below to submit a request:
+    </div>
+    <div id="location_code_container">
+        {LOCATION_CODE}
+    </div>
+</div>
+
+<hr class="separator">
+
+<!-- The section below will only display if your show is set for Voting mode, there
+is no need to delete it if you are using the Jukebox mode, and you might change your
+mind on the selection method later! -->
+
+<div {playlist-voting-dynamic-container}>
+    <div class="rtable">
+        <div class="cell-vote-playlist" style="border: none; cursor: text">
+            Song List
+        </div>
+        <div class="cell-vote" style="border: none; cursor: text">
+            Votes
+        </div>
+    </div>
+    <div class="rtable">
+        {PLAYLISTS}
+    </div>
+</div>
+
+
+<!-- The section below will only display if your show is set for Jukebox mode, there
+is no need to delete it if you are using the Voting mode, and you might change your
+mind on the selection method later! -->
+
+<div {jukebox-dynamic-container}>
+    <div id="playlists_container">
+        {PLAYLISTS}
+    </div>
+</div>
+<!-- *****************************************
+    The sections below are for the error messages, don't delete them!
+    ************************************* -->
+
+<div id="requestSuccessful" style="display: none">
+    <div class="innerRequestSuccessful">
+        Successfully Added!
+    </div>
+</div>
+
+<div id="requestFailed" style="display: none">
+    <div class="failed_Info_Box">
+        ERROR <br/>
+        An unexpected error has occurred! Sorry for the inconvenience.
+    </div>
+</div>
+
+<div id="requestPlaying" style="display: none">
+    <div class="failed_Info_Box">
+        SONG ALREADY REQUESTED <br/>
+        The selected song has already been requested.
+    </div>
+</div>
+
+<div id="queueFull" style="display: none">
+    <div class="failed_Info_Box">
+        QUEUE FULL<br/>
+        The queue is full. The maximum number of request is {QUEUE_DEPTH}
+    </div>
+</div>
+
+<div id="invalidLocation" style="display: none">
+    <div class="failed_Info_Box">
+        INVALID LOCATION <br/>
+        You are not located where the show is or didn't allow your location to be identified!
+    </div>
+</div>
+
+<div id="alreadyVoted" style="display: none">
+    <div class="failed_Info_Box">
+        ALREADY VOTED <br/>
+        You can only vote once per round, you will have to wait for the current song to finish before you can vote
+        again.
+    </div>
+</div>
+
+<div id="invalidLocationCode" style="display: none">
+    <div class="failed_Info_Box">
+        INVALID CODE <br/>
+        The code you entered is not correct!
+    </div>
+</div>
+
+<!-- end of error messages -->
+
+<hr class="separator">
+
+<div class="body_text" id="footer_text">
+    <h3>About our show</h3>
+    Enter whatever information you want like maybe details about your show or show times
+</div>
+
+<a href="https://remotefalcon.com" class="button">Visit our
+    Website</a> <!-- change this to your website or delete if not needed -->
+
+<div class="body_text" id="social_links"> <!-- modify or delete the links as needed -->
+    <h3>FOLLOW US</h3>
+
+    <a style="display: inline-block;"
+       href="https://www.facebook.com/sharer/sharer.php?u=https://www.facebook.com/PROFILE"
+       target="_blank"> <img style="border-radius: 3px; display: block;"
+                             src="https://s3-eu-west-1.amazonaws.com/ecomail-assets/editor/social-icos/roundedwhite/facebook.png"
+                             alt="" width="35" height="35"/> </a>
+    <a style="display: inline-block;" href="https://twitter.com/home?status=https://www.twitter.com/PROFILE"
+       target="_blank"> <img style="border-radius: 3px; display: block;"
+                             src="https://s3-eu-west-1.amazonaws.com/ecomail-assets/editor/social-icos/roundedwhite/twitter.png"
+                             alt="" width="35" height="35"/> </a>
+    <a style="display: inline-block;"
+       href="https://www.linkedin.com/shareArticle?mini=true&amp;url=[[SHORT_PERMALINK]]&amp;title=&amp;summary=&amp;source="
+       target="_blank"> <img style="border-radius: 3px; display: block;"
+                             src="https://s3-eu-west-1.amazonaws.com/ecomail-assets/editor/social-icos/roundedwhite/linkedin.png"
+                             alt="" width="35" height="35"/> </a>
+    <a style="display: inline-block;" href="[[SHORT_PERMALINK]]" target="_blank"> <img
+            style="border-radius: 3px; display: block;"
+            src="https://s3-eu-west-1.amazonaws.com/ecomail-assets/editor/social-icos/roundedwhite/instagram.png"
+            alt="" width="35" height="35"/> </a>
+</div>
+<div id="footer">
+    Hosted by RemoteFalcon 2020
+</div>

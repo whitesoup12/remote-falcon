@@ -1,0 +1,30 @@
+package com.remotefalcon.api.entity;
+
+import lombok.*;
+import org.hibernate.annotations.Type;
+
+import javax.persistence.*;
+
+@Entity
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "REMOTE_VIEWER_PAGE_TEMPLATES")
+public class RemoteViewerPageTemplates {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "remoteViewerPageTemplateKey")
+  private Long remoteViewerPageTemplateKey;
+
+  @Column(name = "viewerPageTemplateName")
+  private String viewerPageTemplateName;
+
+  @Column(name = "viewerPageTemplateHtml")
+  private String viewerPageTemplateHtml;
+
+  @Column(name = "isActive")
+  @Type(type = "yes_no")
+  private Boolean isActive;
+}
