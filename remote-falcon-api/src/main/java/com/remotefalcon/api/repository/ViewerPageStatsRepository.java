@@ -3,7 +3,7 @@ package com.remotefalcon.api.repository;
 import com.remotefalcon.api.entity.ViewerPageStats;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.time.ZonedDateTime;
 import java.util.List;
 

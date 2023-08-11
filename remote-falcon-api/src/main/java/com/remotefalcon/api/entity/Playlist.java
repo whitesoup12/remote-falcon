@@ -3,7 +3,7 @@ package com.remotefalcon.api.entity;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -32,7 +32,7 @@ public class Playlist {
   private Integer sequenceDuration;
 
   @Column(name = "playlistVisible")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean sequenceVisible;
 
   @Column(name = "playlistVotes")
@@ -54,11 +54,11 @@ public class Playlist {
   private String sequenceImageUrl;
 
   @Column(name = "isPlaylistActive")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean isSequenceActive;
 
   @Column(name = "ownerVoted")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean ownerVoted;
 
   @Column(name = "sequenceVisibleCount")

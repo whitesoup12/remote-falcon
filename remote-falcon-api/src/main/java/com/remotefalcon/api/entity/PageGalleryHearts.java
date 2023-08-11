@@ -3,7 +3,7 @@ package com.remotefalcon.api.entity;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -26,7 +26,7 @@ public class PageGalleryHearts {
   private String viewerPage;
 
   @Column(name = "viewerPageHearted")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean viewerPageHearted;
 
   @Transient

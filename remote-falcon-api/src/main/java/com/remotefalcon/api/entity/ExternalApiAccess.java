@@ -1,18 +1,8 @@
 package com.remotefalcon.api.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.hibernate.annotations.Type;
+import jakarta.persistence.*;
+import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.time.ZonedDateTime;
 
 @Entity
@@ -38,7 +28,7 @@ public class ExternalApiAccess {
   private String accessSecret;
 
   @Column(name = "isActive")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean isActive;
 
   @Column(name = "createdDate")
