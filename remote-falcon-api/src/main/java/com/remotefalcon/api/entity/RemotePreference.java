@@ -3,7 +3,7 @@ package com.remotefalcon.api.entity;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
@@ -23,25 +23,25 @@ public class RemotePreference {
   private String remoteToken;
 
   @Column(name = "viewerModeEnabled")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean viewerModeEnabled;
 
   @Column(name = "viewerControlEnabled")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean viewerControlEnabled;
 
   @Column(name = "viewerControlMode")
   private String viewerControlMode;
 
   @Column(name = "resetVotes")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean resetVotes;
 
   @Column(name = "jukeboxDepth")
   private Integer jukeboxDepth;
 
   @Column(name = "enableGeolocation")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean enableGeolocation;
 
   @Column(name = "remoteLatitude")
@@ -57,15 +57,15 @@ public class RemotePreference {
   private Integer messageDisplayTime;
 
   @Column(name = "checkIfVoted")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean checkIfVoted;
 
   @Column(name = "interruptSchedule")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean interruptSchedule;
 
   @Column(name = "psaEnabled")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean psaEnabled;
 
   @Column(name = "psaSequence")
@@ -78,35 +78,35 @@ public class RemotePreference {
   private Integer jukeboxRequestLimit;
 
   @Column(name = "viewerPagePublic")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean viewerPagePublic;
 
   @Column(name = "jukeboxHistoryLimit")
   private Integer jukeboxHistoryLimit;
 
   @Column(name = "enableLocationCode")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean enableLocationCode;
 
   @Column(name = "locationCode")
   private String locationCode;
 
   @Column(name = "apiAccessRequested")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean apiAccessRequested;
 
   @Column(name = "autoSwitchControlModeSize")
   private Integer autoSwitchControlModeSize;
 
   @Column(name = "autoSwitchControlModeToggled")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean autoSwitchControlModeToggled;
 
   @Column(name = "hideSequenceCount")
   private Integer hideSequenceCount;
 
   @Column(name = "makeItSnow")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean makeItSnow;
 
   @Transient

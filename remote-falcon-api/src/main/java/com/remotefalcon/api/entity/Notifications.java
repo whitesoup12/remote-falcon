@@ -3,7 +3,7 @@ package com.remotefalcon.api.entity;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Getter
@@ -31,6 +31,6 @@ public class Notifications {
   private String notificationText;
 
   @Column(name = "notificationRead")
-  @Type(type = "yes_no")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean notificationRead;
 }
