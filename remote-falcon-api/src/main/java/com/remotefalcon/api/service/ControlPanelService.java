@@ -3,33 +3,28 @@ package com.remotefalcon.api.service;
 import com.remotefalcon.api.dto.TokenDTO;
 import com.remotefalcon.api.entity.*;
 import com.remotefalcon.api.enums.EmailTemplate;
-import com.remotefalcon.api.model.Comments;
-import com.remotefalcon.api.model.WorkItemCommentDetails;
-import com.remotefalcon.api.model.WorkItemDetailLinks;
 import com.remotefalcon.api.repository.*;
 import com.remotefalcon.api.request.*;
-import com.remotefalcon.api.response.ADOWorkItemResponse;
+import com.remotefalcon.api.response.GitHubIssueResponse;
 import com.remotefalcon.api.response.PublicViewerPagesResponse;
 import com.remotefalcon.api.response.RemoteResponse;
-import com.remotefalcon.api.util.ADOUtils;
 import com.remotefalcon.api.util.AuthUtil;
 import com.remotefalcon.api.util.EmailUtil;
 import com.sendgrid.Response;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.azd.workitemtracking.types.WorkItem;
-import org.azd.workitemtracking.types.WorkItemFields;
-import org.azd.workitemtracking.types.WorkItemList;
 import org.dozer.DozerBeanMapper;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -66,7 +61,7 @@ public class ControlPanelService {
   private final EmailUtil emailUtil;
   private final EasterEggRepository easterEggRepository;
   private final NotificationsRepository notificationsRepository;
-  private final ADOUtils adoUtils;
+  private final WebClient gitHubWebClient;
 
   public ControlPanelService(RemoteRepository remoteRepository, RemotePreferenceRepository remotePreferenceRepository,
                              ViewerPageStatsRepository viewerPageStatsRepository, ViewerJukeStatsRepository viewerJukeStatsRepository, ViewerVoteStatsRepository viewerVoteStatsRepository,
@@ -77,7 +72,7 @@ public class ControlPanelService {
                              PluginService pluginService, PageGalleryHeartsRepository pageGalleryHeartsRepository, AuthUtil authUtil, DozerBeanMapper mapper,
                              EmailUtil emailUtil, PlaylistGroupRepository playlistGroupRepository, PsaSequenceRepository psaSequenceRepository, RemoteViewerPagesRepository remoteViewerPagesRepository,
                              RemoteViewerPageTemplatesRepository remoteViewerPageTemplatesRepository, EasterEggRepository easterEggRepository, NotificationsRepository notificationsRepository,
-                             ADOUtils adoUtils) {
+                             WebClient gitHubWebClient) {
     this.remoteRepository = remoteRepository;
     this.remotePreferenceRepository = remotePreferenceRepository;
     this.viewerPageStatsRepository = viewerPageStatsRepository;
@@ -105,7 +100,7 @@ public class ControlPanelService {
     this.remoteViewerPageTemplatesRepository = remoteViewerPageTemplatesRepository;
     this.easterEggRepository = easterEggRepository;
     this.notificationsRepository = notificationsRepository;
-    this.adoUtils = adoUtils;
+    this.gitHubWebClient = gitHubWebClient;
   }
 
   public ResponseEntity<RemoteResponse> coreInfo() {
@@ -741,71 +736,18 @@ public class ControlPanelService {
     return ResponseEntity.status(200).build();
   }
 
-  public ResponseEntity<WorkItemList> getAdoWorkItemsRaw() {
-    WorkItemList workItemList = adoUtils.queryWorkItems(VISIBLE_IN_RF_QUERY_ID);
-    return ResponseEntity.ok(workItemList);
-  }
-
-  public ResponseEntity<List<ADOWorkItemResponse>> getAdoWorkItems() {
-    WorkItemList workItemList = adoUtils.queryWorkItems(VISIBLE_IN_RF_QUERY_ID);
-    List<ADOWorkItemResponse> adoWorkItemResponses = new ArrayList<>();
-    if(workItemList != null && CollectionUtils.isNotEmpty(workItemList.getWorkItems())) {
-      workItemList.getWorkItems().forEach(workItem -> {
-        WorkItemFields workItemFields = workItem.getFields();
-        if(workItemFields != null) {
-          String severity = null;
-          if(StringUtils.equalsIgnoreCase("Bug", workItemFields.getSystemWorkItemType())) {
-            severity = workItemFields.getOtherFields().get("Microsoft.VSTS.Common.Severity").toString();
-          }
-
-          adoWorkItemResponses.add(ADOWorkItemResponse.builder()
-                          .id(workItem.getId())
-                          .type(workItemFields.getSystemWorkItemType())
-                          .title(workItemFields.getSystemTitle())
-                          .state(workItemFields.getSystemState())
-                          .createdDate(ZonedDateTime.parse(workItemFields.getSystemCreatedDate()))
-                          .description(workItemFields.getSystemDescription())
-                          .requestedBy(workItemFields.getOtherFields().get("Custom.RequestedBy").toString())
-                          .severity(severity)
-                          .commentCount(workItemFields.getSystemCommentCount())
-                  .build());
-        }
+  public ResponseEntity<List<GitHubIssueResponse>> gitHubIssues() {
+    List<GitHubIssueResponse> ghIssue = this.gitHubWebClient.get()
+            .uri("repos/whitesoup12/remote-falcon/issues")
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<List<GitHubIssueResponse>>() {})
+            .block();
+    if(CollectionUtils.isNotEmpty(ghIssue)) {
+      ghIssue.forEach(issue -> {
+        boolean isBug = issue.getLabels().stream().anyMatch(label -> StringUtils.equalsIgnoreCase("bug", label.getName()));
+        issue.setType(isBug ? "bug" : "enhancement");
       });
     }
-    return ResponseEntity.ok(adoWorkItemResponses);
-  }
-
-  public ResponseEntity<List<Comments>> getAdoWorkItemComments(Integer workItemId) {
-    WorkItem workItemDetails = adoUtils.workItemDetails(workItemId);
-    WorkItemDetailLinks workItemLinks = mapper.map(workItemDetails.get_links(), WorkItemDetailLinks.class);
-    List<Comments> comments = adoUtils.workItemComments(workItemLinks.getWorkItemComments().getHref());
-    return ResponseEntity.ok(comments);
-  }
-
-  public ResponseEntity<?> editAdoWorkItem(Integer workItemId, ADOWorkItemRequest adoWorkItemRequest) {
-    adoUtils.editWorkItem(workItemId, adoWorkItemRequest);
-    return ResponseEntity.status(200).build();
-  }
-
-  public ResponseEntity<?> createAdoWorkItem(ADOWorkItemRequest adoWorkItemRequest) {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
-    adoUtils.createWorkItem(adoWorkItemRequest, remote);
-    return ResponseEntity.status(200).build();
-  }
-
-  public ResponseEntity<?> addWorkItemComment(Integer workItemId, WorkItemCommentDetails workItemCommentDetails) {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
-    workItemCommentDetails.setText(String.format("%s:%s", remote.getRemoteName(), workItemCommentDetails.getText()));
-    WorkItem workItemDetails = adoUtils.workItemDetails(workItemId);
-    WorkItemDetailLinks workItemLinks = mapper.map(workItemDetails.get_links(), WorkItemDetailLinks.class);
-    adoUtils.addWorkItemComment(workItemLinks.getWorkItemComments().getHref(), workItemCommentDetails);
-    return ResponseEntity.status(200).build();
-  }
-
-  public ResponseEntity<?> deleteWorkItem(Integer workItemId) {
-    adoUtils.deleteWorkItem(workItemId);
-    return ResponseEntity.status(200).build();
+    return ResponseEntity.ok(ghIssue);
   }
 }

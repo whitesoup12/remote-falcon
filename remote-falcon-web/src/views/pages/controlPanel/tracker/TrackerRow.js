@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 
 import Chip from 'ui-component/extended/Chip';
 
-import EditWorkItem from './EditWorkItem';
+import ViewWorkItem from './ViewWorkItem';
 
 function TrackerRow({ workItem, coreInfo, setIsLoading, fetchWorkItems }) {
   const [editWorkItemDrawerOpen, setEditWorkItemDrawerOpen] = useState(false);
@@ -19,10 +19,10 @@ function TrackerRow({ workItem, coreInfo, setIsLoading, fetchWorkItems }) {
     <>
       <TableRow hover>
         <TableCell sx={{ pl: 3, minWidth: 10, width: 10 }} />
-        <TableCell sx={{ minWidth: 20, width: 20 }}>{workItem?.id}</TableCell>
+        <TableCell sx={{ minWidth: 20, width: 20 }}>{workItem?.number}</TableCell>
         <TableCell sx={{ minWidth: 60, width: 60, cursor: 'pointer' }}>
-          {workItem?.type === 'Bug' && <Chip label="Bug" size="small" variant="outlined" chipcolor="error" />}
-          {workItem?.type === 'User Story' && <Chip label="Feature" size="small" variant="outlined" />}
+          {workItem?.type === 'bug' && <Chip label="Bug" size="small" variant="outlined" chipcolor="error" />}
+          {workItem?.type === 'enhancement' && <Chip label="Feature" size="small" variant="outlined" />}
         </TableCell>
         <TableCell
           onClick={handleEditWorkItemDrawer}
@@ -32,19 +32,8 @@ function TrackerRow({ workItem, coreInfo, setIsLoading, fetchWorkItems }) {
         >
           {workItem?.title}
         </TableCell>
-        <TableCell onClick={handleEditWorkItemDrawer} sx={{ pl: 3, minWidth: 60, width: 60, cursor: 'pointer' }}>
-          {workItem?.state === 'New' && <Chip label="New" size="small" variant="outlined" />}
-          {workItem?.state === 'Active' && <Chip label="Active" size="small" variant="outlined" chipcolor="warning" />}
-          {workItem?.state === 'Closed' && <Chip label="Closed" size="small" variant="outlined" chipcolor="success" />}
-        </TableCell>
-        <TableCell onClick={handleEditWorkItemDrawer} sx={{ pl: 3, minWidth: 60, width: 60, cursor: 'pointer' }}>
-          {workItem?.severity === '2 - High' && <Chip label="High" size="small" variant="outlined" chipcolor="error" />}
-          {workItem?.severity === '3 - Medium' && <Chip label="Medium" size="small" variant="outlined" chipcolor="warning" />}
-          {workItem?.severity === '4 - Low' && <Chip label="Low" size="small" variant="outlined" />}
-        </TableCell>
-        <TableCell sx={{ minWidth: 60, width: 60 }}>{workItem?.commentCount}</TableCell>
       </TableRow>
-      <EditWorkItem
+      <ViewWorkItem
         workItem={workItem}
         coreInfo={coreInfo}
         open={editWorkItemDrawerOpen}

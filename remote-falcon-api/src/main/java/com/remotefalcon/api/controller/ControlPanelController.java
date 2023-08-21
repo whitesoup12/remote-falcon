@@ -3,19 +3,16 @@ package com.remotefalcon.api.controller;
 import com.remotefalcon.api.aop.RequiresAccess;
 import com.remotefalcon.api.aop.RequiresAdminAccess;
 import com.remotefalcon.api.entity.*;
-import com.remotefalcon.api.model.Comments;
-import com.remotefalcon.api.model.WorkItemCommentDetails;
 import com.remotefalcon.api.request.*;
-import com.remotefalcon.api.response.ADOWorkItemResponse;
+import com.remotefalcon.api.response.GitHubIssueResponse;
 import com.remotefalcon.api.response.PublicViewerPagesResponse;
 import com.remotefalcon.api.response.RemoteResponse;
 import com.remotefalcon.api.service.ControlPanelService;
-import org.azd.workitemtracking.types.WorkItemList;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -345,45 +342,9 @@ public class ControlPanelController {
     return this.controlPanelService.deleteNotification(notificationKey);
   }
 
-  @GetMapping(value = "/controlPanel/getAdoWorkItems/raw")
+  @GetMapping(value = "/controlPanel/gitHubIssues")
   @RequiresAccess
-  public ResponseEntity<WorkItemList> getAdoWorkItemsRaw() {
-    return this.controlPanelService.getAdoWorkItemsRaw();
-  }
-
-  @GetMapping(value = "/controlPanel/getAdoWorkItems")
-  @RequiresAccess
-  public ResponseEntity<List<ADOWorkItemResponse>> getAdoWorkItems() {
-    return this.controlPanelService.getAdoWorkItems();
-  }
-
-  @GetMapping(value = "/controlPanel/getAdoWorkItemComments/{workItemId}")
-  @RequiresAccess
-  public ResponseEntity<List<Comments>> getAdoWorkItemComments(@PathVariable(name = "workItemId") Integer workItemId) {
-    return this.controlPanelService.getAdoWorkItemComments(workItemId);
-  }
-
-  @PostMapping(value = "/controlPanel/editAdoWorkItem/{workItemId}")
-  @RequiresAccess
-  public ResponseEntity<?> editAdoWorkItem(@PathVariable(name = "workItemId") Integer workItemId, @RequestBody ADOWorkItemRequest adoWorkItemRequest) {
-    return this.controlPanelService.editAdoWorkItem(workItemId, adoWorkItemRequest);
-  }
-
-  @PostMapping(value = "/controlPanel/createAdoWorkItem")
-  @RequiresAccess
-  public ResponseEntity<?> createAdoWorkItem(@RequestBody ADOWorkItemRequest adoWorkItemRequest) {
-    return this.controlPanelService.createAdoWorkItem(adoWorkItemRequest);
-  }
-
-  @PostMapping(value = "/controlPanel/addWorkItemComment/{workItemId}")
-  @RequiresAccess
-  public ResponseEntity<?> addWorkItemComment(@PathVariable(name = "workItemId") Integer workItemId, @RequestBody WorkItemCommentDetails workItemCommentDetails) {
-    return this.controlPanelService.addWorkItemComment(workItemId, workItemCommentDetails);
-  }
-
-  @DeleteMapping(value = "/controlPanel/deleteWorkItem/{workItemId}")
-  @RequiresAccess
-  public ResponseEntity<?> addWorkItemComment(@PathVariable(name = "workItemId") Integer workItemId) {
-    return this.controlPanelService.deleteWorkItem(workItemId);
+  public ResponseEntity<List<GitHubIssueResponse>> gitHubIssues() {
+    return this.controlPanelService.gitHubIssues();
   }
 }

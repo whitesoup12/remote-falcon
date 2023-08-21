@@ -58,7 +58,7 @@ services:
       - SENDGRID_KEY=
       - JWT_SIGN_KEY=1234567890
       - JWT_VIEWER_SIGN_KEY=1234567890
-      - ADO_PAT=
+      - GITHUB_PAT=
       - DATABASE_URL=mysql://root:root@host.docker.internal:3306/remotefalcon
     depends_on:
       mysql:
