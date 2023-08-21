@@ -7,7 +7,7 @@ export const BASE_PATH = '';
 
 export const CONTROL_PANEL_PATH = '/control-panel';
 
-export const VERSION = '1.2.1';
+export const VERSION = '#{Build.BuildNumber}#';
 
 const config = {
   fontFamily: `'Roboto', sans-serif`,
