@@ -47,6 +47,6 @@ yarn-debug.log*
 yarn-error.log*
 
 /public/config.js
-package-lock.json
+#package-lock.json
 
 /berry/node_modules
