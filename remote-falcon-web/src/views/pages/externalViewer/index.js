@@ -82,6 +82,15 @@ const ExternalViewerPage = () => {
     }
   }, [dispatch]);
 
+  const setViewerLocation = useCallback(async () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        setViewerLatitude(position.coords.latitude.toFixed(5));
+        setViewerLongitude(position.coords.longitude.toFixed(5));
+      });
+    }
+  }, []);
+
   const getExternalViewerPageDetails = useCallback(async () => {
     let remoteName = '';
     try {
@@ -90,6 +99,9 @@ const ExternalViewerPage = () => {
         ...externalViewerPageDetailsResponse.data
       });
       remoteName = externalViewerPageDetailsResponse.data?.remotePreferences?.remoteName;
+      if (externalViewerPageDetails?.remotePreferences?.enableGeolocation) {
+        setViewerLocation();
+      }
     } catch (err) {
       dispatch(
         openSnackbar({
@@ -136,15 +148,6 @@ const ExternalViewerPage = () => {
     const inserViewerPageStatsResponse = await insertViewerPageStatsService();
     if (inserViewerPageStatsResponse?.status === 200) {
       mixpanel.track('External Viewer Page View', { 'Show Name': remoteName });
-    }
-  }, []);
-
-  const setViewerLocation = useCallback(async () => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        setViewerLatitude(position.coords.latitude.toFixed(5));
-        setViewerLongitude(position.coords.longitude.toFixed(5));
-      });
     }
   }, []);
 
@@ -336,7 +339,6 @@ const ExternalViewerPage = () => {
   ]);
 
   useEffect(() => {
-    setViewerLocation();
     const init = async () => {
       setLoading(true);
       await signViewerJwt();
@@ -347,7 +349,7 @@ const ExternalViewerPage = () => {
     };
 
     init();
-  }, [fetchExternalViewerPage, getExternalViewerPageDetails, insertViewerPageStats, setViewerLocation, signViewerJwt]);
+  }, [fetchExternalViewerPage, getExternalViewerPageDetails, insertViewerPageStats, signViewerJwt]);
 
   useInterval(async () => {
     getExternalViewerPageDetails();
