@@ -6,36 +6,29 @@ labels: 'bug'
 assignees: ''
 
 ---
+**Your Show Name:**
+Adding your show name helps in reproducing the bug.
 
-**Describe the bug**
+**Describe the bug:**
 A clear and concise description of what the bug is.
 
-**To Reproduce**
+**To Reproduce:**
 Steps to reproduce the behavior:
 1. Go to '...'
 2. Click on '...'
 3. Scroll down to '...'
 4. See error
 
-**Your Show Name**
-Adding your show name helps in reproducing the bug.
-
-**Expected behavior**
+**Expected behavior:**
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
+**Screenshots:**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
+**Desktop (if issue is seen on desktop, otherwise N/A):**
  - OS: [e.g. Windows]
  - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
 
-**Smartphone (please complete the following information):**
+**Smartphone (if issue is seen on mobile, otherwise N/A):**
  - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
  - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
-**Additional context**
-Add any other context about the problem here.

@@ -85,7 +85,7 @@ const ViewWorkItem = ({ workItem, coreInfo, open, handleDrawerOpen }) => {
           </Box>
           <Divider />
           <PerfectScrollbar options={{ wheelPropagation: false }}>
-            <Box sx={{ p: 3 }}>
+            <Box sx={{ p: 3, pb: 15 }}>
               <Grid container alignItems="center" spacing={0.5} justifyContent="space-between">
                 <Grid item sx={{ width: 'calc(100% - 50px)' }}>
                   <ReactMarkdown remarkPlugins={[remarkBreaks]}>{workItem?.body}</ReactMarkdown>
