@@ -5,14 +5,13 @@ import { Box, Grid, TableRow, TableCell, TableContainer, Table, TableHead, Table
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
 
-import { fetchWorkItemsService } from 'services/controlPanel/tracker.service';
+import { fetchGitHubIssuesService } from 'services/controlPanel/tracker.service';
 import { useDispatch, useSelector } from 'store';
 import { gridSpacing } from 'store/constant';
 import MainCard from 'ui-component/cards/MainCard';
 import TrackerSkeleton from 'ui-component/cards/Skeleton/TrackerSkeleton';
 import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
 
-import NewWorkItem from './NewWorkItem';
 import TrackerRow from './TrackerRow';
 
 const Tracker = () => {
@@ -22,12 +21,11 @@ const Tracker = () => {
 
   const [isLoading, setIsLoading] = useState(0);
   const [workItems, setWorkItems] = useState([]);
-  const [newWorkItemDrawerOpen, setNewWorkItemDrawerOpen] = useState(false);
 
   const fetchWorkItems = useCallback(async () => {
     try {
       setIsLoading(true);
-      const workItemsResponse = await fetchWorkItemsService();
+      const workItemsResponse = await fetchGitHubIssuesService();
       const workItems = workItemsResponse.data;
       setWorkItems(workItems);
     } catch (err) {
@@ -46,10 +44,6 @@ const Tracker = () => {
 
     init();
   }, [dispatch, fetchWorkItems, coreInfo]);
-
-  const handleNewWorkItemDrawer = () => {
-    setNewWorkItemDrawerOpen((prevState) => !prevState);
-  };
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -72,7 +66,9 @@ const Tracker = () => {
                               borderColor: theme.palette.green.main
                             }}
                             size="small"
-                            onClick={handleNewWorkItemDrawer}
+                            onClick={() =>
+                              window.open('https://github.com/whitesoup12/remote-falcon/issues/new/choose', '_blank', 'noreferrer')
+                            }
                           >
                             <AddTwoToneIcon sx={{ fontSize: '1.5rem' }} />
                           </IconButton>
@@ -81,9 +77,6 @@ const Tracker = () => {
                       <TableCell>ID</TableCell>
                       <TableCell sx={{ pl: 3 }}>Type</TableCell>
                       <TableCell>Title</TableCell>
-                      <TableCell sx={{ pl: 3 }}>State</TableCell>
-                      <TableCell sx={{ pl: 3 }}>Severity</TableCell>
-                      <TableCell>Comments</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -99,13 +92,6 @@ const Tracker = () => {
           </MainCard>
         </Grid>
       </Grid>
-      <NewWorkItem
-        coreInfo={coreInfo}
-        newWorkItemDrawerOpen={newWorkItemDrawerOpen}
-        handleNewWorkItemDrawer={handleNewWorkItemDrawer}
-        setIsLoading={setIsLoading}
-        fetchWorkItems={fetchWorkItems}
-      />
     </Box>
   );
 };
