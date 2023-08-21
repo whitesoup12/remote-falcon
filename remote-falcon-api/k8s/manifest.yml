@@ -60,8 +60,8 @@ spec:
           value: #{JWT_SIGN_KEY}#
         - name: JWT_VIEWER_SIGN_KEY
           value: #{JWT_VIEWER_SIGN_KEY}#
-        - name: ADO_PAT
-          value: #{ADO_PAT}#
+        - name: GITHUB_PAT
+          value: #{GITHUB_PAT}#
         - name: DD_ENV
           valueFrom:
             fieldRef:
