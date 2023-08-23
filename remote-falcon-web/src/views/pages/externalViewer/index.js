@@ -116,7 +116,7 @@ const ExternalViewerPage = () => {
       );
     }
     return remoteName;
-  }, [dispatch]);
+  }, [dispatch, externalViewerPageDetails?.remotePreferences?.enableGeolocation, setViewerLocation]);
 
   const showViewerMessage = useCallback(
     (response) => {

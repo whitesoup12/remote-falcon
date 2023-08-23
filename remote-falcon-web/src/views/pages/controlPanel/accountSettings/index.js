@@ -20,6 +20,9 @@ import {
   handleInputChange,
   handleOpen,
   handleClose,
+  handleUpdateEmailOpen,
+  handleUpdateEmailClose,
+  updateEmail,
   handleClickShowRemoteToken,
   tabOptions,
   saveProfile,
@@ -40,10 +43,12 @@ const AccountSettings = () => {
   const { coreInfo, isDemo } = useSelector((state) => state.account);
 
   const [open, setOpen] = useState(false);
+  const [updateEmailOpen, setUpdateEmailOpen] = useState(false);
   const [importantAnalyticsOpen, setImportantAnalyticsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showLinearProgress, setShowLinearProgress] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
   const [isRequestingApi, setIsRequestingApi] = useState(false);
   const [changePasswordEnabled, setChangePasswordEnabled] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -105,11 +110,20 @@ const AccountSettings = () => {
                       <UserProfileSkeleton />
                     ) : (
                       <UserProfile
+                        theme={theme}
                         gravatar={gravatar}
                         coreInfo={coreInfo}
+                        isDemo={isDemo}
+                        updateEmail={() =>
+                          updateEmail(dispatch, coreInfo, setIsUpdatingEmail, logout, userProfile, setUpdateEmailOpen, setUserProfile)
+                        }
+                        isUpdatingEmail={isUpdatingEmail}
                         saveProfile={() => saveProfile(dispatch, userProfile, setShowLinearProgress, startFetchCoreInfoAction)}
                         userProfile={userProfile}
                         handleInputChange={(event, value) => handleInputChange(event, value, setUserProfile, userProfile)}
+                        handleUpdateEmailOpen={() => handleUpdateEmailOpen(setUpdateEmailOpen, coreInfo?.email, userProfile?.email)}
+                        handleUpdateEmailClose={() => handleUpdateEmailClose(setUpdateEmailOpen, coreInfo, userProfile, setUserProfile)}
+                        updateEmailOpen={updateEmailOpen}
                       />
                     )}
                   </RFTab>

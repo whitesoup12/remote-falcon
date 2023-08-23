@@ -1,8 +1,10 @@
 import ErrorTwoToneIcon from '@mui/icons-material/ErrorTwoTone';
-import { Grid, TextField, Typography } from '@mui/material';
+import { Grid, TextField, Typography, Modal } from '@mui/material';
 
 import { gridSpacing } from 'store/constant';
 import Avatar from 'ui-component/extended/Avatar';
+
+import UpdateEmailModal from './UpdateEmail.modal';
 
 const UserProfile = ({ ...otherProps }) => (
   <Grid container spacing={gridSpacing}>
@@ -57,7 +59,14 @@ const UserProfile = ({ ...otherProps }) => (
       />
     </Grid>
     <Grid item xs={12} sm={6}>
-      <TextField fullWidth disabled label="Email Address" defaultValue={otherProps.userProfile?.email} />
+      <TextField
+        fullWidth
+        label="Email Address"
+        name="email"
+        value={otherProps.userProfile?.email}
+        onChange={otherProps.handleInputChange}
+        onBlur={otherProps.handleUpdateEmailOpen}
+      />
     </Grid>
     <Grid item xs={12} sm={6}>
       <TextField
@@ -79,6 +88,21 @@ const UserProfile = ({ ...otherProps }) => (
         onBlur={otherProps.saveProfile}
       />
     </Grid>
+    <Modal
+      open={otherProps.updateEmailOpen}
+      onClose={otherProps.handleUpdateEmailClose}
+      aria-labelledby="simple-modal-title"
+      aria-describedby="simple-modal-description"
+    >
+      <UpdateEmailModal
+        theme={otherProps.theme}
+        handleClose={otherProps.handleUpdateEmailClose}
+        updateEmail={otherProps.updateEmail}
+        updatedEmail={otherProps.userProfile?.email}
+        isUpdatingEmail={otherProps.isUpdatingEmail}
+        isDemo={otherProps.isDemo}
+      />
+    </Modal>
   </Grid>
 );
 

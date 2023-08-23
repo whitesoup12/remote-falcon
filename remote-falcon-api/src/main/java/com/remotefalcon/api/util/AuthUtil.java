@@ -190,6 +190,14 @@ public class AuthUtil {
     return null;
   }
 
+  public String getEmailFromHeader(HttpServletRequest httpServletRequest) {
+    final String email = httpServletRequest.getHeader("Email");
+    if (email != null) {
+      return new String(Base64.getDecoder().decode(email));
+    }
+    return null;
+  }
+
   public String getUpdatedPasswordFromHeader(HttpServletRequest httpServletRequest) {
     final String password = httpServletRequest.getHeader("NewPassword");
     if (password != null) {
