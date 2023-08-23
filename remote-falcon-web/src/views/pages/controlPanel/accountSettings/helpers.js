@@ -6,6 +6,7 @@ import {
   saveUserProfileService,
   coreInfoService,
   deleteAccountService,
+  updateEmailService,
   requestApiAccessService,
   updatePasswordService,
   importantAnalyticsService
@@ -24,6 +25,19 @@ export const handleOpen = (setOpen) => {
 };
 export const handleClose = (setOpen) => {
   setOpen(false);
+};
+
+export const handleUpdateEmailOpen = (seUpdateEmailOpen, currentEmail, updatedEmail) => {
+  if (currentEmail !== updatedEmail) {
+    seUpdateEmailOpen(true);
+  }
+};
+export const handleUpdateEmailClose = (setUpdateEmailOpen, coreInfo, userProfile, setUserProfile) => {
+  setUserProfile({
+    ...userProfile,
+    email: coreInfo?.email
+  });
+  setUpdateEmailOpen(false);
 };
 
 export const handleImportantAnalyticsClose = (setImportantAnalyticsOpen) => {
@@ -101,6 +115,26 @@ export const deleteAccount = async (dispatch, coreInfo, setIsDeleting, logout) =
     showAlert({ dispatch, alert: 'error' });
   }
   setIsDeleting(false);
+};
+
+export const updateEmail = async (dispatch, coreInfo, setIsUpdatingEmail, logout, userProfile, setUpdateEmailOpen, setUserProfile) => {
+  setIsUpdatingEmail(true);
+  const response = await updateEmailService(userProfile?.email);
+  mixpanelTrack('Update Email', coreInfo);
+  if (response?.status === 200) {
+    showAlert({ dispatch, message: 'Email updated and verification email sent', alert: 'success' });
+    setTimeout(() => {
+      logout();
+    }, 500);
+  } else {
+    showAlert({ dispatch, message: 'Cannot update email', alert: 'error' });
+  }
+  setUserProfile({
+    ...userProfile,
+    email: coreInfo?.email
+  });
+  setIsUpdatingEmail(false);
+  setUpdateEmailOpen(false);
 };
 
 export const updatePassword = async (dispatch, userProfile, setIsChangingPassword, logout) => {

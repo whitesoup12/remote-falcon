@@ -21,6 +21,18 @@ export const deleteAccountService = async () => {
   return response;
 };
 
+export const updateEmailService = async (updatedEmail) => {
+  const updatedEmailBase64 = Buffer.from(updatedEmail, 'binary').toString('base64');
+  const response = await axios.post(
+    '/remotefalcon/api/controlPanel/updateEmail',
+    {},
+    {
+      headers: { Email: updatedEmailBase64 }
+    }
+  );
+  return response;
+};
+
 export const requestApiAccessService = async () => {
   const response = await axios.post('/remotefalcon/api/controlPanel/requestApiAccess');
   return response;

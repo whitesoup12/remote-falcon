@@ -750,4 +750,25 @@ public class ControlPanelService {
     }
     return ResponseEntity.ok(ghIssue);
   }
+
+  public ResponseEntity<?> updateEmail(HttpServletRequest httpServletRequest) {
+    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    if(remote == null) {
+      return ResponseEntity.status(401).build();
+    }
+    String updatedEmail = this.authUtil.getEmailFromHeader(httpServletRequest);
+    if (updatedEmail != null) {
+      Remote updatedEmailRemote = this.remoteRepository.findByEmail(updatedEmail);
+      if(updatedEmailRemote != null) {
+        return ResponseEntity.status(204).build();
+      }
+      remote.setEmail(updatedEmail);
+      remote.setEmailVerified(false);
+      this.remoteRepository.save(remote);
+      this.emailUtil.sendEmail(remote, null, null, EmailTemplate.VERIFICATION);
+      return ResponseEntity.status(200).build();
+    }
+    return ResponseEntity.status(400).build();
+  }
 }

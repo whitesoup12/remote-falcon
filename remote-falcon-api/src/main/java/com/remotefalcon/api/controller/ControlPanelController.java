@@ -347,4 +347,10 @@ public class ControlPanelController {
   public ResponseEntity<List<GitHubIssueResponse>> gitHubIssues() {
     return this.controlPanelService.gitHubIssues();
   }
+
+  @PostMapping(value = "/controlPanel/updateEmail")
+  @RequiresAccess
+  public ResponseEntity<?> updateEmail(HttpServletRequest httpServletRequest) {
+    return this.controlPanelService.updateEmail(httpServletRequest);
+  }
 }

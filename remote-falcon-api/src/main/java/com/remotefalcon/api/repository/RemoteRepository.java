@@ -1,11 +1,11 @@
 package com.remotefalcon.api.repository;
 
 import com.remotefalcon.api.entity.Remote;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import jakarta.transaction.Transactional;
 import java.util.List;
 
 @Repository
@@ -17,7 +17,6 @@ public interface RemoteRepository extends JpaRepository<Remote, Integer> {
   Remote findByRemoteTokenAndUserRole(String remoteToken, String userRole);
   Remote findByEmail(String email);
   Remote findByRemoteToken(String remoteToken);
-  List<Remote> findAllByRemoteTokenIn(List<String> remoteToken);
 
   @Query(value = "SELECT " +
           "  A.*, " +
