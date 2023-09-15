@@ -42,6 +42,39 @@ export const saveViewerSettings = async (
   setShowLinearProgress(false);
 };
 
+export const saveGPSLocation = async (
+  dispatch,
+  coreInfo,
+  remotePrefs,
+  currentLatitude,
+  currentLongitude,
+  setShowLinearProgress,
+  setRemotePrefs,
+  setCoreInfo
+) => {
+  setShowLinearProgress(true);
+  const updatedRemotePrefs = _.cloneDeep(remotePrefs);
+  if (!remotePrefs?.checkViewerPresent) {
+    updatedRemotePrefs.enableGeolocation = false;
+    updatedRemotePrefs.enableLocationCode = false;
+  }
+  if (updatedRemotePrefs.enableGeolocation) {
+    updatedRemotePrefs.remoteLatitude = currentLatitude;
+    updatedRemotePrefs.remoteLongitude = currentLongitude;
+  }
+  const response = await saveRemotePrefsService(updatedRemotePrefs);
+  if (response?.status === 200) {
+    dispatch(setRemotePrefs({ ...updatedRemotePrefs }));
+    const updatedCoreInfo = _.cloneDeep(coreInfo);
+    updatedCoreInfo.viewerControlMode = updatedRemotePrefs.viewerControlMode;
+    dispatch(setCoreInfo({ ...updatedCoreInfo }));
+    showAlert({ dispatch, message: 'Viewer Settings Saved' });
+  } else {
+    showAlert({ dispatch, alert: 'error' });
+  }
+  setShowLinearProgress(false);
+};
+
 export const getDefaultSequencesForPSA = (remotePrefs, setDefaultPsaSequences) => {
   const selectedPsaSequenceList = [];
   _.forEach(remotePrefs?.psaSequenceList, (sequence) =>
@@ -275,12 +308,14 @@ export const handleCurrentLongitudeChange = (event, value, setCurrentLongitude) 
   setCurrentLongitude(event?.target?.value);
 };
 
-export const refreshLocation = (setCurrentLatitude, setCurrentLongitude) => {
+export const refreshLocation = (setCurrentLatitude, setCurrentLongitude, dispatch) => {
   if ('geolocation' in navigator) {
     navigator.geolocation.getCurrentPosition((position) => {
       setCurrentLatitude(position.coords.latitude.toFixed(5));
       setCurrentLongitude(position.coords.longitude.toFixed(5));
     });
+  } else {
+    showAlert({ dispatch, alert: 'wanting', message: 'Location is not enabled' });
   }
 };
 
