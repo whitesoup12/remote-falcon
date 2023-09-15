@@ -107,7 +107,8 @@ const ViewerSettings = () => {
     };
 
     init();
-  }, [fetchSequences, fetchRemotePrefs, fetchExternalViewerPageMeta, coreInfo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchSequences, fetchRemotePrefs, fetchExternalViewerPageMeta]);
 
   return (
     <Box sx={{ mt: 2 }}>

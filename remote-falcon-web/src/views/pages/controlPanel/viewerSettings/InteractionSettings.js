@@ -48,7 +48,21 @@ const InteractionSettings = ({
           <Divider />
           <CardActions>
             <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
+              <Grid item xs={12} md={6} lg={4} ml={2}>
+                <Typography variant="h4">PSA Full Control</Typography>
+                <Typography component="div" variant="caption">
+                  Gives Remote Falcon the ability to fully control your PSA and when it plays, even if requests or votes are not being made.
+                </Typography>
+              </Grid>
               <Grid item xs={12} md={6} lg={4}>
+                <Switch name="managePsa" color="primary" checked={remotePrefs?.managePsa} onChange={handleSwitchChange} />
+              </Grid>
+            </Grid>
+          </CardActions>
+          <Divider />
+          <CardActions>
+            <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
+              <Grid item xs={12} md={6} lg={4} ml={2}>
                 <Typography variant="h4">PSA Sequences</Typography>
                 <Typography component="div" variant="caption">
                   These are the PSA sequences you want to be played. Multiple sequences can be selected and will be played through in the
@@ -73,7 +87,7 @@ const InteractionSettings = ({
           <Divider />
           <CardActions>
             <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
-              <Grid item xs={12} md={6} lg={4}>
+              <Grid item xs={12} md={6} lg={4} ml={2}>
                 <Typography variant="h4">PSA Frequency</Typography>
                 <Typography component="div" variant="caption">
                   Controls how often a PSA is played.
@@ -118,7 +132,7 @@ const InteractionSettings = ({
           <Divider />
           <CardActions>
             <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
-              <Grid item xs={12} md={6} lg={4}>
+              <Grid item xs={12} md={6} lg={4} ml={2}>
                 <Typography variant="h4">Viewer Present Mode</Typography>
                 <Typography component="div" variant="caption">
                   The method in which you want to check that your viewer is present.
@@ -140,7 +154,7 @@ const InteractionSettings = ({
               <Divider />
               <CardActions>
                 <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
-                  <Grid item xs={12} md={6} lg={4}>
+                  <Grid item xs={12} md={6} lg={4} ml={4}>
                     <Typography variant="h4">Show Location</Typography>
                     <Typography component="div" variant="caption">
                       Location of the show. Defaults to detected location, but can be changed if needed.
@@ -187,7 +201,7 @@ const InteractionSettings = ({
               <Divider />
               <CardActions>
                 <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
-                  <Grid item xs={12} md={6} lg={4}>
+                  <Grid item xs={12} md={6} lg={4} ml={4}>
                     <Typography variant="h4">Check Radius (in miles)</Typography>
                     <Typography component="div" variant="caption">
                       This number, in miles, determines how close the viewer should be to your location in order to place a request. Default
@@ -215,7 +229,7 @@ const InteractionSettings = ({
               <Divider />
               <CardActions>
                 <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
-                  <Grid item xs={12} md={6} lg={4}>
+                  <Grid item xs={12} md={6} lg={4} ml={4}>
                     <Typography variant="h4">Location Code</Typography>
                     <Typography component="div" variant="caption">
                       This is the numerical code that will be entered by your viewer when requesting a sequence.

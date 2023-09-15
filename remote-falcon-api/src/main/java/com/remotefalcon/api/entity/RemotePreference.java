@@ -1,9 +1,8 @@
 package com.remotefalcon.api.entity;
 
-import lombok.*;
-import org.hibernate.annotations.Type;
-
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.List;
 
 @Entity
@@ -108,6 +107,10 @@ public class RemotePreference {
   @Column(name = "makeItSnow")
   @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean makeItSnow;
+
+  @Column(name = "managePsa")
+  @Convert(converter = org.hibernate.type.YesNoConverter.class)
+  private Boolean managePsa;
 
   @Transient
   List<PsaSequence> psaSequenceList;
