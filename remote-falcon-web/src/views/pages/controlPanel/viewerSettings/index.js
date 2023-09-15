@@ -339,7 +339,7 @@ const ViewerSettings = () => {
                             setCoreInfo
                           )
                         }
-                        refreshLocation={() => refreshLocation(setCurrentLatitude, setCurrentLongitude)}
+                        refreshLocation={() => refreshLocation(setCurrentLatitude, setCurrentLongitude, dispatch)}
                       />
                     </RFTab>
                   </CardContent>

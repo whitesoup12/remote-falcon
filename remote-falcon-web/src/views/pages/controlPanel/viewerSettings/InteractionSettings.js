@@ -1,4 +1,5 @@
 import RefreshTwoToneIcon from '@mui/icons-material/RefreshTwoTone';
+import SaveTwoToneIcon from '@mui/icons-material/SaveTwoTone';
 import { Grid, CardActions, Divider, Typography, Switch, TextField, Autocomplete, IconButton, Tooltip } from '@mui/material';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
@@ -151,35 +152,33 @@ const InteractionSettings = ({
                       <Grid item xs={11} md={5} lg={5}>
                         <TextField
                           fullWidth
-                          label="Latitude"
+                          label="Detected Latitude"
                           name="currentLatitude"
                           type="text"
                           defaultValue={currentLatitude}
                           onChange={handleCurrentLatitudeChange}
-                          onBlur={saveViewerSettings}
                         />
                       </Grid>
                       <Grid item xs={11} md={5} lg={5}>
                         <TextField
                           fullWidth
-                          label="Longitude"
+                          label="Detected Longitude"
                           name="currentLongitude"
                           type="text"
                           defaultValue={currentLongitude}
                           onChange={handleCurrentLongitudeChange}
-                          onBlur={saveViewerSettings}
                         />
                       </Grid>
                       <Grid item xs={1} md={1} lg={1}>
-                        <Tooltip placement="top" title="Refresh Location">
-                          <IconButton color="primary" size="large" onClick={refreshLocation}>
-                            <RefreshTwoToneIcon sx={{ fontSize: '1.5rem' }} />
+                        <Tooltip placement="top" title="Save Custom Location">
+                          <IconButton color="primary" size="large" onClick={saveViewerSettings}>
+                            <SaveTwoToneIcon sx={{ fontSize: '1.5rem' }} />
                           </IconButton>
                         </Tooltip>
                       </Grid>
                     </Grid>
                     <Typography variant="h5" style={{ paddingTop: '1em' }}>
-                      Saved Location: {remotePrefs?.remoteLatitude},{remotePrefs?.remoteLongitude}
+                      Saved Location: {remotePrefs?.remoteLatitude}, {remotePrefs?.remoteLongitude}
                     </Typography>
                   </Grid>
                 </Grid>

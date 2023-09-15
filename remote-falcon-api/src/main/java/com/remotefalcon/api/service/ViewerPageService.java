@@ -49,6 +49,7 @@ public class ViewerPageService {
   private final PlaylistGroupRepository playlistGroupRepository;
   private final PsaSequenceRepository psaSequenceRepository;
   private final RemoteViewerPagesRepository remoteViewerPagesRepository;
+  private final DefaultViewerPageRepository defaultViewerPageRepository;
 
   @Autowired
   public ViewerPageService(PlaylistRepository playlistRepository, RemoteRepository remoteRepository, RemotePreferenceRepository remotePreferenceRepository,
@@ -56,7 +57,8 @@ public class ViewerPageService {
                            ViewerPageMetaRepository viewerPageMetaRepository, RemoteJukeRepository remoteJukeRepository, ViewerVoteStatsRepository viewerVoteStatsRepository,
                            ViewerJukeStatsRepository viewerJukeStatsRepository, RemoteViewerVoteRepository remoteViewerVoteRepository,
                            FppScheduleRepository fppScheduleRepository, AuthUtil authUtil, ClientUtil clientUtil,
-                           PlaylistGroupRepository playlistGroupRepository, PsaSequenceRepository psaSequenceRepository, RemoteViewerPagesRepository remoteViewerPagesRepository) {
+                           PlaylistGroupRepository playlistGroupRepository, PsaSequenceRepository psaSequenceRepository, RemoteViewerPagesRepository remoteViewerPagesRepository,
+                           DefaultViewerPageRepository defaultViewerPageRepository) {
     this.playlistRepository = playlistRepository;
     this.remoteRepository = remoteRepository;
     this.remotePreferenceRepository = remotePreferenceRepository;
@@ -74,6 +76,7 @@ public class ViewerPageService {
     this.playlistGroupRepository = playlistGroupRepository;
     this.psaSequenceRepository = psaSequenceRepository;
     this.remoteViewerPagesRepository = remoteViewerPagesRepository;
+    this.defaultViewerPageRepository = defaultViewerPageRepository;
   }
 
   public ResponseEntity<ExternalViewerPageDetailsResponse> externalViewerPageDetails() {
@@ -170,8 +173,15 @@ public class ViewerPageService {
     if(viewerTokenDTO == null) {
       return ResponseEntity.status(401).build();
     }
+    String htmlContent = "";
     Optional<RemoteViewerPages> remoteViewerPage = this.remoteViewerPagesRepository.findFirstByRemoteTokenAndViewerPageActive(viewerTokenDTO.getRemoteToken(), true);
-    return remoteViewerPage.map(remoteViewerPages -> ResponseEntity.ok(remoteViewerPages.getViewerPageHtml())).orElseGet(() -> ResponseEntity.ok(""));
+    if(remoteViewerPage.isPresent()) {
+      htmlContent = remoteViewerPage.map(RemoteViewerPages::getViewerPageHtml).orElse("");
+    }else {
+      DefaultViewerPage defaultViewerPage = this.defaultViewerPageRepository.findFirstByIsVersionActive(true);
+      htmlContent = defaultViewerPage.getHtmlContent();
+    }
+    return ResponseEntity.ok(htmlContent);
   }
 
   public ResponseEntity<ViewerRemotePreferencesResponse> remotePrefs() {
