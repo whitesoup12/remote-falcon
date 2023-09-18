@@ -230,7 +230,7 @@
                 <version>2.19.1</version>
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
-                    <argLine>${dd.java.agent.arg}</argLine>
+                    <argLine>@{argLine} -javaagent:${settings.localRepository}/com/datadoghq/dd-java-agent/0.101.0/dd-java-agent-0.101.0.jar -Ddd.service=remote-falcon-api -Ddd.civisibility.enabled=true</argLine>
                 </configuration>
                 <executions>
                     <execution>
