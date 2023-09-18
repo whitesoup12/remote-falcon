@@ -10,11 +10,11 @@ import com.remotefalcon.api.response.PublicViewerPagesResponse;
 import com.remotefalcon.api.response.RemoteResponse;
 import com.remotefalcon.api.util.AuthUtil;
 import com.remotefalcon.api.util.EmailUtil;
+import com.remotefalcon.api.util.RandomUtil;
 import com.sendgrid.Response;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dozer.DozerBeanMapper;
 import org.springframework.core.ParameterizedTypeReference;
@@ -191,8 +191,8 @@ public class ControlPanelService {
     if(externalApiAccess != null) {
       return ResponseEntity.status(204).build();
     }
-    String accessToken = RandomStringUtils.random(20, true, true);
-    String secretKey = RandomStringUtils.random(20, true, true);
+    String accessToken = RandomUtil.generateToken(20);
+    String secretKey = RandomUtil.generateToken(20);
     externalApiAccess = ExternalApiAccess.builder()
             .accessToken(accessToken)
             .accessSecret(secretKey)

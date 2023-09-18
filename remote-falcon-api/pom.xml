@@ -12,8 +12,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
+        <jacoco.version>0.8.7</jacoco.version>
         <sonar.organization>remote-falcon</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.language>java</sonar.language>
     </properties>
 
     <parent>
@@ -171,6 +175,11 @@
             <version>3.0.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -221,7 +230,7 @@
                 <version>2.19.1</version>
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
-                    <argLine>${dd.java.agent.arg}</argLine>
+                    <argLine>@{argLine} -javaagent:${settings.localRepository}/com/datadoghq/dd-java-agent/0.101.0/dd-java-agent-0.101.0.jar -Ddd.service=remote-falcon-api -Ddd.civisibility.enabled=true</argLine>
                 </configuration>
                 <executions>
                     <execution>
@@ -266,6 +275,30 @@
                         </artifactItem>
                     </artifactItems>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <formats>
+                                <format>XML</format>
+                            </formats>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

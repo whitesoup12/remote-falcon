@@ -16,8 +16,9 @@ import com.remotefalcon.api.response.RemoteResponse;
 import com.remotefalcon.api.util.AuthUtil;
 import com.remotefalcon.api.util.ClientUtil;
 import com.remotefalcon.api.util.EmailUtil;
+import com.remotefalcon.api.util.RandomUtil;
 import com.sendgrid.Response;
-import org.apache.commons.lang3.RandomStringUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.dozer.DozerBeanMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -75,7 +75,7 @@ public class AccountService {
       if (remote != null) {
         return ResponseEntity.status(HttpStatus.valueOf(401)).build();
       }
-      String remoteToken = validateRemoteToken(RandomStringUtils.random(25, true, true));
+      String remoteToken = validateRemoteToken(RandomUtil.generateToken(25));
       BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
       String hashedPassword = passwordEncoder.encode(password);
       request.setEmail(email);
@@ -108,7 +108,7 @@ public class AccountService {
     if(remote == null) {
       return remoteToken;
     }else {
-      validateRemoteToken(RandomStringUtils.random(25, true, true));
+      validateRemoteToken(RandomUtil.generateToken(25));
     }
     return null;
   }
@@ -196,7 +196,7 @@ public class AccountService {
   public ResponseEntity<?> forgotPassword(PasswordReset request) {
     Remote remote = this.remoteRepository.findByEmail(request.getEmail());
     if (remote != null) {
-      String passwordResetLink = RandomStringUtils.random(25, true, true);
+      String passwordResetLink = RandomUtil.generateToken(25);
       request.setRemoteToken(remote.getRemoteToken());
       request.setPasswordResetLink(passwordResetLink);
       request.setPasswordResetExpiry(ZonedDateTime.now().plus(1, ChronoUnit.DAYS));
