@@ -380,4 +380,43 @@ public class AccountServiceTest {
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(400), response.getStatusCode());
   }
+
+  @Test
+  public void forgotPassword() {
+
+    PasswordReset request = Mocks.passwordReset();
+    Remote remote = Mocks.remote();
+    Response sendGridResponse = new Response();
+    sendGridResponse.setStatusCode(202);
+
+    when(this.remoteRepository.findByEmail(eq(request.getEmail()))).thenReturn(remote);
+    when(this.emailUtil.sendEmail(eq(remote), eq(request), eq(null), eq(EmailTemplate.FORGOT_PASSWORD))).thenReturn(sendGridResponse);
+
+    ResponseEntity<?> response = this.accountService.forgotPassword(request);
+    assertNotNull(response);
+    assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
+
+    verify(passwordResetRepository, times(1)).deleteByEmail(remote.getEmail());
+    verify(passwordResetRepository, times(1)).save(request);
+    verify(emailUtil, times(1)).sendEmail(eq(remote), eq(request), eq(null), eq(EmailTemplate.FORGOT_PASSWORD));
+  }
+
+  @Test
+  public void forgotPassword_noEmailFound() {
+
+    PasswordReset request = Mocks.passwordReset();
+    Remote remote = Mocks.remote();
+    Response sendGridResponse = new Response();
+    sendGridResponse.setStatusCode(202);
+
+    when(this.remoteRepository.findByEmail(eq(request.getEmail()))).thenReturn(null);
+
+    ResponseEntity<?> response = this.accountService.forgotPassword(request);
+    assertNotNull(response);
+    assertEquals(HttpStatus.valueOf(401), response.getStatusCode());
+
+    verify(passwordResetRepository, times(0)).deleteByEmail(remote.getEmail());
+    verify(passwordResetRepository, times(0)).save(request);
+    verify(emailUtil, times(0)).sendEmail(eq(remote), eq(request), eq(null), eq(EmailTemplate.FORGOT_PASSWORD));
+  }
 }
