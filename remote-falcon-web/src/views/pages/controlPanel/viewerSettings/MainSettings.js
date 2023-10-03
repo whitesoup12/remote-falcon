@@ -1,4 +1,5 @@
-import { Grid, CardActions, Divider, Typography, Autocomplete, Switch, TextField } from '@mui/material';
+import InfoTwoToneIcon from '@mui/icons-material/InfoTwoTone';
+import { Grid, CardActions, Divider, Typography, Autocomplete, Switch, TextField, Stack } from '@mui/material';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -16,7 +17,19 @@ const MainSettings = ({ remotePrefs, handleSwitchChange, handleViewerControlMode
       <CardActions>
         <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
           <Grid item xs={12} md={6} lg={4}>
-            <Typography variant="h4">Viewer Control</Typography>
+            <Stack direction="row" spacing={2} pb={1}>
+              <Typography variant="h4">Viewer Control</Typography>
+              <InfoTwoToneIcon
+                onClick={() =>
+                  window.open(
+                    'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#viewer-control',
+                    '_blank',
+                    'noreferrer'
+                  )
+                }
+                fontSize="small"
+              />
+            </Stack>
             <Typography component="div" variant="caption">
               Enables the ability for the viewer to be able to control your show.
             </Typography>
@@ -30,7 +43,19 @@ const MainSettings = ({ remotePrefs, handleSwitchChange, handleViewerControlMode
       <CardActions>
         <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
           <Grid item xs={12} md={6} lg={4}>
-            <Typography variant="h4">Viewer Control Mode</Typography>
+            <Stack direction="row" spacing={2} pb={1}>
+              <Typography variant="h4">Viewer Control Mode</Typography>
+              <InfoTwoToneIcon
+                onClick={() =>
+                  window.open(
+                    'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#viewer-control-mode',
+                    '_blank',
+                    'noreferrer'
+                  )
+                }
+                fontSize="small"
+              />
+            </Stack>
             <Typography component="div" variant="caption">
               The mode in which you want your viewer to be able to control your show. Changing modes requires a plugin restart.
             </Typography>
