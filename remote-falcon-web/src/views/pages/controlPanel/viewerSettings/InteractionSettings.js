@@ -1,6 +1,6 @@
-import RefreshTwoToneIcon from '@mui/icons-material/RefreshTwoTone';
+import InfoTwoToneIcon from '@mui/icons-material/InfoTwoTone';
 import SaveTwoToneIcon from '@mui/icons-material/SaveTwoTone';
-import { Grid, CardActions, Divider, Typography, Switch, TextField, Autocomplete, IconButton, Tooltip } from '@mui/material';
+import { Grid, CardActions, Divider, Typography, Switch, TextField, Autocomplete, IconButton, Tooltip, Stack } from '@mui/material';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -25,8 +25,7 @@ const InteractionSettings = ({
   handlePsaSequenceChange,
   handleViewerPresentModeChange,
   handleCheckViewerPresentChange,
-  saveViewerSettings,
-  refreshLocation
+  saveViewerSettings
 }) => (
   <Grid item xs={12}>
     <MainCard content={false}>
@@ -34,7 +33,15 @@ const InteractionSettings = ({
       <CardActions>
         <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
           <Grid item xs={12} md={6} lg={4}>
-            <Typography variant="h4">Play PSA</Typography>
+            <Stack direction="row" spacing={2} pb={1}>
+              <Typography variant="h4">Play PSA</Typography>
+              <InfoTwoToneIcon
+                onClick={() =>
+                  window.open('https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#play-psa', '_blank', 'noreferrer')
+                }
+                fontSize="small"
+              />
+            </Stack>
             <Typography component="div" variant="caption">
               Enables the ability to play a PSA sequence after a specified number of requests or votes.
             </Typography>
@@ -50,7 +57,19 @@ const InteractionSettings = ({
           <CardActions>
             <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
               <Grid item xs={12} md={6} lg={4}>
-                <Typography variant="h4">PSA Sequences</Typography>
+                <Stack direction="row" spacing={2} pb={1}>
+                  <Typography variant="h4">PSA Sequences</Typography>
+                  <InfoTwoToneIcon
+                    onClick={() =>
+                      window.open(
+                        'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#psa-sequences',
+                        '_blank',
+                        'noreferrer'
+                      )
+                    }
+                    fontSize="small"
+                  />
+                </Stack>
                 <Typography component="div" variant="caption">
                   These are the PSA sequences you want to be played. Multiple sequences can be selected and will be played through in the
                   order of selection.
@@ -75,7 +94,19 @@ const InteractionSettings = ({
           <CardActions>
             <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
               <Grid item xs={12} md={6} lg={4}>
-                <Typography variant="h4">PSA Frequency</Typography>
+                <Stack direction="row" spacing={2} pb={1}>
+                  <Typography variant="h4">PSA Frequency</Typography>
+                  <InfoTwoToneIcon
+                    onClick={() =>
+                      window.open(
+                        'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#psa-frequency',
+                        '_blank',
+                        'noreferrer'
+                      )
+                    }
+                    fontSize="small"
+                  />
+                </Stack>
                 <Typography component="div" variant="caption">
                   Controls how often a PSA is played.
                 </Typography>
@@ -99,7 +130,19 @@ const InteractionSettings = ({
       <CardActions>
         <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
           <Grid item xs={12} md={6} lg={4}>
-            <Typography variant="h4">Check Viewer Present</Typography>
+            <Stack direction="row" spacing={2} pb={1}>
+              <Typography variant="h4">Check Viewer Present</Typography>
+              <InfoTwoToneIcon
+                onClick={() =>
+                  window.open(
+                    'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#check-viewer-present',
+                    '_blank',
+                    'noreferrer'
+                  )
+                }
+                fontSize="small"
+              />
+            </Stack>
             <Typography component="div" variant="caption">
               Enables checks to make sure the viewer is present before placing requests or votes.
             </Typography>
@@ -120,7 +163,19 @@ const InteractionSettings = ({
           <CardActions>
             <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
               <Grid item xs={12} md={6} lg={4}>
-                <Typography variant="h4">Viewer Present Mode</Typography>
+                <Stack direction="row" spacing={2} pb={1}>
+                  <Typography variant="h4">Viewer Present Mode</Typography>
+                  <InfoTwoToneIcon
+                    onClick={() =>
+                      window.open(
+                        'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#viewer-present-mode',
+                        '_blank',
+                        'noreferrer'
+                      )
+                    }
+                    fontSize="small"
+                  />
+                </Stack>
                 <Typography component="div" variant="caption">
                   The method in which you want to check that your viewer is present.
                 </Typography>
@@ -142,7 +197,19 @@ const InteractionSettings = ({
               <CardActions>
                 <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
                   <Grid item xs={12} md={6} lg={4}>
-                    <Typography variant="h4">Show Location</Typography>
+                    <Stack direction="row" spacing={2} pb={1}>
+                      <Typography variant="h4">Show Location</Typography>
+                      <InfoTwoToneIcon
+                        onClick={() =>
+                          window.open(
+                            'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#show-location',
+                            '_blank',
+                            'noreferrer'
+                          )
+                        }
+                        fontSize="small"
+                      />
+                    </Stack>
                     <Typography component="div" variant="caption">
                       Location of the show. Defaults to detected location, but can be changed if needed.
                     </Typography>
@@ -187,7 +254,19 @@ const InteractionSettings = ({
               <CardActions>
                 <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
                   <Grid item xs={12} md={6} lg={4}>
-                    <Typography variant="h4">Check Radius (in miles)</Typography>
+                    <Stack direction="row" spacing={2} pb={1}>
+                      <Typography variant="h4">Check Radius (in miles)</Typography>
+                      <InfoTwoToneIcon
+                        onClick={() =>
+                          window.open(
+                            'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#check-radius-in-miles',
+                            '_blank',
+                            'noreferrer'
+                          )
+                        }
+                        fontSize="small"
+                      />
+                    </Stack>
                     <Typography component="div" variant="caption">
                       This number, in miles, determines how close the viewer should be to your location in order to place a request. Default
                       is 0.5 miles.
@@ -215,7 +294,19 @@ const InteractionSettings = ({
               <CardActions>
                 <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
                   <Grid item xs={12} md={6} lg={4}>
-                    <Typography variant="h4">Location Code</Typography>
+                    <Stack direction="row" spacing={2} pb={1}>
+                      <Typography variant="h4">Location Code</Typography>
+                      <InfoTwoToneIcon
+                        onClick={() =>
+                          window.open(
+                            'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#location-code',
+                            '_blank',
+                            'noreferrer'
+                          )
+                        }
+                        fontSize="small"
+                      />
+                    </Stack>
                     <Typography component="div" variant="caption">
                       This is the numerical code that will be entered by your viewer when requesting a sequence.
                     </Typography>
@@ -240,7 +331,19 @@ const InteractionSettings = ({
       <CardActions>
         <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
           <Grid item xs={12} md={6} lg={4}>
-            <Typography variant="h4">Hide Sequence After Played</Typography>
+            <Stack direction="row" spacing={2} pb={1}>
+              <Typography variant="h4">Hide Sequence After Played</Typography>
+              <InfoTwoToneIcon
+                onClick={() =>
+                  window.open(
+                    'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#hide-sequence-after-played',
+                    '_blank',
+                    'noreferrer'
+                  )
+                }
+                fontSize="small"
+              />
+            </Stack>
             <Typography component="div" variant="caption">
               When a requested sequence finishes, it will be hidden from the list until after this number of sequences has been played. If
               set to 0, the sequence will not be hidden after it is played.
