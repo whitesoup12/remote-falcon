@@ -451,7 +451,9 @@ public class ControlPanelService {
   public ResponseEntity<?> deleteSequence(Long sequenceKey) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
     Playlist playlist = this.playlistRepository.findByRemoteTokenAndSequenceKey(tokenDTO.getRemoteToken(), sequenceKey);
-    this.playlistRepository.delete(playlist);
+    if(playlist != null) {
+      this.playlistRepository.delete(playlist);
+    }
     return ResponseEntity.status(200).build();
   }
 
