@@ -17,5 +17,6 @@ public interface ActiveViewerRepository extends JpaRepository<ActiveViewer, Inte
   List<ActiveViewer> findAllByRemoteToken(String remoteToken);
 
   @Lock(LockModeType.PESSIMISTIC_READ)
+  @Transactional
   ActiveViewer findFirstByRemoteTokenAndViewerIp(String remoteToken, String viewerIp);
 }
