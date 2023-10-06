@@ -11,6 +11,8 @@ import com.remotefalcon.api.response.ExternalViewerPageDetailsResponse;
 import com.remotefalcon.api.response.ViewerRemotePreferencesResponse;
 import com.remotefalcon.api.util.AuthUtil;
 import com.remotefalcon.api.util.ClientUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -210,7 +210,7 @@ public class ViewerPageService {
             .build();
   }
 
-  @Transactional
+  @SneakyThrows
   public ResponseEntity<?> updateActiveViewer(HttpServletRequest httpServletRequest) {
     ViewerTokenDTO viewerTokenDTO = this.authUtil.getViewerJwtPayload();
     if(viewerTokenDTO == null) {
