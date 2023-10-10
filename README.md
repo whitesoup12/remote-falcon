@@ -23,7 +23,7 @@ Well, there are actually 2 ways to run it locally.
 You can choose either the [Easiest To Run, Most Difficult To Test](#easiest-to-run-most-difficult-to-test) or the [Most Difficult to Run, Easiest to Test](#most-difficult-to-run-easiest-to-test).
 
 ### I Need Help!
-The best way to get quick help is by joining the <a href="https://discord.gg/ZxdZSPSZye" target="_blank">Remote Falcon Discord Server</a>. You can also utilize this repositories <a href="https://github.com/whitesoup12/remote-falcon/discussions" target="_blank">GitHub Discussions page</a>.
+The best way to get quick help is by joining the <a href="https://discord.gg/BGu79unNgk" target="_blank">Remote Falcon Discord Server</a> and posting in the #development channel.
 
 ### Easiest To Run, Most Difficult To Test
 The easiest to run method makes it super simple to get running, but makes development kind of a pain. Because this methos uses Docker Compose, each change requires you to restart all docker images. Whereas the [Most Difficult to Run, Easiest to Test](#most-difficult-to-run-easiest-to-test) only requires you to restart the API alone if changes are made there (changes made to Web actually hot reload since it's ReactJS). Side note... if your local container gets wiped, you loose all your data. So this option might only be good if you're wanting to spin up RF locally quikcly without doing any development work or testing.
