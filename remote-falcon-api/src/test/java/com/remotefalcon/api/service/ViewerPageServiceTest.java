@@ -770,7 +770,7 @@ public class ViewerPageServiceTest {
     when(this.clientUtil.getClientIp(any(HttpServletRequest.class))).thenReturn(ipAddress);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.playlistRepository.findAllByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(playlists);
-    when(this.remoteViewerVoteRepository.findByRemoteTokenAndViewerIp(eq(viewerTokenDTO.getRemoteToken()), eq(ipAddress))).thenReturn(Optional.empty());
+    when(this.remoteViewerVoteRepository.findFirstByRemoteTokenAndViewerIp(eq(viewerTokenDTO.getRemoteToken()), eq(ipAddress))).thenReturn(Optional.empty());
 
     ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(addSequenceRequest, httpServletRequest);
     assertNotNull(response);
@@ -795,7 +795,7 @@ public class ViewerPageServiceTest {
     when(this.clientUtil.getClientIp(any(HttpServletRequest.class))).thenReturn(ipAddress);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     //when(this.playlistRepository.findAllByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(playlists);
-    when(this.remoteViewerVoteRepository.findByRemoteTokenAndViewerIp(eq(viewerTokenDTO.getRemoteToken()), eq(ipAddress))).thenReturn(Optional.of(remoteViewerVote));
+    when(this.remoteViewerVoteRepository.findFirstByRemoteTokenAndViewerIp(eq(viewerTokenDTO.getRemoteToken()), eq(ipAddress))).thenReturn(Optional.of(remoteViewerVote));
 
     ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(addSequenceRequest, httpServletRequest);
     assertNotNull(response);
