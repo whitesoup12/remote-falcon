@@ -168,7 +168,6 @@ const ViewerPage = () => {
                   remoteViewerPages,
                   activeViewerPageHtml,
                   activeViewerPageName,
-                  viewerPageHtmlBase64,
                   setOpenSpeedial,
                   setIsLoading,
                   setNewViewerPageName,
