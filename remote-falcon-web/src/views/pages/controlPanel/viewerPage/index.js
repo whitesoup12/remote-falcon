@@ -157,7 +157,8 @@ const ViewerPage = () => {
                 ariaLabel="Actions Speedial"
                 icon={<SpeedDialIcon />}
                 onClick={() => openCloseActionsSpeedial(setOpenSpeedial, openSpeedial)}
-                open={openSpeedial}
+                open
+                hidden
                 direction="right"
               >
                 {speedialActions(
@@ -167,6 +168,7 @@ const ViewerPage = () => {
                   remoteViewerPages,
                   activeViewerPageHtml,
                   activeViewerPageName,
+                  viewerPageHtmlBase64,
                   setOpenSpeedial,
                   setIsLoading,
                   setNewViewerPageName,

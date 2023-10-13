@@ -440,7 +440,7 @@ public class ViewerPageService {
     boolean checkIfVoted = remotePreference.getCheckIfVoted() != null && remotePreference.getCheckIfVoted();
     boolean viewerVoteSaved = false;
     if(checkIfVoted) {
-      Optional<RemoteViewerVote> remoteViewerVote = this.remoteViewerVoteRepository.findByRemoteTokenAndViewerIp(viewerTokenDTO.getRemoteToken(), ipAddress);
+      Optional<RemoteViewerVote> remoteViewerVote = this.remoteViewerVoteRepository.findFirstByRemoteTokenAndViewerIp(viewerTokenDTO.getRemoteToken(), ipAddress);
       if(remoteViewerVote.isPresent()) {
         return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("ALREADY_VOTED").build());
       }else {
