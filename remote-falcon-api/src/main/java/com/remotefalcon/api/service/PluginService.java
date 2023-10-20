@@ -75,12 +75,12 @@ public class PluginService {
         if(StringUtils.isNotEmpty(currentSequenceDetails.get().getSequenceGroup())) {
           Optional<PlaylistGroup> playlistGroup = this.playlistGroupRepository.findByRemoteTokenAndSequenceGroupName(remoteToken, currentSequenceDetails.get().getSequenceGroup());
           if(playlistGroup.isPresent()) {
-            playlistGroup.get().setSequenceGroupVisibleCount(remotePreference.getHideSequenceCount());
+            playlistGroup.get().setSequenceGroupVisibleCount(remotePreference.getHideSequenceCount() + playlistGroup.get().getSequencesInGroup() + 1);
             nextPlaylistResponse.setPlaylistIndex(currentSequenceDetails.get().getSequenceIndex());
             this.playlistGroupRepository.save(playlistGroup.get());
           }
         }else {
-          currentSequenceDetails.get().setSequenceVisibleCount(remotePreference.getHideSequenceCount());
+          currentSequenceDetails.get().setSequenceVisibleCount(remotePreference.getHideSequenceCount() + 2);
           nextPlaylistResponse.setPlaylistIndex(currentSequenceDetails.get().getSequenceIndex());
           this.playlistRepository.save(currentSequenceDetails.get());
         }
@@ -89,8 +89,6 @@ public class PluginService {
         Optional<RemoteJuke> nextSequence = remoteJukeList.stream().filter(remoteJuke -> !StringUtils.isEmpty(remoteJuke.getFuturePlaylist())).findFirst();
         this.updateQueue(currentSequence, nextSequence);
       }
-    }else {
-      this.updateSequenceHideCountsWhenNoRequests(remoteToken);
     }
     return ResponseEntity.status(200).body(nextPlaylistResponse);
   }
@@ -201,6 +199,9 @@ public class PluginService {
         this.currentPlaylistRepository.save(CurrentPlaylist.builder().remoteToken(remoteToken).currentPlaylist(request.getPlaylist()).build());
       }
     }
+
+    this.updateSequenceHideCounts(remoteToken);
+
     return ResponseEntity.status(200).body(PluginResponse.builder().currentPlaylist(request.getPlaylist()).build());
   }
 
@@ -350,19 +351,12 @@ public class PluginService {
       //Update hide sequence counts.
       if(remotePreference.getHideSequenceCount() != 0) {
         if(!highestVotedIsGrouped) {
-          highestVotedPlaylist.get().setSequenceVisibleCount(remotePreference.getHideSequenceCount());
+          highestVotedPlaylist.get().setSequenceVisibleCount(remotePreference.getHideSequenceCount() + 2);
           this.playlistRepository.save(highestVotedPlaylist.get());
-          this.updateSequenceHideCountsForVoting(highestVotedPlaylist.get());
         }else {
           if(highestVotedPlaylistGroup.isPresent()) {
-            highestVotedPlaylistGroup.get().setSequenceGroupVisibleCount(remotePreference.getHideSequenceCount());
+            highestVotedPlaylistGroup.get().setSequenceGroupVisibleCount(remotePreference.getHideSequenceCount() + highestVotedPlaylistGroup.get().getSequencesInGroup() + 1);
             this.playlistGroupRepository.save(highestVotedPlaylistGroup.get());
-            this.updateSequenceGroupHideCountsForVoting(highestVotedPlaylistGroup.get());
-          }else {
-            this.updateSequenceGroupHideCountsForVoting(PlaylistGroup.builder()
-                    .sequenceGroupName(highestVotedPlaylist.get().getSequenceName())
-                    .remoteToken(highestVotedPlaylist.get().getRemoteToken())
-                    .build());
           }
         }
       }
@@ -376,7 +370,6 @@ public class PluginService {
               .filter(playlist -> playlist.getSequenceGroupVotes() == -1).toList();
       playedGroupVotesToReset.forEach(playlist -> playlist.setSequenceGroupVotes(0));
       this.playlistGroupRepository.saveAll(playedGroupVotesToReset);
-      this.updateSequenceHideCountsWhenNoRequests(remoteToken);
     }
 
     //Reset all owner votes
@@ -482,8 +475,6 @@ public class PluginService {
 
   private void updateQueue(Optional<RemoteJuke> currentSequence, Optional<RemoteJuke> nextSequence) {
     if(currentSequence.isPresent()) {
-      this.updateSequenceHideCounts(currentSequence.get());
-      this.updateSequenceGroupHideCounts(currentSequence.get());
       if(nextSequence.isPresent()) {
         currentSequence.get().setNextPlaylist(nextSequence.get().getFuturePlaylist());
         this.remoteJukeRepository.save(currentSequence.get());
@@ -495,46 +486,7 @@ public class PluginService {
   }
 
   //TODO - Need this same function for sequence groups.
-  private void updateSequenceHideCounts(RemoteJuke currentSequence) {
-    List<Playlist> playlists = this.playlistRepository.findAllByRemoteToken(currentSequence.getRemoteToken());
-    List<Playlist> playlistsToUpdate = playlists.stream()
-            .filter(playlist -> playlist.getSequenceVisibleCount() != 0)
-            .filter(playlist -> !StringUtils.equalsIgnoreCase(playlist.getSequenceName(), currentSequence.getNextPlaylist())).toList();
-    playlistsToUpdate.forEach(playlist -> playlist.setSequenceVisibleCount(playlist.getSequenceVisibleCount() - 1));
-    this.playlistRepository.saveAll(playlistsToUpdate.stream().toList());
-  }
-
-  private void updateSequenceGroupHideCounts(RemoteJuke currentSequence) {
-    List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(currentSequence.getRemoteToken());
-    Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(currentSequence.getRemoteToken(), currentSequence.getSequence());
-    if(playlist.isPresent() && StringUtils.isNotEmpty(playlist.get().getSequenceGroup())) {
-      List<PlaylistGroup> playlistGroupsToUpdate = playlistGroups.stream()
-              .filter(group -> group.getSequenceGroupVisibleCount() != 0)
-              .filter(group -> !StringUtils.equalsIgnoreCase(group.getSequenceGroupName(), playlist.get().getSequenceGroup())).toList();
-      playlistGroupsToUpdate.forEach(group -> group.setSequenceGroupVisibleCount(group.getSequenceGroupVisibleCount() - 1));
-      this.playlistGroupRepository.saveAll(playlistGroupsToUpdate.stream().toList());
-    }
-  }
-
-  private void updateSequenceHideCountsForVoting(Playlist highestVotedPlaylist) {
-    List<Playlist> playlists = this.playlistRepository.findAllByRemoteToken(highestVotedPlaylist.getRemoteToken());
-    List<Playlist> playlistsToUpdate = playlists.stream()
-            .filter(playlist -> playlist.getSequenceVisibleCount() != 0)
-            .filter(playlist -> !StringUtils.equalsIgnoreCase(playlist.getSequenceName(), highestVotedPlaylist.getSequenceName())).toList();
-    playlistsToUpdate.forEach(playlist -> playlist.setSequenceVisibleCount(playlist.getSequenceVisibleCount() - 1));
-    this.playlistRepository.saveAll(playlistsToUpdate.stream().toList());
-  }
-
-  private void updateSequenceGroupHideCountsForVoting(PlaylistGroup highestVotedPlaylistGroup) {
-    List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(highestVotedPlaylistGroup.getRemoteToken());
-    List<PlaylistGroup> playlistGroupsToUpdate = playlistGroups.stream()
-            .filter(playlistGroup -> playlistGroup.getSequenceGroupVisibleCount() != 0)
-            .filter(playlistGroup -> !StringUtils.equalsIgnoreCase(playlistGroup.getSequenceGroupName(), highestVotedPlaylistGroup.getSequenceGroupName())).toList();
-    playlistGroupsToUpdate.forEach(playlistGroup -> playlistGroup.setSequenceGroupVisibleCount(playlistGroup.getSequenceGroupVisibleCount() - 1));
-    this.playlistGroupRepository.saveAll(playlistGroupsToUpdate.stream().toList());
-  }
-
-  private void updateSequenceHideCountsWhenNoRequests(String remoteToken) {
+  private void updateSequenceHideCounts(String remoteToken) {
     List<Playlist> playlists = this.playlistRepository.findAllByRemoteToken(remoteToken);
     List<Playlist> playlistsToUpdate = playlists.stream()
             .filter(playlist -> playlist.getSequenceVisibleCount() != 0).toList();
@@ -543,8 +495,8 @@ public class PluginService {
 
     List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(remoteToken);
     List<PlaylistGroup> playlistGroupsToUpdate = playlistGroups.stream()
-            .filter(playlist -> playlist.getSequenceGroupVisibleCount() != 0).toList();
-    playlistGroupsToUpdate.forEach(playlist -> playlist.setSequenceGroupVisibleCount(playlist.getSequenceGroupVisibleCount() - 1));
+            .filter(group -> group.getSequenceGroupVisibleCount() != 0).toList();
+    playlistGroupsToUpdate.forEach(group -> group.setSequenceGroupVisibleCount(group.getSequenceGroupVisibleCount() - 1));
     this.playlistGroupRepository.saveAll(playlistGroupsToUpdate.stream().toList());
   }
 }
