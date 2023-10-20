@@ -15,4 +15,5 @@ public class SequencesResponse {
   private Integer sequenceDuration;
   private Boolean sequenceVisible;
   private String sequenceImageUrl;
+  private Integer sequenceVotes;
 }

@@ -101,6 +101,7 @@ public class ApiService {
               .sequenceDuration(playlist.getSequenceDuration())
               .sequenceImageUrl(playlist.getSequenceImageUrl())
               .sequenceVisible(playlist.getSequenceVisible())
+              .sequenceVotes(playlist.getSequenceVotes())
               .build());
     });
     return ResponseEntity.status(200).body(sequencesResponseList);
