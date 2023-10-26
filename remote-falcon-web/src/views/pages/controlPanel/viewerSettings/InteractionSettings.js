@@ -317,6 +317,7 @@ const InteractionSettings = ({
                       label="Location Code"
                       name="locationCode"
                       type="number"
+                      onChange={handleNumberChange}
                       defaultValue={remotePrefs?.locationCode}
                       onBlur={saveViewerSettings}
                     />
