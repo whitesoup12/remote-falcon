@@ -83,12 +83,12 @@ spec:
             port: 8080
           initialDelaySeconds: 0
           timeoutSeconds: 10
-          failureThreshold: 3
+          failureThreshold: 60
         readinessProbe:
           httpGet:
             path: /remotefalcon/api/actuator/health
             port: 8080
-          failureThreshold: 3
+          failureThreshold: 60
           initialDelaySeconds: 0
       imagePullSecrets:
         - name: #{DockerHubSecret}#

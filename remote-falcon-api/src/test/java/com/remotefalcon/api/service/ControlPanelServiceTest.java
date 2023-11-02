@@ -647,6 +647,22 @@ public class ControlPanelServiceTest {
   }
 
   @Test
+  public void deleteSequence_nullSequence() {
+    TokenDTO tokenDTO = Mocks.tokenDTO();
+    Playlist playlist = Mocks.sequence();
+    Long sequenceKey = (long) 1;
+
+    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
+    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(sequenceKey))).thenReturn(null);
+
+    ResponseEntity<?> response = this.controlPanelService.deleteSequence(sequenceKey);
+    assertNotNull(response);
+    assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
+
+    verify(playlistRepository, times(0)).delete(playlist);
+  }
+
+  @Test
   public void playSequence_jukebox_noNextSequence() {
     TokenDTO tokenDTO = Mocks.tokenDTO();
     RemotePreference remotePreference = Mocks.remotePreference();

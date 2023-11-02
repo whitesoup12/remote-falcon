@@ -144,7 +144,8 @@ const ExternalViewerPage = () => {
     [messageDisplayTime]
   );
 
-  const insertViewerPageStats = useCallback(async (remoteName) => {
+  const insertViewerPageStats = useCallback(async () => {
+    const remoteName = await getExternalViewerPageDetails();
     const inserViewerPageStatsResponse = await insertViewerPageStatsService();
     if (inserViewerPageStatsResponse?.status === 200) {
       mixpanel.track('External Viewer Page View', { 'Show Name': remoteName });
@@ -343,20 +344,17 @@ const ExternalViewerPage = () => {
       setLoading(true);
       await signViewerJwt();
       await fetchExternalViewerPage();
-      const remoteName = await getExternalViewerPageDetails();
-      insertViewerPageStats(remoteName);
       setLoading(false);
+      insertViewerPageStats();
     };
 
     init();
-  }, [fetchExternalViewerPage, getExternalViewerPageDetails, insertViewerPageStats, signViewerJwt]);
+  }, [fetchExternalViewerPage, insertViewerPageStats, signViewerJwt]);
 
   useInterval(async () => {
     getExternalViewerPageDetails();
     updateActiveViewerService();
   }, 5000);
-
-  setTimeout(() => {}, 2000);
 
   useInterval(async () => {
     convertViewerPageToReact();

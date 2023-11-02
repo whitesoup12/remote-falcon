@@ -1,4 +1,5 @@
-import { Grid, CardActions, Divider, Typography, Autocomplete, Switch, TextField } from '@mui/material';
+import InfoTwoToneIcon from '@mui/icons-material/InfoTwoTone';
+import { Grid, CardActions, Divider, Typography, Autocomplete, Switch, TextField, Stack } from '@mui/material';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -19,7 +20,19 @@ const ExternalViewerPageSettings = ({
       <CardActions>
         <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
           <Grid item xs={12} md={6} lg={4}>
-            <Typography variant="h4">Active Viewer Page</Typography>
+            <Stack direction="row" spacing={2} pb={1}>
+              <Typography variant="h4">Active Viewer Page</Typography>
+              <InfoTwoToneIcon
+                onClick={() =>
+                  window.open(
+                    'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#active-viewer-page',
+                    '_blank',
+                    'noreferrer'
+                  )
+                }
+                fontSize="small"
+              />
+            </Stack>
             <Typography component="div" variant="caption">
               Sets the current active viewer page.
             </Typography>
@@ -39,7 +52,19 @@ const ExternalViewerPageSettings = ({
       <CardActions>
         <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
           <Grid item xs={12} md={6} lg={4}>
-            <Typography variant="h4">Viewer Page Title</Typography>
+            <Stack direction="row" spacing={2} pb={1}>
+              <Typography variant="h4">Viewer Page Title</Typography>
+              <InfoTwoToneIcon
+                onClick={() =>
+                  window.open(
+                    'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#viewer-page-title',
+                    '_blank',
+                    'noreferrer'
+                  )
+                }
+                fontSize="small"
+              />
+            </Stack>
             <Typography component="div" variant="caption">
               Title to display in the Viewer Page browser tab/window.
             </Typography>
@@ -60,7 +85,19 @@ const ExternalViewerPageSettings = ({
       <CardActions>
         <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
           <Grid item xs={12} md={6} lg={4}>
-            <Typography variant="h4">Viewer Page Icon URL</Typography>
+            <Stack direction="row" spacing={2} pb={1}>
+              <Typography variant="h4">Viewer Page Icon URL</Typography>
+              <InfoTwoToneIcon
+                onClick={() =>
+                  window.open(
+                    'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#viewer-page-icon-url',
+                    '_blank',
+                    'noreferrer'
+                  )
+                }
+                fontSize="small"
+              />
+            </Stack>
             <Typography component="div" variant="caption">
               Image URL for the icon to display in the Viewer Page browser tab/window.
             </Typography>
@@ -81,7 +118,19 @@ const ExternalViewerPageSettings = ({
       <CardActions>
         <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
           <Grid item xs={12} md={6} lg={4}>
-            <Typography variant="h4">Make it Snow</Typography>
+            <Stack direction="row" spacing={2} pb={1}>
+              <Typography variant="h4">Make it Snow</Typography>
+              <InfoTwoToneIcon
+                onClick={() =>
+                  window.open(
+                    'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#make-it-snow',
+                    '_blank',
+                    'noreferrer'
+                  )
+                }
+                fontSize="small"
+              />
+            </Stack>
             <Typography component="div" variant="caption">
               Add a snow effect to your viewer page.
             </Typography>

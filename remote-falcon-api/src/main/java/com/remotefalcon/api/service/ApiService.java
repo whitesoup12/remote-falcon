@@ -101,6 +101,7 @@ public class ApiService {
               .sequenceDuration(playlist.getSequenceDuration())
               .sequenceImageUrl(playlist.getSequenceImageUrl())
               .sequenceVisible(playlist.getSequenceVisible())
+              .sequenceVotes(playlist.getSequenceVotes())
               .build());
     });
     return ResponseEntity.status(200).body(sequencesResponseList);
@@ -208,7 +209,7 @@ public class ApiService {
       }
     }
     if(checkIfVoted) {
-      Optional<RemoteViewerVote> remoteViewerVote = this.remoteViewerVoteRepository.findByRemoteTokenAndViewerIp(externalApiAccess.getRemoteToken(), ipAddress);
+      Optional<RemoteViewerVote> remoteViewerVote = this.remoteViewerVoteRepository.findFirstByRemoteTokenAndViewerIp(externalApiAccess.getRemoteToken(), ipAddress);
       if(remoteViewerVote.isPresent()) {
         return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("ALREADY_VOTED").build());
       }

@@ -11,6 +11,8 @@ import com.remotefalcon.api.response.ExternalViewerPageDetailsResponse;
 import com.remotefalcon.api.response.ViewerRemotePreferencesResponse;
 import com.remotefalcon.api.util.AuthUtil;
 import com.remotefalcon.api.util.ClientUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -49,6 +49,7 @@ public class ViewerPageService {
   private final PlaylistGroupRepository playlistGroupRepository;
   private final PsaSequenceRepository psaSequenceRepository;
   private final RemoteViewerPagesRepository remoteViewerPagesRepository;
+  private final DefaultViewerPageRepository defaultViewerPageRepository;
 
   @Autowired
   public ViewerPageService(PlaylistRepository playlistRepository, RemoteRepository remoteRepository, RemotePreferenceRepository remotePreferenceRepository,
@@ -56,7 +57,8 @@ public class ViewerPageService {
                            ViewerPageMetaRepository viewerPageMetaRepository, RemoteJukeRepository remoteJukeRepository, ViewerVoteStatsRepository viewerVoteStatsRepository,
                            ViewerJukeStatsRepository viewerJukeStatsRepository, RemoteViewerVoteRepository remoteViewerVoteRepository,
                            FppScheduleRepository fppScheduleRepository, AuthUtil authUtil, ClientUtil clientUtil,
-                           PlaylistGroupRepository playlistGroupRepository, PsaSequenceRepository psaSequenceRepository, RemoteViewerPagesRepository remoteViewerPagesRepository) {
+                           PlaylistGroupRepository playlistGroupRepository, PsaSequenceRepository psaSequenceRepository, RemoteViewerPagesRepository remoteViewerPagesRepository,
+                           DefaultViewerPageRepository defaultViewerPageRepository) {
     this.playlistRepository = playlistRepository;
     this.remoteRepository = remoteRepository;
     this.remotePreferenceRepository = remotePreferenceRepository;
@@ -74,6 +76,7 @@ public class ViewerPageService {
     this.playlistGroupRepository = playlistGroupRepository;
     this.psaSequenceRepository = psaSequenceRepository;
     this.remoteViewerPagesRepository = remoteViewerPagesRepository;
+    this.defaultViewerPageRepository = defaultViewerPageRepository;
   }
 
   public ResponseEntity<ExternalViewerPageDetailsResponse> externalViewerPageDetails() {
@@ -170,8 +173,15 @@ public class ViewerPageService {
     if(viewerTokenDTO == null) {
       return ResponseEntity.status(401).build();
     }
+    String htmlContent = "";
     Optional<RemoteViewerPages> remoteViewerPage = this.remoteViewerPagesRepository.findFirstByRemoteTokenAndViewerPageActive(viewerTokenDTO.getRemoteToken(), true);
-    return remoteViewerPage.map(remoteViewerPages -> ResponseEntity.ok(remoteViewerPages.getViewerPageHtml())).orElseGet(() -> ResponseEntity.ok(""));
+    if(remoteViewerPage.isPresent()) {
+      htmlContent = remoteViewerPage.map(RemoteViewerPages::getViewerPageHtml).orElse("");
+    }else {
+      DefaultViewerPage defaultViewerPage = this.defaultViewerPageRepository.findFirstByIsVersionActive(true);
+      htmlContent = defaultViewerPage.getHtmlContent();
+    }
+    return ResponseEntity.ok(htmlContent);
   }
 
   public ResponseEntity<ViewerRemotePreferencesResponse> remotePrefs() {
@@ -200,7 +210,7 @@ public class ViewerPageService {
             .build();
   }
 
-  @Transactional
+  @SneakyThrows
   public ResponseEntity<?> updateActiveViewer(HttpServletRequest httpServletRequest) {
     ViewerTokenDTO viewerTokenDTO = this.authUtil.getViewerJwtPayload();
     if(viewerTokenDTO == null) {
@@ -430,7 +440,7 @@ public class ViewerPageService {
     boolean checkIfVoted = remotePreference.getCheckIfVoted() != null && remotePreference.getCheckIfVoted();
     boolean viewerVoteSaved = false;
     if(checkIfVoted) {
-      Optional<RemoteViewerVote> remoteViewerVote = this.remoteViewerVoteRepository.findByRemoteTokenAndViewerIp(viewerTokenDTO.getRemoteToken(), ipAddress);
+      Optional<RemoteViewerVote> remoteViewerVote = this.remoteViewerVoteRepository.findFirstByRemoteTokenAndViewerIp(viewerTokenDTO.getRemoteToken(), ipAddress);
       if(remoteViewerVote.isPresent()) {
         return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("ALREADY_VOTED").build());
       }else {
