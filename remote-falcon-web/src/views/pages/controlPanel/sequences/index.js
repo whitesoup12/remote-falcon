@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 
-import { Box, Grid, TableRow, TableCell, TableContainer, Table, TableHead, TableBody, LinearProgress, Modal } from '@mui/material';
+import { Box, Grid, TableRow, TableCell, TableContainer, Table, TableHead, TableBody, LinearProgress, Modal, Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
 import { sequencesService, sequenceGroupsService } from 'services/controlPanel/sequences.services';
 import { useDispatch, useSelector } from 'store';
@@ -10,8 +11,10 @@ import { gridSpacing } from 'store/constant';
 import { setSequences } from 'store/slices/controlPanel';
 import MainCard from 'ui-component/cards/MainCard';
 import SequencesSkeleton from 'ui-component/cards/Skeleton/SequencesSkeleton';
+import RFLoadingButton from 'ui-component/RFLoadingButton';
 import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
 
+import { downloadStatsToExcel } from '../dashboard/helpers';
 import CreateNewSequenceGroup from './CreateNewSequenceGroup.modal';
 import {
   saveSequenceChanges,
@@ -26,7 +29,9 @@ import {
   openManageSequenceGroups,
   closeCreateNewSequenceGroup,
   handleSequenceGroupNameChange,
-  closeManageSequenceGroups
+  closeManageSequenceGroups,
+  sortSequencesAlphabetically,
+  reorderSequences
 } from './helpers';
 import ManageSequenceGroups from './ManageSequenceGroups.modal';
 import SequenceRow from './SequenceRow';
@@ -100,9 +105,21 @@ const Sequences = () => {
               <SequencesSkeleton />
             ) : (
               <TableContainer>
+                <Stack direction="row" spacing={2} justifyContent="right" pt={2} pb={2} pr={2}>
+                  <RFLoadingButton
+                    loading={showLinearProgress}
+                    onClick={() =>
+                      sortSequencesAlphabetically(sequences, setShowLinearProgress, coreInfo, dispatch, () => fetchSequences())
+                    }
+                    color="primary"
+                  >
+                    Sort Alphabetically
+                  </RFLoadingButton>
+                </Stack>
                 <Table size="small" aria-label="collapsible table">
                   <TableHead sx={{ '& th,& td': { whiteSpace: 'nowrap' } }}>
                     <TableRow>
+                      <TableCell sx={{ pl: 3 }} />
                       <TableCell sx={{ pl: 3 }}>Status</TableCell>
                       <TableCell sx={{ pl: 3 }}>Type</TableCell>
                       <TableCell>Name</TableCell>
@@ -111,56 +128,83 @@ const Sequences = () => {
                       <TableCell sx={{ pl: 3 }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>
-                  <TableBody>
-                    <>
-                      {_.map(sequences, (sequence) => (
-                        <SequenceRow
-                          sequence={sequence}
-                          sequenceGroups={sequenceGroups}
-                          sequenceGroupOptions={sequenceGroupOptions}
-                          handleSequenceGroupChange={(event, value, sequenceKey) =>
-                            handleSequenceGroupChange(
-                              event,
-                              value,
-                              sequenceKey,
-                              dispatch,
-                              sequences,
-                              setShowLinearProgress,
-                              fetchSequences,
-                              fetchSequenceGroups
-                            )
-                          }
-                          playSequence={(sequenceKey, sequenceName) =>
-                            playSequence(dispatch, sequenceKey, sequenceName, setShowLinearProgress, coreInfo)
-                          }
-                          toggleSequenceVisibility={(sequenceKey, sequenceName) =>
-                            toggleSequenceVisibility(dispatch, sequenceKey, sequenceName, sequences, setShowLinearProgress, coreInfo)
-                          }
-                          deleteSequence={(sequenceKey, sequenceName) =>
-                            deleteSequence({
-                              dispatch,
-                              sequenceKey,
-                              sequenceName,
-                              setShowLinearProgress,
-                              fetchSequences,
-                              coreInfo
-                            })
-                          }
-                          handleInputChange={(event, sequenceKey) => handleInputChange(event, sequenceKey, dispatch, sequences)}
-                          saveSequenceChanges={() =>
-                            saveSequenceChanges(dispatch, sequences, setShowLinearProgress, () => {
-                              fetchSequences();
-                              fetchSequenceGroups();
-                            })
-                          }
-                          openCreateNewSequenceGroup={() =>
-                            openCreateNewSequenceGroup(setCreateNewSequenceGroupOpen, setNewSequenceGroupName, setNewSequenceGroupNameError)
-                          }
-                          openManageSequenceGroups={() => openManageSequenceGroups(setManageSequenceGroupsOpen)}
-                        />
-                      ))}
-                    </>
-                  </TableBody>
+                  <DragDropContext
+                    onDragEnd={(result) =>
+                      reorderSequences(result, sequences, setShowLinearProgress, coreInfo, dispatch, () => fetchSequences())
+                    }
+                  >
+                    <Droppable droppableId="sequences">
+                      {(provided) => (
+                        <TableBody {...provided.droppableProps} ref={provided.innerRef}>
+                          <>
+                            {_.map(sequences, (sequence, index) => (
+                              <Draggable index={parseInt(index, 10)} draggableId={sequence.sequenceName} key={sequence.sequenceName}>
+                                {(provided) => (
+                                  <SequenceRow
+                                    provided={provided}
+                                    sequence={sequence}
+                                    sequenceGroups={sequenceGroups}
+                                    sequenceGroupOptions={sequenceGroupOptions}
+                                    handleSequenceGroupChange={(event, value, sequenceKey) =>
+                                      handleSequenceGroupChange(
+                                        event,
+                                        value,
+                                        sequenceKey,
+                                        dispatch,
+                                        sequences,
+                                        setShowLinearProgress,
+                                        fetchSequences,
+                                        fetchSequenceGroups
+                                      )
+                                    }
+                                    playSequence={(sequenceKey, sequenceName) =>
+                                      playSequence(dispatch, sequenceKey, sequenceName, setShowLinearProgress, coreInfo)
+                                    }
+                                    toggleSequenceVisibility={(sequenceKey, sequenceName) =>
+                                      toggleSequenceVisibility(
+                                        dispatch,
+                                        sequenceKey,
+                                        sequenceName,
+                                        sequences,
+                                        setShowLinearProgress,
+                                        coreInfo
+                                      )
+                                    }
+                                    deleteSequence={(sequenceKey, sequenceName) =>
+                                      deleteSequence({
+                                        dispatch,
+                                        sequenceKey,
+                                        sequenceName,
+                                        setShowLinearProgress,
+                                        fetchSequences,
+                                        coreInfo
+                                      })
+                                    }
+                                    handleInputChange={(event, sequenceKey) => handleInputChange(event, sequenceKey, dispatch, sequences)}
+                                    saveSequenceChanges={() =>
+                                      saveSequenceChanges(dispatch, sequences, setShowLinearProgress, () => {
+                                        fetchSequences();
+                                        fetchSequenceGroups();
+                                      })
+                                    }
+                                    openCreateNewSequenceGroup={() =>
+                                      openCreateNewSequenceGroup(
+                                        setCreateNewSequenceGroupOpen,
+                                        setNewSequenceGroupName,
+                                        setNewSequenceGroupNameError
+                                      )
+                                    }
+                                    openManageSequenceGroups={() => openManageSequenceGroups(setManageSequenceGroupsOpen)}
+                                  />
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </>
+                        </TableBody>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
                 </Table>
               </TableContainer>
             )}

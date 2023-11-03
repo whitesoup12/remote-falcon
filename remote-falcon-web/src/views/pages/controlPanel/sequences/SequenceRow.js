@@ -2,6 +2,7 @@ import React from 'react';
 
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import PlayArrowTwoToneIcon from '@mui/icons-material/PlayArrowTwoTone';
+import ReorderTwoToneIcon from '@mui/icons-material/ReorderTwoTone';
 import VisibilityOffTwoToneIcon from '@mui/icons-material/VisibilityOffTwoTone';
 import VisibilityTwoToneIcon from '@mui/icons-material/VisibilityTwoTone';
 import { IconButton, TableCell, TableRow, Stack, Tooltip } from '@mui/material';
@@ -13,6 +14,7 @@ import Chip from 'ui-component/extended/Chip';
 import SequenceDetails from './SequenceDetails';
 
 function SequenceRow({
+  provided,
   sequence,
   sequenceGroupOptions,
   handleSequenceGroupChange,
@@ -33,7 +35,12 @@ function SequenceRow({
 
   return (
     <>
-      <TableRow hover>
+      <TableRow ref={provided.innerRef} {...provided.draggableProps} hover>
+        <TableCell align="left">
+          <div {...provided.dragHandleProps}>
+            <ReorderTwoToneIcon />
+          </div>
+        </TableCell>
         <TableCell onClick={handleSequenceDetailsDrawer} sx={{ minWidth: 60, width: 60, cursor: 'pointer' }}>
           {sequence.isSequenceActive && <Chip label="Active" size="small" variant="outlined" chipcolor="success" />}
           {!sequence.isSequenceActive && <Chip label="Inactive" size="small" variant="outlined" chipcolor="error" />}
