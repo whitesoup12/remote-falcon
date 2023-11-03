@@ -14,7 +14,6 @@ import SequencesSkeleton from 'ui-component/cards/Skeleton/SequencesSkeleton';
 import RFLoadingButton from 'ui-component/RFLoadingButton';
 import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
 
-import { downloadStatsToExcel } from '../dashboard/helpers';
 import CreateNewSequenceGroup from './CreateNewSequenceGroup.modal';
 import {
   saveSequenceChanges,
@@ -125,6 +124,7 @@ const Sequences = () => {
                       <TableCell>Name</TableCell>
                       <TableCell>Display Name</TableCell>
                       <TableCell>Group</TableCell>
+                      <TableCell>Category</TableCell>
                       <TableCell sx={{ pl: 3 }}>Actions</TableCell>
                     </TableRow>
                   </TableHead>

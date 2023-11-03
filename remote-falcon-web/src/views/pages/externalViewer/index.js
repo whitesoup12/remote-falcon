@@ -25,7 +25,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 import axios from 'utils/axios';
 import { getSubdomain } from 'utils/route-guard/helpers/helpers';
 
-import { defaultProcessingInstructions, processingInstructions, viewerPageMessageElements } from './helpers/helpers';
+import { defaultProcessingInstructions, processingInstructions, viewerPageMessageElements } from './helpers';
 
 const ExternalViewerPage = () => {
   const dispatch = useDispatch();
@@ -260,6 +260,8 @@ const ExternalViewerPage = () => {
     parsedViewerPage = displayCurrentViewerMessages(parsedViewerPage);
 
     const sequencesElement = [];
+    const categoriesPlaced = [];
+
     _.map(externalViewerPageDetails?.sequences, (sequence) => {
       if (sequence.sequenceVisible && sequence.sequenceVisibleCount === 0) {
         let sequenceImageElement = [<></>];
@@ -270,25 +272,79 @@ const ExternalViewerPage = () => {
         }
         if (externalViewerPageDetails?.remotePreferences?.viewerControlMode === 'voting') {
           if (sequence.sequenceVotes !== -1) {
+            if (sequence.sequenceCategory == null || sequence.sequenceCategory === '') {
+              sequencesElement.push(
+                <>
+                  <div className="cell-vote-playlist" onClick={(e) => voteForSequence(e)} data-key={sequence.sequenceName}>
+                    {sequenceImageElement}
+                    {sequence.sequenceDisplayName}
+                  </div>
+                  <div className="cell-vote">{sequence.sequenceVotes}</div>
+                </>
+              );
+            } else if (!_.includes(categoriesPlaced, sequence.sequenceCategory)) {
+              categoriesPlaced.push(sequence.sequenceCategory);
+              const categorizedSequencesArray = [];
+              const categorizedSequencesToIterate = _.cloneDeep(externalViewerPageDetails?.sequences);
+              _.map(categorizedSequencesToIterate, (categorizedSequence) => {
+                if (categorizedSequence.sequenceCategory === sequence.sequenceCategory) {
+                  const theElement = (
+                    <>
+                      <div className="cell-vote-playlist" onClick={(e) => voteForSequence(e)} data-key={categorizedSequence.sequenceName}>
+                        {sequenceImageElement}
+                        {categorizedSequence.sequenceDisplayName}
+                      </div>
+                      <div className="cell-vote">{categorizedSequence.sequenceVotes}</div>
+                    </>
+                  );
+                  categorizedSequencesArray.push(theElement);
+                }
+              });
+
+              sequencesElement.push(
+                <>
+                  <div className="category-label">{sequence.sequenceCategory}</div>
+                  {categorizedSequencesArray}
+                  <div className="category-section" />
+                </>
+              );
+            }
+          }
+        } else if (externalViewerPageDetails?.remotePreferences?.viewerControlMode === 'jukebox') {
+          if (sequence.sequenceCategory == null || sequence.sequenceCategory === '') {
             sequencesElement.push(
               <>
-                <div className="cell-vote-playlist" onClick={(e) => voteForSequence(e)} data-key={sequence.sequenceName}>
+                <div className="jukebox-list" onClick={(e) => addSequenceToQueue(e)} data-key={sequence.sequenceName}>
                   {sequenceImageElement}
                   {sequence.sequenceDisplayName}
                 </div>
-                <div className="cell-vote">{sequence.sequenceVotes}</div>
+              </>
+            );
+          } else if (!_.includes(categoriesPlaced, sequence.sequenceCategory)) {
+            categoriesPlaced.push(sequence.sequenceCategory);
+            const categorizedSequencesArray = [];
+            const categorizedSequencesToIterate = _.cloneDeep(externalViewerPageDetails?.sequences);
+            _.map(categorizedSequencesToIterate, (categorizedSequence) => {
+              if (categorizedSequence.sequenceCategory === sequence.sequenceCategory) {
+                const theElement = (
+                  <>
+                    <div className="jukebox-list" onClick={(e) => addSequenceToQueue(e)} data-key={categorizedSequence.sequenceName}>
+                      {sequenceImageElement}
+                      {categorizedSequence.sequenceDisplayName}
+                    </div>
+                  </>
+                );
+                categorizedSequencesArray.push(theElement);
+              }
+            });
+
+            sequencesElement.push(
+              <>
+                <div className="category-label">{sequence.sequenceCategory}</div>
+                <div className="category-section ">{categorizedSequencesArray}</div>
               </>
             );
           }
-        } else {
-          sequencesElement.push(
-            <>
-              <div className="jukebox-list" onClick={(e) => addSequenceToQueue(e)} data-key={sequence.sequenceName}>
-                {sequenceImageElement}
-                {sequence.sequenceDisplayName}
-              </div>
-            </>
-          );
         }
       }
     });
