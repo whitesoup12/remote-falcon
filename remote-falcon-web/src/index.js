@@ -9,8 +9,8 @@ import '_mockApis';
 import App from 'App';
 import { BASE_PATH } from 'config';
 import { ConfigProvider } from 'contexts/ConfigContext';
-import reportWebVitals from 'reportWebVitals';
-import * as serviceWorker from 'serviceWorker';
+// import reportWebVitals from 'reportWebVitals';
+// import * as serviceWorker from 'serviceWorker';
 import { store } from 'store';
 
 import 'assets/scss/style.scss';
