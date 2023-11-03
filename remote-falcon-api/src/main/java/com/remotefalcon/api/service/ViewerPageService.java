@@ -421,7 +421,7 @@ public class ViewerPageService {
     }
 
     this.saveViewerJukeStats(viewerTokenDTO.getRemoteToken(), request.getPlaylist());
-    if(remotePreference.getPsaEnabled() != null && remotePreference.getPsaEnabled()) {
+    if(remotePreference.getPsaEnabled() != null && remotePreference.getPsaEnabled() && !remotePreference.getManagePsa()) {
       Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(viewerTokenDTO.getRemoteToken());
       if(psaSequence.isPresent()) {
         this.addPSAToQueue(viewerTokenDTO.getRemoteToken(), remotePreference.getPsaFrequency(), nextRequestSequence, psaSequence.get());

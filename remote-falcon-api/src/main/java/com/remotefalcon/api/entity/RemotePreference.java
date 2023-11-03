@@ -112,6 +112,9 @@ public class RemotePreference {
   @Convert(converter = org.hibernate.type.YesNoConverter.class)
   private Boolean managePsa;
 
+  @Column(name = "sequencesPlayed")
+  private Integer sequencesPlayed;
+
   @Transient
   List<PsaSequence> psaSequenceList;
 

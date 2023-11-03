@@ -58,11 +58,11 @@ const InteractionSettings = ({
             <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
               <Grid item xs={12} md={6} lg={4} ml={2}>
                 <Stack direction="row" spacing={2} pb={1}>
-                  <Typography variant="h4">PSA Full Control</Typography>
+                  <Typography variant="h4">Managed PSA</Typography>
                   <InfoTwoToneIcon
                     onClick={() =>
                       window.open(
-                        'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#psa-full-control',
+                        'https://docs.remotefalcon.com/docs/control-panel/remote-falcon-settings#managed-psa',
                         '_blank',
                         'noreferrer'
                       )
@@ -71,7 +71,8 @@ const InteractionSettings = ({
                   />
                 </Stack>
                 <Typography component="div" variant="caption">
-                  Gives Remote Falcon the ability to fully control your PSA and when it plays, even if requests or votes are not being made.
+                  Gives Remote Falcon the ability to fully manage your PSA and control when it plays, even if requests or votes are not
+                  being made.
                 </Typography>
               </Grid>
               <Grid item xs={12} md={6} lg={4}>

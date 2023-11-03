@@ -214,6 +214,7 @@ CREATE TABLE `REMOTE_PREFS` (
   `jukeboxHistoryLimit` int NOT NULL DEFAULT '3',
   `makeItSnow` varchar(1) NOT NULL DEFAULT 'N',
   `managePsa` varchar(1) DEFAULT 'N',
+  `sequencesPlayed` int DEFAULT 0,
   PRIMARY KEY (`remotePrefToken`),
   KEY `all_remote_prefs` (`viewerModeEnabled`,`viewerControlEnabled`,`viewerControlMode`,`enableGeolocation`,`messageDisplayTime`,`jukeboxDepth`,`enableLocationCode`,`locationCode`)
 );
