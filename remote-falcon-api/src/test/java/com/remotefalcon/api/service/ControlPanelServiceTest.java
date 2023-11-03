@@ -339,6 +339,7 @@ public class ControlPanelServiceTest {
     RemotePreference remotePreference = Mocks.remotePreference();
     List<PsaSequence> psaSequenceList = Mocks.psaSequenceList();
     remotePreference.setPsaSequenceList(psaSequenceList);
+    remotePreference.setManagePsa(true);
 
     when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);

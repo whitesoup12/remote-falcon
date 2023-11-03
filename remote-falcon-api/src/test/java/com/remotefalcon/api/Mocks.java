@@ -245,6 +245,8 @@ public class Mocks {
             .locationCode(null)
             .psaFrequency(0)
             .viewerPagePublic(true)
+            .managePsa(false)
+            .sequencesPlayed(0)
             .build();
   }
 

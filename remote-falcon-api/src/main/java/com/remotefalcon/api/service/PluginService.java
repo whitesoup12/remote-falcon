@@ -202,6 +202,42 @@ public class PluginService {
 
     this.updateSequenceHideCounts(remoteToken);
 
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
+    remotePreference.setSequencesPlayed(remotePreference.getSequencesPlayed() + 1);
+
+    //PSA
+    if(remotePreference.getPsaEnabled() && remotePreference.getManagePsa()) {
+      int sequencesPlayed = remotePreference.getSequencesPlayed();
+      if(sequencesPlayed != 0 && sequencesPlayed % remotePreference.getPsaFrequency() == 0) {
+        Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
+        if(psaSequence.isPresent()) {
+          List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceVotesDescSequenceVoteTimeAsc(remoteToken, true);
+          Optional<Playlist> psaPlaylist = playlists.stream().filter(playlist -> StringUtils.equalsIgnoreCase(psaSequence.get().getPsaSequenceName(), playlist.getSequenceName())).findFirst();
+          if(psaPlaylist.isPresent()) {
+            if(StringUtils.equalsIgnoreCase("VOTING", remotePreference.getViewerControlMode())) {
+              psaPlaylist.get().setSequenceVotes(11111);
+              this.playlistRepository.save(psaPlaylist.get());
+            }else {
+              this.remoteJukeRepository.save(RemoteJuke.builder()
+                              .remoteToken(remoteToken)
+                              .nextPlaylist(psaPlaylist.get().getSequenceName())
+                              .ownerRequested(true)
+                      .build());
+            }
+
+            psaSequence.get().setPsaSequenceLastPlayed(ZonedDateTime.now());
+            this.psaSequenceRepository.save(psaSequence.get());
+          }
+        }
+      }
+      List<PsaSequence> psaSequences = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
+      boolean isPsaPlaying = psaSequences.stream().anyMatch(psaSequence -> StringUtils.equalsIgnoreCase(request.getPlaylist(), psaSequence.getPsaSequenceName()));
+      if(isPsaPlaying) {
+        remotePreference.setSequencesPlayed(remotePreference.getSequencesPlayed() - 1);
+      }
+      this.remotePreferenceRepository.save(remotePreference);
+    }
+
     return ResponseEntity.status(200).body(PluginResponse.builder().currentPlaylist(request.getPlaylist()).build());
   }
 
@@ -330,10 +366,10 @@ public class PluginService {
       this.playlistRepository.save(highestVotedPlaylist.get());
 
       //PSA
-      if(remotePreference.getPsaEnabled() && !isWinningSequencePsa) {
+      if(remotePreference.getPsaEnabled() && !isWinningSequencePsa && !remotePreference.getManagePsa()) {
         ZonedDateTime todayOhHundred = ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0);
         int voteWinCounts = this.viewerVoteWinStatsRepository.countAllByRemoteTokenAndVoteWinDateTimeAfter(remoteToken, todayOhHundred);
-        if(voteWinCounts % remotePreference.getPsaFrequency() == 0) {
+        if(voteWinCounts != 0 && voteWinCounts % remotePreference.getPsaFrequency() == 0) {
           Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
           if(psaSequence.isPresent()) {
             Optional<Playlist> psaPlaylist = playlists.stream().filter(playlist -> StringUtils.equalsIgnoreCase(psaSequence.get().getPsaSequenceName(), playlist.getSequenceName())).findFirst();
@@ -469,6 +505,7 @@ public class PluginService {
     String remoteToken = this.authUtil.getRemoteTokenFromHeader();
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
     remotePreference.setViewerControlEnabled(StringUtils.equalsIgnoreCase("Y", request.getViewerControlEnabled()));
+    remotePreference.setSequencesPlayed(0);
     this.remotePreferenceRepository.save(remotePreference);
     return ResponseEntity.status(200).body(PluginResponse.builder().viewerControlEnabled(StringUtils.equalsIgnoreCase("Y", request.getViewerControlEnabled())).build());
   }

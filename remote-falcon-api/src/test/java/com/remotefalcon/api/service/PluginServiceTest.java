@@ -286,6 +286,7 @@ public class PluginServiceTest {
     playlists.get(0).setSequenceVisibleCount(1);
     List<PlaylistGroup> playlistGroups = Mocks.playlistGroupList();
     playlistGroups.get(0).setSequenceGroupVisibleCount(1);
+    RemotePreference remotePreference = Mocks.remotePreference();
 
     List<Playlist> playlistsSavedForCounts = List.of(playlists.get(0));
     List<PlaylistGroup> playlistGroupsSavedForCounts = List.of(playlistGroups.get(0));
@@ -294,6 +295,123 @@ public class PluginServiceTest {
     when(this.currentPlaylistRepository.findByRemoteToken(eq(remoteToken))).thenReturn(Optional.of(currentPlaylist));
     when(this.playlistRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlists);
     when(this.playlistGroupRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlistGroups);
+    when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
+
+    ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
+    assertNotNull(response);
+    assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals("Sequence One", response.getBody().getCurrentPlaylist());
+
+    verify(currentPlaylistRepository, times(1)).save(any(CurrentPlaylist.class));
+    verify(playlistRepository, times(1)).saveAll(playlistsSavedForCounts);
+    verify(playlistGroupRepository, times(1)).saveAll(playlistGroupsSavedForCounts);
+  }
+
+  @Test
+  public void updateWhatsPlaying_managedPsa_normalSequence() {
+    String remoteToken = "abc123";
+    CurrentPlaylist currentPlaylist = Mocks.currentPlaylist();
+    UpdateWhatsPlayingRequest updateWhatsPlayingRequest = Mocks.updateWhatsPlayingRequest();
+    List<Playlist> playlists = Mocks.sequences();
+    playlists.get(0).setSequenceVisibleCount(1);
+    List<PlaylistGroup> playlistGroups = Mocks.playlistGroupList();
+    playlistGroups.get(0).setSequenceGroupVisibleCount(1);
+    RemotePreference remotePreference = Mocks.remotePreference();
+    List<PsaSequence> psaSequences = Mocks.psaSequenceList();
+
+    List<Playlist> playlistsSavedForCounts = List.of(playlists.get(0));
+    List<PlaylistGroup> playlistGroupsSavedForCounts = List.of(playlistGroups.get(0));
+    remotePreference.setManagePsa(true);
+
+    when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
+    when(this.currentPlaylistRepository.findByRemoteToken(eq(remoteToken))).thenReturn(Optional.of(currentPlaylist));
+    when(this.playlistRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlists);
+    when(this.playlistGroupRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlistGroups);
+    when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
+
+    ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
+    assertNotNull(response);
+    assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals("Sequence One", response.getBody().getCurrentPlaylist());
+
+    verify(currentPlaylistRepository, times(1)).save(any(CurrentPlaylist.class));
+    verify(playlistRepository, times(1)).saveAll(playlistsSavedForCounts);
+    verify(playlistGroupRepository, times(1)).saveAll(playlistGroupsSavedForCounts);
+  }
+
+  @Test
+  public void updateWhatsPlaying_managedPsa_psa() {
+    String remoteToken = "abc123";
+    CurrentPlaylist currentPlaylist = Mocks.currentPlaylist();
+    UpdateWhatsPlayingRequest updateWhatsPlayingRequest = Mocks.updateWhatsPlayingRequest();
+    List<Playlist> playlists = Mocks.sequences();
+    playlists.get(0).setSequenceVisibleCount(1);
+    List<PlaylistGroup> playlistGroups = Mocks.playlistGroupList();
+    playlistGroups.get(0).setSequenceGroupVisibleCount(1);
+    RemotePreference remotePreference = Mocks.remotePreference();
+    List<PsaSequence> psaSequences = Mocks.psaSequenceList();
+
+    List<Playlist> playlistsSavedForCounts = List.of(playlists.get(0));
+    List<PlaylistGroup> playlistGroupsSavedForCounts = List.of(playlistGroups.get(0));
+    remotePreference.setManagePsa(true);
+    remotePreference.setPsaEnabled(true);
+    remotePreference.setPsaSequenceList(List.of(PsaSequence.builder().psaSequenceName("Sequence One").build()));
+    remotePreference.setPsaFrequency(3);
+    remotePreference.setSequencesPlayed(2);
+    psaSequences.get(0).setPsaSequenceName("Sequence One");
+
+    when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
+    when(this.currentPlaylistRepository.findByRemoteToken(eq(remoteToken))).thenReturn(Optional.of(currentPlaylist));
+    when(this.playlistRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlists);
+    when(this.playlistGroupRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlistGroups);
+    when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
+    when(this.psaSequenceRepository.findAllByRemoteToken(remoteToken)).thenReturn(psaSequences);
+    when(this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken)).thenReturn(Optional.of(psaSequences.get(0)));
+    when(this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceVotesDescSequenceVoteTimeAsc(remoteToken, true)).thenReturn(playlists);
+
+    ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
+    assertNotNull(response);
+    assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertEquals("Sequence One", response.getBody().getCurrentPlaylist());
+
+    verify(currentPlaylistRepository, times(1)).save(any(CurrentPlaylist.class));
+    verify(playlistRepository, times(1)).saveAll(playlistsSavedForCounts);
+    verify(playlistGroupRepository, times(1)).saveAll(playlistGroupsSavedForCounts);
+  }
+
+  @Test
+  public void updateWhatsPlaying_managedPsa_psa_voting() {
+    String remoteToken = "abc123";
+    CurrentPlaylist currentPlaylist = Mocks.currentPlaylist();
+    UpdateWhatsPlayingRequest updateWhatsPlayingRequest = Mocks.updateWhatsPlayingRequest();
+    List<Playlist> playlists = Mocks.sequences();
+    playlists.get(0).setSequenceVisibleCount(1);
+    List<PlaylistGroup> playlistGroups = Mocks.playlistGroupList();
+    playlistGroups.get(0).setSequenceGroupVisibleCount(1);
+    RemotePreference remotePreference = Mocks.remotePreference();
+    List<PsaSequence> psaSequences = Mocks.psaSequenceList();
+
+    List<Playlist> playlistsSavedForCounts = List.of(playlists.get(0));
+    List<PlaylistGroup> playlistGroupsSavedForCounts = List.of(playlistGroups.get(0));
+    remotePreference.setViewerControlMode("VOTING");
+    remotePreference.setManagePsa(true);
+    remotePreference.setPsaEnabled(true);
+    remotePreference.setPsaSequenceList(List.of(PsaSequence.builder().psaSequenceName("Sequence One").build()));
+    remotePreference.setPsaFrequency(3);
+    remotePreference.setSequencesPlayed(2);
+    psaSequences.get(0).setPsaSequenceName("Sequence One");
+
+    when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
+    when(this.currentPlaylistRepository.findByRemoteToken(eq(remoteToken))).thenReturn(Optional.of(currentPlaylist));
+    when(this.playlistRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlists);
+    when(this.playlistGroupRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlistGroups);
+    when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
+    when(this.psaSequenceRepository.findAllByRemoteToken(remoteToken)).thenReturn(psaSequences);
+    when(this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken)).thenReturn(Optional.of(psaSequences.get(0)));
+    when(this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceVotesDescSequenceVoteTimeAsc(remoteToken, true)).thenReturn(playlists);
 
     ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
     assertNotNull(response);
@@ -310,9 +428,11 @@ public class PluginServiceTest {
   public void updateWhatsPlaying_noCurrentPlaylist() {
     String remoteToken = "abc123";
     UpdateWhatsPlayingRequest updateWhatsPlayingRequest = Mocks.updateWhatsPlayingRequest();
+    RemotePreference remotePreference = Mocks.remotePreference();
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
     when(this.currentPlaylistRepository.findByRemoteToken(eq(remoteToken))).thenReturn(Optional.empty());
+    when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
 
     ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
     assertNotNull(response);
@@ -326,9 +446,11 @@ public class PluginServiceTest {
   public void updateWhatsPlaying_noPlaylist() {
     String remoteToken = "abc123";
     UpdateWhatsPlayingRequest updateWhatsPlayingRequest = Mocks.updateWhatsPlayingRequest();
+    RemotePreference remotePreference = Mocks.remotePreference();
     updateWhatsPlayingRequest.setPlaylist(null);
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
+    when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
 
     ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
     assertNotNull(response);

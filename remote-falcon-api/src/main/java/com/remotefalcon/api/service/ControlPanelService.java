@@ -284,6 +284,10 @@ public class ControlPanelService {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
     if(remotePreference != null) {
+      if(request.getViewerControlEnabled() != remotePreference.getViewerControlEnabled()
+              || request.getManagePsa() != remotePreference.getManagePsa()) {
+        request.setSequencesPlayed(0);
+      }
       request.setRemoteToken(tokenDTO.getRemoteToken());
       request.setRemotePrefToken(remotePreference.getRemotePrefToken());
       this.remotePreferenceRepository.save(request);
@@ -368,10 +372,14 @@ public class ControlPanelService {
     playlists.forEach(playlist -> {
       playlist.setSequenceVotes(0);
       playlist.setOwnerVoted(false);
+      playlist.setSequenceVisibleCount(0);
     });
     this.playlistRepository.saveAll(playlists.stream().toList());
     List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
-    playlistGroups.forEach(playlistGroup -> playlistGroup.setSequenceGroupVotes(0));
+    playlistGroups.forEach(playlistGroup -> {
+      playlistGroup.setSequenceGroupVotes(0);
+      playlistGroup.setSequenceGroupVisibleCount(0);
+    });
     this.playlistGroupRepository.saveAll(playlistGroups.stream().toList());
     List<RemoteViewerVote> remoteViewerVotes = this.remoteViewerVoteRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
     this.remoteViewerVoteRepository.deleteAll(remoteViewerVotes.stream().toList());
