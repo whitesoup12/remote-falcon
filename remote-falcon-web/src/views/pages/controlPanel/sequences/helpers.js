@@ -6,7 +6,8 @@ import {
   toggleSequenceVisibilityService,
   deleteSequenceService,
   saveSequenceGroupService,
-  deleteSequenceGroupService
+  deleteSequenceGroupService,
+  updateSequenceOrderService
 } from 'services/controlPanel/sequences.services';
 import { setSequences } from 'store/slices/controlPanel';
 import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
@@ -197,4 +198,47 @@ export const handleSequenceGroupChange = (
     fetchSequences();
     fetchSequenceGroups();
   });
+};
+
+export const sortSequencesAlphabetically = async (sequences, setShowLinearProgress, coreInfo, dispatch, fetchSequences) => {
+  setShowLinearProgress(true);
+  let updatedSequences = _.cloneDeep(sequences);
+  updatedSequences = _.sortBy(updatedSequences, ['sequenceDisplayName']);
+  const sequencesArray = [];
+  _.map(updatedSequences, (sequence, index) => {
+    sequence.sequenceOrder = index;
+    sequencesArray.push({ ...sequence });
+  });
+  const response = await updateSequenceOrderService(sequencesArray);
+  if (response?.status === 200) {
+    showAlert({ dispatch, message: 'Sequences Sorted Alphabetically' });
+    mixpanelTrack('Sequences Sorted Alphabetically', coreInfo);
+  } else {
+    showAlert({ dispatch, alert: 'error' });
+  }
+  fetchSequences();
+  setShowLinearProgress(false);
+};
+
+export const reorderSequences = async (result, sequences, setShowLinearProgress, coreInfo, dispatch, fetchSequences) => {
+  if (!result.destination) return;
+  const updatedSequences = _.cloneDeep(_.values(sequences));
+  const [reorderedItem] = updatedSequences.splice(result.source.index, 1);
+  updatedSequences.splice(result.destination.index, 0, reorderedItem);
+
+  const sequencesArray = [];
+  _.map(updatedSequences, (sequence, index) => {
+    sequence.sequenceOrder = index;
+    sequencesArray.push({ ...sequence });
+  });
+
+  const response = await updateSequenceOrderService(sequencesArray);
+  if (response?.status === 200) {
+    showAlert({ dispatch, message: 'Sequence Order Updated' });
+    mixpanelTrack('Sequences Sorted Alphabetically', coreInfo);
+  } else {
+    showAlert({ dispatch, alert: 'error' });
+  }
+  fetchSequences();
+  setShowLinearProgress(false);
 };

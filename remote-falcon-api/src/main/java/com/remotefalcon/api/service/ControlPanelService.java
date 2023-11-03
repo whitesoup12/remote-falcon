@@ -343,11 +343,17 @@ public class ControlPanelService {
     this.remoteJukeRepository.deleteByRemoteToken(tokenDTO.getRemoteToken());
 
     List<Playlist> playlists = this.playlistRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
-    playlists.forEach(playlist -> playlist.setSequenceVisibleCount(0));
+    playlists.forEach(playlist -> {
+      playlist.setSequenceVisibleCount(0);
+      playlist.setSequenceVotes(0);
+    });
     this.playlistRepository.saveAll(playlists);
 
     List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
-    playlistGroups.forEach(playlistGroup -> playlistGroup.setSequenceGroupVisibleCount(0));
+    playlistGroups.forEach(playlistGroup -> {
+      playlistGroup.setSequenceGroupVisibleCount(0);
+      playlistGroup.setSequenceGroupVotes(0);
+    });
     this.playlistGroupRepository.saveAll(playlistGroups);
 
     return ResponseEntity.status(200).build();
@@ -373,12 +379,14 @@ public class ControlPanelService {
       playlist.setSequenceVotes(0);
       playlist.setOwnerVoted(false);
       playlist.setSequenceVisibleCount(0);
+      playlist.setSequenceVotes(0);
     });
     this.playlistRepository.saveAll(playlists.stream().toList());
     List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
     playlistGroups.forEach(playlistGroup -> {
       playlistGroup.setSequenceGroupVotes(0);
       playlistGroup.setSequenceGroupVisibleCount(0);
+      playlistGroup.setSequenceGroupVotes(0);
     });
     this.playlistGroupRepository.saveAll(playlistGroups.stream().toList());
     List<RemoteViewerVote> remoteViewerVotes = this.remoteViewerVoteRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());

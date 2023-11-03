@@ -45,3 +45,8 @@ export const deleteSequenceGroupService = async (sequenceGroupKey) => {
   const response = await axios.delete(`/remotefalcon/api/controlPanel/sequenceGroups/${sequenceGroupKey}`);
   return response;
 };
+
+export const updateSequenceOrderService = async (sequences) => {
+  const response = await axios.post('/remotefalcon/api/controlPanel/updateSequenceOrder', sequences);
+  return response;
+};

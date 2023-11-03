@@ -483,10 +483,18 @@ public class PluginService {
   public ResponseEntity<PluginResponse> resetAllVotes() {
     String remoteToken = this.authUtil.getRemoteTokenFromHeader();
     List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceOrderAsc(remoteToken, true);
-    playlists.forEach(playlist -> playlist.setSequenceVotes(0));
+    playlists.forEach(playlist -> {
+      playlist.setSequenceVotes(0);
+      playlist.setSequenceVisibleCount(0);
+      playlist.setSequenceVotes(0);
+    });
     this.playlistRepository.saveAll(playlists.stream().toList());
     List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(remoteToken);
-    playlistGroups.forEach(playlistGroup -> playlistGroup.setSequenceGroupVotes(0));
+    playlistGroups.forEach(playlistGroup -> {
+      playlistGroup.setSequenceGroupVotes(0);
+      playlistGroup.setSequenceGroupVisibleCount(0);
+      playlistGroup.setSequenceGroupVotes(0);
+    });
     this.playlistGroupRepository.saveAll(playlistGroups.stream().toList());
     List<RemoteViewerVote> remoteViewerVotes = this.remoteViewerVoteRepository.findAllByRemoteToken(remoteToken);
     this.remoteViewerVoteRepository.deleteAll(remoteViewerVotes.stream().toList());
