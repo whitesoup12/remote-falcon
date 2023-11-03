@@ -100,6 +100,17 @@ const SequenceDetails = ({
                       onBlur={() => saveSequenceChanges()}
                     />
                   </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      type="text"
+                      fullWidth
+                      name="sequenceCategory"
+                      label="Sequence Category"
+                      defaultValue={sequence.sequenceCategory}
+                      onChange={(event) => handleInputChange(event, sequence.sequenceKey)}
+                      onBlur={() => saveSequenceChanges()}
+                    />
+                  </Grid>
 
                   <Grid item xs={12}>
                     <Grid container alignItems="center" spacing={2}>

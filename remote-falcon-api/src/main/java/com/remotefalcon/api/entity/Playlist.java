@@ -1,9 +1,8 @@
 package com.remotefalcon.api.entity;
 
-import lombok.*;
-import org.hibernate.annotations.Type;
-
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.ZonedDateTime;
 
 @Entity
@@ -69,4 +68,7 @@ public class Playlist {
 
   @Column(name = "playlistGroupName")
   private String sequenceGroup;
+
+  @Column(name = "playlistCategoryName")
+  private String sequenceCategory;
 }

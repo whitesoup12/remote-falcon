@@ -59,6 +59,9 @@ function SequenceRow({
         <TableCell onClick={handleSequenceDetailsDrawer} sx={{ maxWidth: 'calc(100vw - 850px)', minWidth: 140, cursor: 'pointer' }}>
           {sequence.sequenceGroup}
         </TableCell>
+        <TableCell onClick={handleSequenceDetailsDrawer} sx={{ maxWidth: 'calc(100vw - 850px)', minWidth: 140, cursor: 'pointer' }}>
+          {sequence.sequenceCategory}
+        </TableCell>
         <TableCell sx={{ minWidth: 60, width: 60 }}>
           <Stack direction="row" spacing={0.25} alignItems="center">
             <Tooltip placement="top" title="Play">
@@ -127,7 +130,8 @@ SequenceRow.propTypes = {
   handleInputChange: PropTypes.func,
   saveSequenceChanges: PropTypes.func,
   openCreateNewSequenceGroup: PropTypes.func,
-  openManageSequenceGroups: PropTypes.func
+  openManageSequenceGroups: PropTypes.func,
+  provided: PropTypes.object
 };
 
 export default SequenceRow;

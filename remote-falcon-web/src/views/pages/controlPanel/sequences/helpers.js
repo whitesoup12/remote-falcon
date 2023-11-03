@@ -34,10 +34,11 @@ export const saveSequenceChanges = async (dispatch, sequences, setShowLinearProg
   setShowLinearProgress(true);
   const sequencesArray = [];
   _.map(sequences, (sequence) => {
-    if (sequence.sequenceDisplayName == null || sequence.sequenceDisplayName === '') {
-      showAlert({ dispatch, message: 'Sequence Display Name cannot be empty!', alert: 'warning' });
-    } else {
-      sequencesArray.push({ ...sequence });
+    sequencesArray.push({ ...sequence });
+  });
+  _.forEach(sequencesArray, (sequence) => {
+    if (sequence.sequenceCategory === '') {
+      sequence.sequenceCategory = null;
     }
   });
   const response = await updateSequenceDetailsService(sequencesArray);
