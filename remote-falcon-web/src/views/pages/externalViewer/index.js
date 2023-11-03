@@ -25,7 +25,7 @@ import { openSnackbar } from 'store/slices/snackbar';
 import axios from 'utils/axios';
 import { getSubdomain } from 'utils/route-guard/helpers/helpers';
 
-import { defaultProcessingInstructions, processingInstructions, viewerPageMessageElements } from './helpers';
+import { defaultProcessingInstructions, processingInstructions, viewerPageMessageElements } from './helpers/helpers';
 
 const ExternalViewerPage = () => {
   const dispatch = useDispatch();
