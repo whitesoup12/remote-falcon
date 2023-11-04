@@ -80,9 +80,11 @@ public class PluginService {
             this.playlistGroupRepository.save(playlistGroup.get());
           }
         }else {
-          currentSequenceDetails.get().setSequenceVisibleCount(remotePreference.getHideSequenceCount() + 2);
-          nextPlaylistResponse.setPlaylistIndex(currentSequenceDetails.get().getSequenceIndex());
-          this.playlistRepository.save(currentSequenceDetails.get());
+          if(remotePreference.getHideSequenceCount() != 0) {
+            currentSequenceDetails.get().setSequenceVisibleCount(remotePreference.getHideSequenceCount() + 2);
+            nextPlaylistResponse.setPlaylistIndex(currentSequenceDetails.get().getSequenceIndex());
+            this.playlistRepository.save(currentSequenceDetails.get());
+          }
         }
       }
       if(updateQueue) {
