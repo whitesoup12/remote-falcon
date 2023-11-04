@@ -288,6 +288,21 @@ const ExternalViewerPage = () => {
               const categorizedSequencesToIterate = _.cloneDeep(externalViewerPageDetails?.sequences);
               _.map(categorizedSequencesToIterate, (categorizedSequence) => {
                 if (categorizedSequence.sequenceCategory === sequence.sequenceCategory) {
+                  sequenceImageElement = [<></>];
+                  if (
+                    categorizedSequence &&
+                    categorizedSequence.sequenceImageUrl &&
+                    categorizedSequence.sequenceImageUrl.replace(/\s/g, '').length
+                  ) {
+                    sequenceImageElement = (
+                      <img
+                        alt={categorizedSequence.sequenceName}
+                        className="sequence-image"
+                        src={categorizedSequence.sequenceImageUrl}
+                        data-key={categorizedSequence.sequenceName}
+                      />
+                    );
+                  }
                   const theElement = (
                     <>
                       <div className="cell-vote-playlist" onClick={(e) => voteForSequence(e)} data-key={categorizedSequence.sequenceName}>
@@ -326,6 +341,21 @@ const ExternalViewerPage = () => {
             const categorizedSequencesToIterate = _.cloneDeep(externalViewerPageDetails?.sequences);
             _.map(categorizedSequencesToIterate, (categorizedSequence) => {
               if (categorizedSequence.sequenceCategory === sequence.sequenceCategory) {
+                sequenceImageElement = [<></>];
+                if (
+                  categorizedSequence &&
+                  categorizedSequence.sequenceImageUrl &&
+                  categorizedSequence.sequenceImageUrl.replace(/\s/g, '').length
+                ) {
+                  sequenceImageElement = (
+                    <img
+                      alt={categorizedSequence.sequenceName}
+                      className="sequence-image"
+                      src={categorizedSequence.sequenceImageUrl}
+                      data-key={categorizedSequence.sequenceName}
+                    />
+                  );
+                }
                 const theElement = (
                   <>
                     <div className="jukebox-list" onClick={(e) => addSequenceToQueue(e)} data-key={categorizedSequence.sequenceName}>
