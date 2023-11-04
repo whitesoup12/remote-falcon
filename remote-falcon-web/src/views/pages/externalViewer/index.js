@@ -266,8 +266,9 @@ const ExternalViewerPage = () => {
       if (sequence.sequenceVisible && sequence.sequenceVisibleCount === 0) {
         let sequenceImageElement = [<></>];
         if (sequence && sequence.sequenceImageUrl && sequence.sequenceImageUrl.replace(/\s/g, '').length) {
+          const classname = `sequence-image sequence-image-${sequence.sequenceKey}`;
           sequenceImageElement = (
-            <img alt={sequence.sequenceName} className="sequence-image" src={sequence.sequenceImageUrl} data-key={sequence.sequenceName} />
+            <img alt={sequence.sequenceName} className={classname} src={sequence.sequenceImageUrl} data-key={sequence.sequenceName} />
           );
         }
         if (externalViewerPageDetails?.remotePreferences?.viewerControlMode === 'voting') {
@@ -294,10 +295,11 @@ const ExternalViewerPage = () => {
                     categorizedSequence.sequenceImageUrl &&
                     categorizedSequence.sequenceImageUrl.replace(/\s/g, '').length
                   ) {
+                    const classname = `sequence-image sequence-image-${categorizedSequence.sequenceKey}`;
                     sequenceImageElement = (
                       <img
                         alt={categorizedSequence.sequenceName}
-                        className="sequence-image"
+                        className={classname}
                         src={categorizedSequence.sequenceImageUrl}
                         data-key={categorizedSequence.sequenceName}
                       />
@@ -347,10 +349,11 @@ const ExternalViewerPage = () => {
                   categorizedSequence.sequenceImageUrl &&
                   categorizedSequence.sequenceImageUrl.replace(/\s/g, '').length
                 ) {
+                  const classname = `sequence-image sequence-image-${categorizedSequence.sequenceKey}`;
                   sequenceImageElement = (
                     <img
                       alt={categorizedSequence.sequenceName}
-                      className="sequence-image"
+                      className={classname}
                       src={categorizedSequence.sequenceImageUrl}
                       data-key={categorizedSequence.sequenceName}
                     />
