@@ -82,9 +82,9 @@ public class PluginService {
         }else {
           if(remotePreference.getHideSequenceCount() != 0) {
             currentSequenceDetails.get().setSequenceVisibleCount(remotePreference.getHideSequenceCount() + 2);
-            nextPlaylistResponse.setPlaylistIndex(currentSequenceDetails.get().getSequenceIndex());
-            this.playlistRepository.save(currentSequenceDetails.get());
           }
+          nextPlaylistResponse.setPlaylistIndex(currentSequenceDetails.get().getSequenceIndex());
+          this.playlistRepository.save(currentSequenceDetails.get());
         }
       }
       if(updateQueue) {
