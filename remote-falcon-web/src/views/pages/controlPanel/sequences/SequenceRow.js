@@ -50,6 +50,13 @@ function SequenceRow({
           {sequence.sequenceType === 'COMMAND' && <Chip label="Command" size="small" variant="outlined" chipcolor="warning" />}
           {sequence.sequenceType === 'MEDIA' && <Chip label="Media" size="small" variant="outlined" />}
         </TableCell>
+        <TableCell
+          onClick={handleSequenceDetailsDrawer}
+          sx={{ maxWidth: 'calc(100vw - 850px)', minWidth: 140, cursor: 'pointer' }}
+          align="center"
+        >
+          {sequence.sequenceKey}
+        </TableCell>
         <TableCell onClick={handleSequenceDetailsDrawer} sx={{ maxWidth: 'calc(100vw - 850px)', minWidth: 140, cursor: 'pointer' }}>
           {sequence.sequenceName}
         </TableCell>

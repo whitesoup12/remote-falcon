@@ -121,6 +121,9 @@ const Sequences = () => {
                       <TableCell sx={{ pl: 3 }} />
                       <TableCell sx={{ pl: 3 }}>Status</TableCell>
                       <TableCell sx={{ pl: 3 }}>Type</TableCell>
+                      <TableCell sx={{ pl: 3 }} align="center">
+                        Sequence Key
+                      </TableCell>
                       <TableCell>Name</TableCell>
                       <TableCell>Display Name</TableCell>
                       <TableCell>Group</TableCell>
