@@ -320,9 +320,10 @@ const ExternalViewerPage = () => {
 
               sequencesElement.push(
                 <>
-                  <div className="category-label">{sequence.sequenceCategory}</div>
-                  {categorizedSequencesArray}
-                  <div className="category-section" />
+                  <div className="category-section" style={{ width: '100%', display: 'flex', flexWrap: 'wrap' }}>
+                    <div className="category-label">{sequence.sequenceCategory}</div>
+                    {categorizedSequencesArray}
+                  </div>
                 </>
               );
             }
@@ -373,8 +374,10 @@ const ExternalViewerPage = () => {
 
             sequencesElement.push(
               <>
-                <div className="category-label">{sequence.sequenceCategory}</div>
-                <div className="category-section ">{categorizedSequencesArray}</div>
+                <div className="category-section ">
+                  <div className="category-label">{sequence.sequenceCategory}</div>
+                  {categorizedSequencesArray}
+                </div>
               </>
             );
           }
