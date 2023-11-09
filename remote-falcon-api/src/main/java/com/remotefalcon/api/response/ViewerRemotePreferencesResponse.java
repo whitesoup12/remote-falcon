@@ -11,10 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ViewerRemotePreferencesResponse {
   private Boolean viewerControlEnabled;
-  private Boolean viewerModeEnabled;
   private String viewerControlMode;
   private Boolean enableGeolocation;
-  private Integer messageDisplayTime;
   private Integer jukeboxDepth;
   private String remoteName;
   private Boolean enableLocationCode;

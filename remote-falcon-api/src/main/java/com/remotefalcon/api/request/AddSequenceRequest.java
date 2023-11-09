@@ -16,5 +16,5 @@ public class AddSequenceRequest {
   private Float viewerLongitude;
   private String timezone;
   private ZonedDateTime date;
-  private String playlist;
+  private String sequence;
 }

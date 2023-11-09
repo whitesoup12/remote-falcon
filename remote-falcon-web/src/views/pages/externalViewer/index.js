@@ -176,7 +176,7 @@ const ExternalViewerPage = () => {
         viewerLongitude,
         timezone: viewerTimezone,
         date: new Date().getTime(),
-        playlist: sequenceName
+        sequence: sequenceName
       };
       const addSequenceToQueueResponse = await addSequenceToQueueService(request);
       showViewerMessage(addSequenceToQueueResponse);
@@ -218,7 +218,7 @@ const ExternalViewerPage = () => {
         viewerLongitude,
         timezone: viewerTimezone,
         date: new Date().getTime(),
-        playlist: sequenceName
+        sequence: sequenceName
       };
       const voteForSequenceResponse = await voteForSequenceService(request);
       showViewerMessage(voteForSequenceResponse);

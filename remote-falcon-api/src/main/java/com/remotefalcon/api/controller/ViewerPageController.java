@@ -1,6 +1,7 @@
 package com.remotefalcon.api.controller;
 
 import com.remotefalcon.api.aop.RequiresViewerAccess;
+import com.remotefalcon.api.dto.ViewerTokenDTO;
 import com.remotefalcon.api.entity.Playlist;
 import com.remotefalcon.api.entity.ViewerPageMeta;
 import com.remotefalcon.api.request.AddSequenceRequest;
@@ -9,6 +10,7 @@ import com.remotefalcon.api.response.AddSequenceResponse;
 import com.remotefalcon.api.response.ExternalViewerPageDetailsResponse;
 import com.remotefalcon.api.response.ViewerRemotePreferencesResponse;
 import com.remotefalcon.api.service.ViewerPageService;
+import com.remotefalcon.api.util.AuthUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -26,11 +28,17 @@ import java.util.List;
 public class ViewerPageController {
   @Autowired
   private ViewerPageService viewerPageService;
+  @Autowired
+  private AuthUtil authUtil;
 
   @GetMapping(value = "/viewer/externalViewerPageDetails")
   @RequiresViewerAccess
   public ResponseEntity<ExternalViewerPageDetailsResponse> externalViewerPageDetails() {
-    return this.viewerPageService.externalViewerPageDetails();
+    ViewerTokenDTO viewerTokenDTO = this.authUtil.getViewerJwtPayload();
+    if(viewerTokenDTO == null) {
+      return ResponseEntity.status(401).build();
+    }
+    return this.viewerPageService.externalViewerPageDetails(viewerTokenDTO);
   }
 
   @GetMapping(value = "/viewer/playlists")
@@ -97,12 +105,20 @@ public class ViewerPageController {
   @PostMapping(value = "/viewer/addPlaylistToQueue")
   @RequiresViewerAccess
   public ResponseEntity<AddSequenceResponse> addPlaylistToQueue(@RequestBody AddSequenceRequest request) {
-    return this.viewerPageService.addPlaylistToQueue(request);
+    ViewerTokenDTO viewerTokenDTO = this.authUtil.getViewerJwtPayload();
+    if(viewerTokenDTO == null) {
+      return ResponseEntity.status(401).build();
+    }
+    return this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, request);
   }
 
   @PostMapping(value = "/viewer/voteForPlaylist")
   @RequiresViewerAccess
   public ResponseEntity<AddSequenceResponse> voteForPlaylist(@RequestBody AddSequenceRequest request, HttpServletRequest httpServletRequest) {
-    return this.viewerPageService.voteForPlaylist(request, httpServletRequest);
+    ViewerTokenDTO viewerTokenDTO = this.authUtil.getViewerJwtPayload();
+    if(viewerTokenDTO == null) {
+      return ResponseEntity.status(401).build();
+    }
+    return this.viewerPageService.voteForPlaylist(viewerTokenDTO,  request, httpServletRequest);
   }
 }
