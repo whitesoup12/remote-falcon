@@ -15,10 +15,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.dozer.DozerBeanMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -50,6 +50,7 @@ public class ViewerPageService {
   private final PsaSequenceRepository psaSequenceRepository;
   private final RemoteViewerPagesRepository remoteViewerPagesRepository;
   private final DefaultViewerPageRepository defaultViewerPageRepository;
+  private final DozerBeanMapper mapper;
 
   @Autowired
   public ViewerPageService(PlaylistRepository playlistRepository, RemoteRepository remoteRepository, RemotePreferenceRepository remotePreferenceRepository,
@@ -58,7 +59,7 @@ public class ViewerPageService {
                            ViewerJukeStatsRepository viewerJukeStatsRepository, RemoteViewerVoteRepository remoteViewerVoteRepository,
                            FppScheduleRepository fppScheduleRepository, AuthUtil authUtil, ClientUtil clientUtil,
                            PlaylistGroupRepository playlistGroupRepository, PsaSequenceRepository psaSequenceRepository, RemoteViewerPagesRepository remoteViewerPagesRepository,
-                           DefaultViewerPageRepository defaultViewerPageRepository) {
+                           DefaultViewerPageRepository defaultViewerPageRepository, DozerBeanMapper mapper) {
     this.playlistRepository = playlistRepository;
     this.remoteRepository = remoteRepository;
     this.remotePreferenceRepository = remotePreferenceRepository;
@@ -77,14 +78,11 @@ public class ViewerPageService {
     this.psaSequenceRepository = psaSequenceRepository;
     this.remoteViewerPagesRepository = remoteViewerPagesRepository;
     this.defaultViewerPageRepository = defaultViewerPageRepository;
+    this.mapper = mapper;
   }
 
-  public ResponseEntity<ExternalViewerPageDetailsResponse> externalViewerPageDetails() {
+  public ResponseEntity<ExternalViewerPageDetailsResponse> externalViewerPageDetails(ViewerTokenDTO viewerTokenDTO) {
     ExternalViewerPageDetailsResponse externalViewerPageDetailsResponse = new ExternalViewerPageDetailsResponse();
-    ViewerTokenDTO viewerTokenDTO = this.authUtil.getViewerJwtPayload();
-    if(viewerTokenDTO == null) {
-      return ResponseEntity.status(401).build();
-    }
 
     //Gather
     CompletableFuture<ViewerRemotePreferencesResponse> viewerRemotePreferencesResponse = CompletableFuture.supplyAsync(() -> this.remotePrefs(viewerTokenDTO));
@@ -165,6 +163,7 @@ public class ViewerPageService {
         groupedPlaylists.addAll(playlistsWithNoVotes);
       }
     }
+    groupedPlaylists.forEach(playlist -> playlist.setRemoteToken(null));
     return groupedPlaylists;
   }
 
@@ -198,9 +197,7 @@ public class ViewerPageService {
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(viewerTokenDTO.getRemoteToken());
     return ViewerRemotePreferencesResponse.builder()
             .viewerControlEnabled(remotePreference.getViewerControlEnabled())
-            .viewerModeEnabled(remotePreference.getViewerModeEnabled())
             .locationCode(remotePreference.getLocationCode())
-            .messageDisplayTime(remotePreference.getMessageDisplayTime())
             .remoteName(remote.getRemoteName())
             .enableGeolocation(remotePreference.getEnableGeolocation())
             .enableLocationCode(remotePreference.getEnableLocationCode())
@@ -271,7 +268,9 @@ public class ViewerPageService {
   }
 
   private ViewerPageMeta getExternalViewerPageMeta(ViewerTokenDTO viewerTokenDTO) {
-    return this.viewerPageMetaRepository.findByRemoteToken(viewerTokenDTO.getRemoteToken());
+    ViewerPageMeta viewerPageMeta = this.viewerPageMetaRepository.findByRemoteToken(viewerTokenDTO.getRemoteToken());
+    viewerPageMeta.setRemoteToken(null);
+    return viewerPageMeta;
   }
 
   public ResponseEntity<ViewerPageMeta> getViewerPageMeta() {
@@ -349,11 +348,7 @@ public class ViewerPageService {
     return remoteJukes.stream().filter(remoteJuke -> StringUtils.isNotEmpty(remoteJuke.getFuturePlaylist())).map(RemoteJuke::getSequence).collect(Collectors.toList());
   }
 
-  public ResponseEntity<AddSequenceResponse> addPlaylistToQueue(@RequestBody AddSequenceRequest request) {
-    ViewerTokenDTO viewerTokenDTO = this.authUtil.getViewerJwtPayload();
-    if(viewerTokenDTO == null) {
-      return ResponseEntity.status(401).build();
-    }
+  public ResponseEntity<AddSequenceResponse> addPlaylistToQueue(ViewerTokenDTO viewerTokenDTO, AddSequenceRequest request) {
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(viewerTokenDTO.getRemoteToken());
     int jukeboxDepth = remotePreference.getJukeboxDepth();
     List<RemoteJuke> remoteJukes = this.getAllJukeboxRequests(viewerTokenDTO.getRemoteToken());
@@ -369,11 +364,11 @@ public class ViewerPageService {
     }
     List<String> sequencesByMostRecent = Lists.reverse(sequences);
     List<String> sequencesRecentlyRequested = sequencesByMostRecent.stream().limit(remotePreference.getJukeboxRequestLimit()).toList();
-    if(sequencesRecentlyRequested.contains(request.getPlaylist())) {
+    if(sequencesRecentlyRequested.contains(request.getSequence())) {
       return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("SONG_REQUESTED").build());
     }
     Optional<CurrentPlaylist> currentPlaylist = this.currentPlaylistRepository.findByRemoteToken(viewerTokenDTO.getRemoteToken());
-    if(currentPlaylist.isPresent() && StringUtils.equalsIgnoreCase(currentPlaylist.get().getCurrentPlaylist(), request.getPlaylist())) {
+    if(currentPlaylist.isPresent() && StringUtils.equalsIgnoreCase(currentPlaylist.get().getCurrentPlaylist(), request.getSequence())) {
       return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("SONG_REQUESTED").build());
     }
     RemoteJuke sequenceToAdd = RemoteJuke.builder()
@@ -385,11 +380,11 @@ public class ViewerPageService {
 
     int nextRequestSequence = 1;
     //Check if requested sequence is actually a group
-    Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceGroup(viewerTokenDTO.getRemoteToken(), request.getPlaylist());
+    Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceGroup(viewerTokenDTO.getRemoteToken(), request.getSequence());
     if(playlist.isPresent()) {
       //Group request
       List<RemoteJuke> sequencesToAdd = new ArrayList<>();
-      List<Playlist> groupedPlaylists = this.playlistRepository.findAllByRemoteTokenAndSequenceGroupOrderBySequenceOrderAsc(viewerTokenDTO.getRemoteToken(), request.getPlaylist());
+      List<Playlist> groupedPlaylists = this.playlistRepository.findAllByRemoteTokenAndSequenceGroupOrderBySequenceOrderAsc(viewerTokenDTO.getRemoteToken(), request.getSequence());
       if(mostCurrentRequest.isPresent()) {
         nextRequestSequence = mostCurrentRequest.get().getFuturePlaylistSequence() + 1;
       }
@@ -412,15 +407,15 @@ public class ViewerPageService {
       //Single request
       if(mostCurrentRequest.isPresent()) {
         nextRequestSequence = mostCurrentRequest.get().getFuturePlaylistSequence() + 1;
-        sequenceToAdd.setFuturePlaylist(request.getPlaylist());
+        sequenceToAdd.setFuturePlaylist(request.getSequence());
       }else {
-        sequenceToAdd.setNextPlaylist(request.getPlaylist());
+        sequenceToAdd.setNextPlaylist(request.getSequence());
       }
       sequenceToAdd.setFuturePlaylistSequence(nextRequestSequence);
       this.remoteJukeRepository.save(sequenceToAdd);
     }
 
-    this.saveViewerJukeStats(viewerTokenDTO.getRemoteToken(), request.getPlaylist());
+    this.saveViewerJukeStats(viewerTokenDTO.getRemoteToken(), request.getSequence());
     if(remotePreference.getPsaEnabled() != null && remotePreference.getPsaEnabled() && !remotePreference.getManagePsa()) {
       Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(viewerTokenDTO.getRemoteToken());
       if(psaSequence.isPresent()) {
@@ -430,11 +425,7 @@ public class ViewerPageService {
     return ResponseEntity.status(200).build();
   }
 
-  public ResponseEntity<AddSequenceResponse> voteForPlaylist(@RequestBody AddSequenceRequest request, HttpServletRequest httpServletRequest) {
-    ViewerTokenDTO viewerTokenDTO = this.authUtil.getViewerJwtPayload();
-    if(viewerTokenDTO == null) {
-      return ResponseEntity.status(401).build();
-    }
+  public ResponseEntity<AddSequenceResponse> voteForPlaylist(ViewerTokenDTO viewerTokenDTO, AddSequenceRequest request, HttpServletRequest httpServletRequest) {
     String ipAddress = this.clientUtil.getClientIp(httpServletRequest);
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(viewerTokenDTO.getRemoteToken());
     boolean checkIfVoted = remotePreference.getCheckIfVoted() != null && remotePreference.getCheckIfVoted();
@@ -471,8 +462,8 @@ public class ViewerPageService {
         return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("INVALID_LOCATION").build());
       }
     }
-    Optional<Playlist> votedPlaylist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(viewerTokenDTO.getRemoteToken(), request.getPlaylist());
-    Optional<Playlist> votedPlaylistGroup = this.playlistRepository.findFirstByRemoteTokenAndSequenceGroup(viewerTokenDTO.getRemoteToken(), request.getPlaylist());
+    Optional<Playlist> votedPlaylist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(viewerTokenDTO.getRemoteToken(), request.getSequence());
+    Optional<Playlist> votedPlaylistGroup = this.playlistRepository.findFirstByRemoteTokenAndSequenceGroup(viewerTokenDTO.getRemoteToken(), request.getSequence());
     if(votedPlaylist.isPresent()) {
       //Single sequence vote
       int playlistVotes = votedPlaylist.get().getSequenceVotes() + 1;
@@ -497,7 +488,7 @@ public class ViewerPageService {
     }else {
       return ResponseEntity.status(400).build();
     }
-    this.saveViewerVoteStats(viewerTokenDTO.getRemoteToken(), request.getPlaylist());
+    this.saveViewerVoteStats(viewerTokenDTO.getRemoteToken(), request.getSequence());
     return ResponseEntity.status(200).build();
   }
 

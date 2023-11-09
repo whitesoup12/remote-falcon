@@ -10,6 +10,7 @@ import com.remotefalcon.api.response.AddSequenceResponse;
 import com.remotefalcon.api.response.ViewerRemotePreferencesResponse;
 import com.remotefalcon.api.util.AuthUtil;
 import com.remotefalcon.api.util.ClientUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +20,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -490,13 +490,12 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
     when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
     when(this.currentPlaylistRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Optional.empty());
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(addSequenceRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 
@@ -514,12 +513,11 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
     when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(addSequenceRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(202), response.getStatusCode());
     assertNotNull(response.getBody());
@@ -537,13 +535,12 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
     when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
     when(this.currentPlaylistRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Optional.empty());
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(addSequenceRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 
@@ -564,12 +561,11 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
     when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(addSequenceRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(202), response.getStatusCode());
     assertNotNull(response.getBody());
@@ -587,12 +583,11 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
     when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(addSequenceRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(202), response.getStatusCode());
     assertNotNull(response.getBody());
@@ -609,13 +604,12 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
     when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
     when(this.currentPlaylistRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Optional.of(currentPlaylist));
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(addSequenceRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(202), response.getStatusCode());
     assertNotNull(response.getBody());
@@ -632,12 +626,11 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Collections.emptyList());
     when(this.currentPlaylistRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Optional.empty());
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(addSequenceRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 
@@ -657,7 +650,6 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
     when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
@@ -665,23 +657,12 @@ public class ViewerPageServiceTest {
     when(this.viewerJukeStatsRepository.countAllByRemoteTokenAndRequestDateTimeAfter(eq(viewerTokenDTO.getRemoteToken()), any(ZonedDateTime.class))).thenReturn(1);
     when(this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Optional.of(psaSequenceList.get(0)));
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(addSequenceRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 
     verify(remoteJukeRepository, times(2)).save(any(RemoteJuke.class));
     verify(viewerJukeStatsRepository, times(1)).save(any(ViewerJukeStats.class));
-  }
-
-  @Test
-  public void addPlaylistToQueue_invalidToken() {
-    AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
-
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(null);
-
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(addSequenceRequest);
-    assertNotNull(response);
-    assertEquals(HttpStatus.valueOf(401), response.getStatusCode());
   }
 
   @Ignore
@@ -698,7 +679,7 @@ public class ViewerPageServiceTest {
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.playlistRepository.findAllByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(playlists);
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(addSequenceRequest, httpServletRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(viewerTokenDTO, addSequenceRequest, httpServletRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 
@@ -721,7 +702,7 @@ public class ViewerPageServiceTest {
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.playlistRepository.findAllByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(playlists);
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(addSequenceRequest, httpServletRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(viewerTokenDTO, addSequenceRequest, httpServletRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 
@@ -741,12 +722,11 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.clientUtil.getClientIp(any(HttpServletRequest.class))).thenReturn(ipAddress);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     //when(this.playlistRepository.findAllByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(playlists);
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(addSequenceRequest, httpServletRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(viewerTokenDTO, addSequenceRequest, httpServletRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(202), response.getStatusCode());
     assertNotNull(response.getBody());
@@ -772,7 +752,7 @@ public class ViewerPageServiceTest {
     when(this.playlistRepository.findAllByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(playlists);
     when(this.remoteViewerVoteRepository.findFirstByRemoteTokenAndViewerIp(eq(viewerTokenDTO.getRemoteToken()), eq(ipAddress))).thenReturn(Optional.empty());
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(addSequenceRequest, httpServletRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(viewerTokenDTO, addSequenceRequest, httpServletRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 
@@ -791,13 +771,12 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.clientUtil.getClientIp(any(HttpServletRequest.class))).thenReturn(ipAddress);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     //when(this.playlistRepository.findAllByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(playlists);
     when(this.remoteViewerVoteRepository.findFirstByRemoteTokenAndViewerIp(eq(viewerTokenDTO.getRemoteToken()), eq(ipAddress))).thenReturn(Optional.of(remoteViewerVote));
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(addSequenceRequest, httpServletRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(viewerTokenDTO, addSequenceRequest, httpServletRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(202), response.getStatusCode());
     assertNotNull(response.getBody());
@@ -817,24 +796,12 @@ public class ViewerPageServiceTest {
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
 
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
     when(this.clientUtil.getClientIp(any(HttpServletRequest.class))).thenReturn(ipAddress);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     //when(this.playlistRepository.findAllByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Collections.emptyList());
 
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(addSequenceRequest, httpServletRequest);
+    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(viewerTokenDTO, addSequenceRequest, httpServletRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(400), response.getStatusCode());
-  }
-
-  @Test
-  public void voteForPlaylist_invalidToken() {
-    AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
-
-    when(this.authUtil.getViewerJwtPayload()).thenReturn(null);
-
-    ResponseEntity<AddSequenceResponse> response = this.viewerPageService.voteForPlaylist(addSequenceRequest, httpServletRequest);
-    assertNotNull(response);
-    assertEquals(HttpStatus.valueOf(401), response.getStatusCode());
   }
 }

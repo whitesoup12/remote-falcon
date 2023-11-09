@@ -536,7 +536,7 @@ public class Mocks {
   public static AddSequenceRequest addSequenceRequest() {
     return AddSequenceRequest.builder()
             .date(ZonedDateTime.now())
-            .playlist("Sequence One")
+            .sequence("Sequence One")
             .timezone("America/Chicago")
             .viewerLatitude((float) 32.0)
             .viewerLongitude((float) -96.0)
