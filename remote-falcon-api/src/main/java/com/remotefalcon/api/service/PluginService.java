@@ -132,7 +132,8 @@ public class PluginService {
     //Add Sequences
     Map<Long, String> existingPlaylists = playlists.stream().collect(Collectors.toMap(Playlist::getSequenceKey, Playlist::getSequenceName));
     List<Playlist> playlistsToSync = new ArrayList<>();
-    AtomicInteger playlistOrderStart = new AtomicInteger(playlists.get(playlists.size() - 1).getSequenceOrder() + 1);
+    int playlistOrderStartInt = playlists.size() != 0 ? playlists.get(playlists.size() - 1).getSequenceOrder() + 1 : 0;
+    AtomicInteger playlistOrderStart = new AtomicInteger(playlistOrderStartInt);
     for(SyncPlaylistDetails playlistInRequest : request.getPlaylists()) {
       if(!existingPlaylists.containsValue(playlistInRequest.getPlaylistName())) {
         playlistsToSync.add(Playlist.builder()
