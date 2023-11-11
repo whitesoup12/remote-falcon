@@ -73,7 +73,7 @@ const ViewerPage = () => {
         })
       );
       setCreateNewPageEnabled(true);
-      if (remoteViewerPages.length >= 5) {
+      if (remoteViewerPages.length >= 5 && process?.env?.REACT_APP_HOST_ENV !== 'local') {
         setCreateNewPageEnabled(false);
       }
       _.forEach(remoteViewerPagesResponse.data, (viewerPage) => {
