@@ -132,7 +132,7 @@ public class PluginService {
     //Add Sequences
     Map<Long, String> existingPlaylists = playlists.stream().collect(Collectors.toMap(Playlist::getSequenceKey, Playlist::getSequenceName));
     List<Playlist> playlistsToSync = new ArrayList<>();
-    AtomicInteger playlistOrderStart = new AtomicInteger(1);
+    AtomicInteger playlistOrderStart = new AtomicInteger(playlists.get(playlists.size() - 1).getSequenceOrder() + 1);
     for(SyncPlaylistDetails playlistInRequest : request.getPlaylists()) {
       if(!existingPlaylists.containsValue(playlistInRequest.getPlaylistName())) {
         playlistsToSync.add(Playlist.builder()
@@ -158,9 +158,7 @@ public class PluginService {
           if(StringUtils.equalsIgnoreCase(playlist.getSequenceName(), playlistInRequest.getPlaylistName())) {
             playlist.setSequenceIndex(playlistInRequest.getPlaylistIndex() != null ? playlistInRequest.getPlaylistIndex() : -1);
             playlist.setIsSequenceActive(true);
-            playlist.setSequenceOrder(playlistOrderStart.get());
             playlistsToSync.add(playlist);
-            playlistOrderStart.getAndIncrement();
           }
         });
       }
