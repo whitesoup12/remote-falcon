@@ -111,6 +111,8 @@ public class ControlPanelService {
     if(remotePreference != null) {
       remoteResponse.setViewerControlMode(remotePreference.getViewerControlMode());
     }
+    remote.setLastLoginDate(ZonedDateTime.now());
+    this.remoteRepository.save(remote);
     return ResponseEntity.status(200).body(remoteResponse);
   }
 
