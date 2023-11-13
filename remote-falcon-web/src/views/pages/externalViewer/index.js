@@ -330,9 +330,10 @@ const ExternalViewerPage = () => {
           }
         } else if (externalViewerPageDetails?.remotePreferences?.viewerControlMode === 'jukebox') {
           if (sequence.sequenceCategory == null || sequence.sequenceCategory === '') {
+            const jukeboxListClassname = `jukebox-list jukebox-list-${sequence.sequenceKey}`;
             sequencesElement.push(
               <>
-                <div className="jukebox-list" onClick={(e) => addSequenceToQueue(e)} data-key={sequence.sequenceName}>
+                <div className={jukeboxListClassname} onClick={(e) => addSequenceToQueue(e)} data-key={sequence.sequenceName}>
                   {sequenceImageElement}
                   {sequence.sequenceDisplayName}
                 </div>
@@ -360,9 +361,14 @@ const ExternalViewerPage = () => {
                     />
                   );
                 }
+                const categorizedJukeboxListClassname = `jukebox-list jukebox-list-${categorizedSequence.sequenceKey}`;
                 const theElement = (
                   <>
-                    <div className="jukebox-list" onClick={(e) => addSequenceToQueue(e)} data-key={categorizedSequence.sequenceName}>
+                    <div
+                      className={categorizedJukeboxListClassname}
+                      onClick={(e) => addSequenceToQueue(e)}
+                      data-key={categorizedSequence.sequenceName}
+                    >
                       {sequenceImageElement}
                       {categorizedSequence.sequenceDisplayName}
                     </div>
