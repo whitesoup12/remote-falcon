@@ -93,6 +93,17 @@ const SequenceDetails = ({
                     <TextField
                       type="text"
                       fullWidth
+                      name="sequenceArtist"
+                      label="Sequence Artist"
+                      defaultValue={sequence.sequenceArtist}
+                      onChange={(event) => handleInputChange(event, sequence.sequenceKey)}
+                      onBlur={() => saveSequenceChanges()}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      type="text"
+                      fullWidth
                       name="sequenceImageUrl"
                       label="Sequence Image URL"
                       defaultValue={sequence.sequenceImageUrl}

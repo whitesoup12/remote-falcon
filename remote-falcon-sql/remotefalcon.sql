@@ -117,6 +117,7 @@ CREATE TABLE `PLAYLISTS` (
   `playlistType` varchar(100) NOT NULL DEFAULT 'SEQUENCE',
   `playlistGroupName` varchar(500) DEFAULT NULL,
   `playlistCategoryName` varchar(500) DEFAULT NULL,
+  `playlistArtist` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`playlistKey`)
 );
 

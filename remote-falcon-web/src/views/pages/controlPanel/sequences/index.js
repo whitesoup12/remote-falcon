@@ -126,6 +126,7 @@ const Sequences = () => {
                       </TableCell>
                       <TableCell>Name</TableCell>
                       <TableCell>Display Name</TableCell>
+                      <TableCell>Artist</TableCell>
                       <TableCell>Group</TableCell>
                       <TableCell>Category</TableCell>
                       <TableCell sx={{ pl: 3 }}>Actions</TableCell>

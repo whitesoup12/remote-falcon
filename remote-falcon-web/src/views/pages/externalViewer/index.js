@@ -274,11 +274,14 @@ const ExternalViewerPage = () => {
         if (externalViewerPageDetails?.remotePreferences?.viewerControlMode === 'voting') {
           if (sequence.sequenceVotes !== -1) {
             if (sequence.sequenceCategory == null || sequence.sequenceCategory === '') {
+              const votingListClassname = `cell-vote-playlist cell-vote-playlist-${sequence.sequenceKey}`;
+              const votingListArtistClassname = `cell-vote-playlist-artist cell-vote-playlist-artist-${sequence.sequenceKey}`;
               sequencesElement.push(
                 <>
-                  <div className="cell-vote-playlist" onClick={(e) => voteForSequence(e)} data-key={sequence.sequenceName}>
+                  <div className={votingListClassname} onClick={(e) => voteForSequence(e)} data-key={sequence.sequenceName}>
                     {sequenceImageElement}
                     {sequence.sequenceDisplayName}
+                    <div className={votingListArtistClassname}>{sequence.sequenceArtist}</div>
                   </div>
                   <div className="cell-vote">{sequence.sequenceVotes}</div>
                 </>
@@ -305,11 +308,18 @@ const ExternalViewerPage = () => {
                       />
                     );
                   }
+                  const categorizedVotingListClassname = `cell-vote-playlist cell-vote-playlist-${sequence.sequenceKey}`;
+                  const categorizedVotingListArtistClassname = `cell-vote-playlist-artist cell-vote-playlist-artist-${sequence.sequenceKey}`;
                   const theElement = (
                     <>
-                      <div className="cell-vote-playlist" onClick={(e) => voteForSequence(e)} data-key={categorizedSequence.sequenceName}>
+                      <div
+                        className={categorizedVotingListClassname}
+                        onClick={(e) => voteForSequence(e)}
+                        data-key={categorizedSequence.sequenceName}
+                      >
                         {sequenceImageElement}
                         {categorizedSequence.sequenceDisplayName}
+                        <div className={categorizedVotingListArtistClassname}>{categorizedSequence.sequenceArtist}</div>
                       </div>
                       <div className="cell-vote">{categorizedSequence.sequenceVotes}</div>
                     </>
@@ -331,11 +341,13 @@ const ExternalViewerPage = () => {
         } else if (externalViewerPageDetails?.remotePreferences?.viewerControlMode === 'jukebox') {
           if (sequence.sequenceCategory == null || sequence.sequenceCategory === '') {
             const jukeboxListClassname = `jukebox-list jukebox-list-${sequence.sequenceKey}`;
+            const jukeboxListArtistClassname = `jukebox-list-artist jukebox-list-artist-${sequence.sequenceKey}`;
             sequencesElement.push(
               <>
                 <div className={jukeboxListClassname} onClick={(e) => addSequenceToQueue(e)} data-key={sequence.sequenceName}>
                   {sequenceImageElement}
                   {sequence.sequenceDisplayName}
+                  <div className={jukeboxListArtistClassname}>{sequence.sequenceArtist}</div>
                 </div>
               </>
             );
@@ -362,6 +374,7 @@ const ExternalViewerPage = () => {
                   );
                 }
                 const categorizedJukeboxListClassname = `jukebox-list jukebox-list-${categorizedSequence.sequenceKey}`;
+                const categorizedJukeboxListArtistClassname = `jukebox-list-artist jukebox-list-artist-${categorizedSequence.sequenceKey}`;
                 const theElement = (
                   <>
                     <div
@@ -371,6 +384,7 @@ const ExternalViewerPage = () => {
                     >
                       {sequenceImageElement}
                       {categorizedSequence.sequenceDisplayName}
+                      <div className={categorizedJukeboxListArtistClassname}>{categorizedSequence.sequenceArtist}</div>
                     </div>
                   </>
                 );

@@ -64,6 +64,9 @@ function SequenceRow({
           {sequence.sequenceDisplayName}
         </TableCell>
         <TableCell onClick={handleSequenceDetailsDrawer} sx={{ maxWidth: 'calc(100vw - 850px)', minWidth: 140, cursor: 'pointer' }}>
+          {sequence.sequenceArtist}
+        </TableCell>
+        <TableCell onClick={handleSequenceDetailsDrawer} sx={{ maxWidth: 'calc(100vw - 850px)', minWidth: 140, cursor: 'pointer' }}>
           {sequence.sequenceGroup}
         </TableCell>
         <TableCell onClick={handleSequenceDetailsDrawer} sx={{ maxWidth: 'calc(100vw - 850px)', minWidth: 140, cursor: 'pointer' }}>
