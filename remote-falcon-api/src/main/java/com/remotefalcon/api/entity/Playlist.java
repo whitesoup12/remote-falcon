@@ -71,4 +71,7 @@ public class Playlist {
 
   @Column(name = "playlistCategoryName")
   private String sequenceCategory;
+
+  @Column(name = "playlistArtist")
+  private String sequenceArtist;
 }
