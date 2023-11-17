@@ -5,7 +5,7 @@ import { Box, Grid, Modal, Typography, SpeedDial, SpeedDialAction, SpeedDialIcon
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
 
-import { getRemoteViewerPageTemplatesService, getRemoteViewerPagesService } from 'services/controlPanel/viewerPage.service';
+import { getRemoteViewerPagesService, getRemoteViewerPageTemplatesFromGithubService } from 'services/controlPanel/viewerPage.service';
 import { useDispatch, useSelector } from 'store';
 import { gridSpacing, unexpectedErrorMessage } from 'store/constant';
 import { setRemoteViewerPages, setRemoteViewerPageTemplates } from 'store/slices/controlPanel';
@@ -102,8 +102,7 @@ const ViewerPage = () => {
   const fetchRemoteViewerPageTemplates = useCallback(async () => {
     setIsLoading(true);
     try {
-      const remoteViewerPageTemplatesResponse = await getRemoteViewerPageTemplatesService();
-      const remoteViewerPageTemplates = remoteViewerPageTemplatesResponse.data;
+      const remoteViewerPageTemplates = await getRemoteViewerPageTemplatesFromGithubService();
       dispatch(
         setRemoteViewerPageTemplates({
           ...remoteViewerPageTemplates
@@ -111,7 +110,7 @@ const ViewerPage = () => {
       );
       const templateOptions = [];
       _.forEach(remoteViewerPageTemplates, (template) => {
-        templateOptions.push({ label: template?.viewerPageTemplateName, id: template?.remoteViewerPageTemplateKey });
+        templateOptions.push({ label: template?.title, id: template?.key });
       });
       setViewerPageTemplateOptions(templateOptions);
       setSelectedStartingTemplate(templateOptions[0]);
