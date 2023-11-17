@@ -44,7 +44,6 @@ const ViewerPageTemplates = () => {
       });
       setViewerPageTemplateOptions(templateOptions);
       const selectedTemplateBase64 = `data:text/html;base64,${btoa(unescape(encodeURIComponent(remoteViewerPageTemplates[0]?.content)))}`;
-      console.log(remoteViewerPageTemplates[0]?.content);
       setSelectedTemplateBase64(selectedTemplateBase64);
       setSelectedTemplate(templateOptions[0]);
     } catch (err) {
