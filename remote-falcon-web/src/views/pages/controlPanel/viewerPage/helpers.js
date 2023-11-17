@@ -137,8 +137,8 @@ export const createNewViewerPage = async (
   } else {
     let templateHtml = '';
     _.forEach(remoteViewerPageTemplates, (template) => {
-      if (template.remoteViewerPageTemplateKey === selectedStartingTemplate.id) {
-        templateHtml = template.viewerPageTemplateHtml;
+      if (template.key === selectedStartingTemplate.id) {
+        templateHtml = template.content;
       }
     });
     const createViewerPageData = {

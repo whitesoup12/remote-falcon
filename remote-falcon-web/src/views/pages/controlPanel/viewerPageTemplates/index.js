@@ -4,7 +4,7 @@ import { Box, Grid, CardContent } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import _ from 'lodash';
 
-import { getRemoteViewerPageTemplatesService } from 'services/controlPanel/viewerPage.service';
+import { getRemoteViewerPageTemplatesFromGithubService } from 'services/controlPanel/viewerPage.service';
 import { useDispatch, useSelector } from 'store';
 import { gridSpacing, unexpectedErrorMessage } from 'store/constant';
 import { setRemoteViewerPageTemplates } from 'store/slices/controlPanel';
@@ -32,8 +32,7 @@ const ViewerPageTemplates = () => {
   const fetchRemoteViewerPageTemplates = useCallback(async () => {
     setShowSkeletonLoader(true);
     try {
-      const remoteViewerPageTemplatesResponse = await getRemoteViewerPageTemplatesService();
-      const remoteViewerPageTemplates = remoteViewerPageTemplatesResponse.data;
+      const remoteViewerPageTemplates = await getRemoteViewerPageTemplatesFromGithubService();
       dispatch(
         setRemoteViewerPageTemplates({
           ...remoteViewerPageTemplates
@@ -41,12 +40,11 @@ const ViewerPageTemplates = () => {
       );
       const templateOptions = [];
       _.forEach(remoteViewerPageTemplates, (template) => {
-        templateOptions.push({ label: template?.viewerPageTemplateName, id: template?.remoteViewerPageTemplateKey });
+        templateOptions.push({ label: template?.title, id: template?.key });
       });
       setViewerPageTemplateOptions(templateOptions);
-      const selectedTemplateBase64 = `data:text/html;base64,${btoa(
-        unescape(encodeURIComponent(remoteViewerPageTemplates[0]?.viewerPageTemplateHtml))
-      )}`;
+      const selectedTemplateBase64 = `data:text/html;base64,${btoa(unescape(encodeURIComponent(remoteViewerPageTemplates[0]?.content)))}`;
+      console.log(remoteViewerPageTemplates[0]?.content);
       setSelectedTemplateBase64(selectedTemplateBase64);
       setSelectedTemplate(templateOptions[0]);
     } catch (err) {

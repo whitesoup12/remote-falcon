@@ -17,9 +17,9 @@ export const tabOptions = [
 
 export const handleTemplateChange = (event, value, remoteViewerPageTemplates, setSelectedTemplate, setSelectedTemplateBase64) => {
   _.map(remoteViewerPageTemplates, (template) => {
-    if (value.label === template?.viewerPageTemplateName) {
+    if (value.label === template?.title) {
       setSelectedTemplate(value);
-      const templateBase64 = `data:text/html;base64,${btoa(unescape(encodeURIComponent(template?.viewerPageTemplateHtml)))}`;
+      const templateBase64 = `data:text/html;base64,${btoa(unescape(encodeURIComponent(template?.content)))}`;
       setSelectedTemplateBase64(templateBase64);
     }
   });
