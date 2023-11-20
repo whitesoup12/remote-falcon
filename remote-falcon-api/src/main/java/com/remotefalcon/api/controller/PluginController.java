@@ -1,8 +1,6 @@
 package com.remotefalcon.api.controller;
 
 import com.remotefalcon.api.aop.RequiresPluginAccess;
-import com.remotefalcon.api.aop.RequiresViewerAccess;
-import com.remotefalcon.api.entity.ViewerPageMeta;
 import com.remotefalcon.api.request.*;
 import com.remotefalcon.api.response.HighestVotedPlaylistResponse;
 import com.remotefalcon.api.response.NextPlaylistResponse;
@@ -11,12 +9,8 @@ import com.remotefalcon.api.response.RemotePreferenceResponse;
 import com.remotefalcon.api.service.PluginService;
 import com.remotefalcon.api.util.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
 
 @RestController
 public class PluginController {
@@ -106,5 +100,11 @@ public class PluginController {
   @RequiresPluginAccess
   public ResponseEntity<PluginResponse> updateViewerControl(@RequestBody ViewerControlRequest request) {
     return this.pluginService.updateViewerControl(request);
+  }
+
+  @PostMapping(value = "/updateManagedPsa")
+  @RequiresPluginAccess
+  public ResponseEntity<PluginResponse> updateManagedPsa(@RequestBody ManagedPSARequest request) {
+    return this.pluginService.updateManagedPsa(request);
   }
 }

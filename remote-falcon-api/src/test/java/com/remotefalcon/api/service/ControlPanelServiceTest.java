@@ -405,8 +405,10 @@ public class ControlPanelServiceTest {
   @Test
   public void purgeQueue() {
     TokenDTO tokenDTO = Mocks.tokenDTO();
+    RemotePreference remotePreference = Mocks.remotePreference();
 
     when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
+    when(this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken())).thenReturn(remotePreference);
 
     ResponseEntity<?> response = this.controlPanelService.purgeQueue();
     assertNotNull(response);
@@ -453,8 +455,10 @@ public class ControlPanelServiceTest {
     List<Playlist> sequences = Mocks.sequences();
     List<RemoteViewerVote> remoteViewerVotes = Mocks.remoteViewerVotes();
     List<PlaylistGroup> playlistGroupList = Mocks.playlistGroupList();
+    RemotePreference remotePreference = Mocks.remotePreference();
 
     when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
+    when(this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken())).thenReturn(remotePreference);
     when(this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceOrderAsc(eq(tokenDTO.getRemoteToken()), eq(true))).thenReturn(sequences);
     when(this.remoteViewerVoteRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remoteViewerVotes);
     when(this.playlistGroupRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(playlistGroupList);

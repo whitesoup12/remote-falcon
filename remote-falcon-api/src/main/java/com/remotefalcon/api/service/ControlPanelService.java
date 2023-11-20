@@ -358,6 +358,10 @@ public class ControlPanelService {
     });
     this.playlistGroupRepository.saveAll(playlistGroups);
 
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    remotePreference.setSequencesPlayed(0);
+    this.remotePreferenceRepository.save(remotePreference);
+
     return ResponseEntity.status(200).build();
   }
 
@@ -393,6 +397,11 @@ public class ControlPanelService {
     this.playlistGroupRepository.saveAll(playlistGroups.stream().toList());
     List<RemoteViewerVote> remoteViewerVotes = this.remoteViewerVoteRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
     this.remoteViewerVoteRepository.deleteAll(remoteViewerVotes.stream().toList());
+
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    remotePreference.setSequencesPlayed(0);
+    this.remotePreferenceRepository.save(remotePreference);
+
     return ResponseEntity.status(200).build();
   }
 
