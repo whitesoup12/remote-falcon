@@ -446,11 +446,9 @@ public class PluginServiceTest {
   public void updateWhatsPlaying_noPlaylist() {
     String remoteToken = "abc123";
     UpdateWhatsPlayingRequest updateWhatsPlayingRequest = Mocks.updateWhatsPlayingRequest();
-    RemotePreference remotePreference = Mocks.remotePreference();
     updateWhatsPlayingRequest.setPlaylist(null);
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
-    when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
 
     ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
     assertNotNull(response);

@@ -9,6 +9,7 @@ import com.remotefalcon.api.response.NextPlaylistResponse;
 import com.remotefalcon.api.response.PluginResponse;
 import com.remotefalcon.api.response.RemotePreferenceResponse;
 import com.remotefalcon.api.util.AuthUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class PluginService {
   private final RemoteRepository remoteRepository;
   private final RemoteJukeRepository remoteJukeRepository;
@@ -199,45 +201,45 @@ public class PluginService {
       }else {
         this.currentPlaylistRepository.save(CurrentPlaylist.builder().remoteToken(remoteToken).currentPlaylist(request.getPlaylist()).build());
       }
+
+      RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
+      remotePreference.setSequencesPlayed(remotePreference.getSequencesPlayed() + 1);
+
+      //PSA
+      if(remotePreference.getPsaEnabled() && remotePreference.getManagePsa()) {
+        int sequencesPlayed = remotePreference.getSequencesPlayed();
+        if(sequencesPlayed != 0 && sequencesPlayed % remotePreference.getPsaFrequency() == 0) {
+          Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
+          if(psaSequence.isPresent()) {
+            List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceVotesDescSequenceVoteTimeAsc(remoteToken, true);
+            Optional<Playlist> psaPlaylist = playlists.stream().filter(playlist -> StringUtils.equalsIgnoreCase(psaSequence.get().getPsaSequenceName(), playlist.getSequenceName())).findFirst();
+            if(psaPlaylist.isPresent()) {
+              if(StringUtils.equalsIgnoreCase("VOTING", remotePreference.getViewerControlMode())) {
+                psaPlaylist.get().setSequenceVotes(11111);
+                this.playlistRepository.save(psaPlaylist.get());
+              }else {
+                this.remoteJukeRepository.save(RemoteJuke.builder()
+                        .remoteToken(remoteToken)
+                        .nextPlaylist(psaPlaylist.get().getSequenceName())
+                        .ownerRequested(true)
+                        .build());
+              }
+
+              psaSequence.get().setPsaSequenceLastPlayed(ZonedDateTime.now());
+              this.psaSequenceRepository.save(psaSequence.get());
+            }
+          }
+        }
+        List<PsaSequence> psaSequences = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
+        boolean isPsaPlaying = psaSequences.stream().anyMatch(psaSequence -> StringUtils.equalsIgnoreCase(request.getPlaylist(), psaSequence.getPsaSequenceName()));
+        if(isPsaPlaying) {
+          remotePreference.setSequencesPlayed(remotePreference.getSequencesPlayed() - 1);
+        }
+        this.remotePreferenceRepository.save(remotePreference);
+      }
     }
 
     this.updateSequenceHideCounts(remoteToken);
-
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
-    remotePreference.setSequencesPlayed(remotePreference.getSequencesPlayed() + 1);
-
-    //PSA
-    if(remotePreference.getPsaEnabled() && remotePreference.getManagePsa()) {
-      int sequencesPlayed = remotePreference.getSequencesPlayed();
-      if(sequencesPlayed != 0 && sequencesPlayed % remotePreference.getPsaFrequency() == 0) {
-        Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
-        if(psaSequence.isPresent()) {
-          List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceVotesDescSequenceVoteTimeAsc(remoteToken, true);
-          Optional<Playlist> psaPlaylist = playlists.stream().filter(playlist -> StringUtils.equalsIgnoreCase(psaSequence.get().getPsaSequenceName(), playlist.getSequenceName())).findFirst();
-          if(psaPlaylist.isPresent()) {
-            if(StringUtils.equalsIgnoreCase("VOTING", remotePreference.getViewerControlMode())) {
-              psaPlaylist.get().setSequenceVotes(11111);
-              this.playlistRepository.save(psaPlaylist.get());
-            }else {
-              this.remoteJukeRepository.save(RemoteJuke.builder()
-                              .remoteToken(remoteToken)
-                              .nextPlaylist(psaPlaylist.get().getSequenceName())
-                              .ownerRequested(true)
-                      .build());
-            }
-
-            psaSequence.get().setPsaSequenceLastPlayed(ZonedDateTime.now());
-            this.psaSequenceRepository.save(psaSequence.get());
-          }
-        }
-      }
-      List<PsaSequence> psaSequences = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
-      boolean isPsaPlaying = psaSequences.stream().anyMatch(psaSequence -> StringUtils.equalsIgnoreCase(request.getPlaylist(), psaSequence.getPsaSequenceName()));
-      if(isPsaPlaying) {
-        remotePreference.setSequencesPlayed(remotePreference.getSequencesPlayed() - 1);
-      }
-      this.remotePreferenceRepository.save(remotePreference);
-    }
 
     return ResponseEntity.status(200).body(PluginResponse.builder().currentPlaylist(request.getPlaylist()).build());
   }
@@ -517,6 +519,15 @@ public class PluginService {
     remotePreference.setSequencesPlayed(0);
     this.remotePreferenceRepository.save(remotePreference);
     return ResponseEntity.status(200).body(PluginResponse.builder().viewerControlEnabled(StringUtils.equalsIgnoreCase("Y", request.getViewerControlEnabled())).build());
+  }
+
+  public ResponseEntity<PluginResponse> updateManagedPsa(ManagedPSARequest request) {
+    String remoteToken = this.authUtil.getRemoteTokenFromHeader();
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
+    remotePreference.setManagePsa(StringUtils.equalsIgnoreCase("Y", request.getManagedPsaEnabled()));
+    remotePreference.setSequencesPlayed(0);
+    this.remotePreferenceRepository.save(remotePreference);
+    return ResponseEntity.status(200).body(PluginResponse.builder().viewerControlEnabled(StringUtils.equalsIgnoreCase("Y", request.getManagedPsaEnabled())).build());
   }
 
   private void updateQueue(Optional<RemoteJuke> currentSequence, Optional<RemoteJuke> nextSequence) {
