@@ -198,10 +198,16 @@ public class ControlPanelController {
     return this.controlPanelService.deleteSequence(sequenceKey);
   }
 
-  @DeleteMapping(value = "/controlPanel/deleteAllInactiveSequences")
+  @DeleteMapping(value = "/controlPanel/deleteInactiveSequences")
   @RequiresAccess
-  public ResponseEntity<?> deleteAllInactiveSequences() {
-    return this.controlPanelService.deleteAllInactiveSequences();
+  public ResponseEntity<?> deleteInactiveSequences() {
+    return this.controlPanelService.deleteInactiveSequences();
+  }
+
+  @DeleteMapping(value = "/controlPanel/deleteAllSequences")
+  @RequiresAccess
+  public ResponseEntity<?> deleteAllSequences() {
+    return this.controlPanelService.deleteAllSequences();
   }
 
   @PostMapping(value = "/controlPanel/playSequence")

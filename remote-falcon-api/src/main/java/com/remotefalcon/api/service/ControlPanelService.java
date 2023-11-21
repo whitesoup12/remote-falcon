@@ -484,9 +484,16 @@ public class ControlPanelService {
     return ResponseEntity.status(200).build();
   }
 
-  public ResponseEntity<?> deleteAllInactiveSequences() {
+  public ResponseEntity<?> deleteInactiveSequences() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
     List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceKeyAsc(tokenDTO.getRemoteToken(), false);
+    this.playlistRepository.deleteAll(playlists);
+    return ResponseEntity.status(200).build();
+  }
+
+  public ResponseEntity<?> deleteAllSequences() {
+    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
+    List<Playlist> playlists = this.playlistRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
     this.playlistRepository.deleteAll(playlists);
     return ResponseEntity.status(200).build();
   }

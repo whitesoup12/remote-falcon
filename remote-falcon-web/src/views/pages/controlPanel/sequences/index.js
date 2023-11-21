@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import * as React from 'react';
 
 import { Box, Grid, TableRow, TableCell, TableContainer, Table, TableHead, TableBody, LinearProgress, Modal, Stack } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -14,6 +15,7 @@ import SequencesSkeleton from 'ui-component/cards/Skeleton/SequencesSkeleton';
 import RFLoadingButton from 'ui-component/RFLoadingButton';
 import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
 
+import RFSplitButton from '../../../../ui-component/RFSplitButton';
 import CreateNewSequenceGroup from './CreateNewSequenceGroup.modal';
 import {
   saveSequenceChanges,
@@ -30,7 +32,8 @@ import {
   handleSequenceGroupNameChange,
   closeManageSequenceGroups,
   sortSequencesAlphabetically,
-  reorderSequences
+  reorderSequences,
+  deleteSequences
 } from './helpers';
 import ManageSequenceGroups from './ManageSequenceGroups.modal';
 import SequenceRow from './SequenceRow';
@@ -114,6 +117,12 @@ const Sequences = () => {
                   >
                     Sort Alphabetically
                   </RFLoadingButton>
+                  <RFSplitButton
+                    color="error"
+                    onClick={(options, selectedIndex) =>
+                      deleteSequences(options, selectedIndex, setShowLinearProgress, dispatch, coreInfo, () => fetchSequences())
+                    }
+                  />
                 </Stack>
                 <Table size="small" aria-label="collapsible table">
                   <TableHead sx={{ '& th,& td': { whiteSpace: 'nowrap' } }}>

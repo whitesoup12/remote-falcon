@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
-import { AppBar, Box, Container, CssBaseline, Toolbar, useMediaQuery } from '@mui/material';
+import { AppBar, Box, Container, CssBaseline, Modal, Toolbar, useMediaQuery } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 import { IconChevronRight } from '@tabler/icons';
 import { Outlet } from 'react-router-dom';
@@ -12,8 +12,10 @@ import { drawerWidth } from 'store/constant';
 import { openDrawer } from 'store/slices/menu';
 import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
 
+import { closeCreateNewSequenceGroup } from '../../views/pages/controlPanel/sequences/helpers';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import WhatsNew from './WhatsNew.modal';
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(({ theme, open }) => ({
   ...theme.typography.mainContent,
@@ -68,8 +70,17 @@ const MainLayout = () => {
   const { drawerOpen } = useSelector((state) => state.menu);
   const { container } = useConfig();
 
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+
+  const newStuffDateString = '2023-11-21';
+  const newStuffDate = Date.parse(newStuffDateString);
+
   React.useEffect(() => {
     dispatch(openDrawer(!matchDownMd));
+    const whatsNewDateViewed = window.localStorage.getItem('whatsNew');
+    if (!whatsNewDateViewed || newStuffDate > Date.parse(whatsNewDateViewed)) {
+      setWhatsNewOpen(true);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [matchDownMd]);
 
@@ -81,6 +92,11 @@ const MainLayout = () => {
     ),
     []
   );
+
+  const closeWhatsNew = () => {
+    window.localStorage.setItem('whatsNew', newStuffDateString);
+    setWhatsNewOpen(false);
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -104,6 +120,9 @@ const MainLayout = () => {
 
       {/* main content */}
       <Main theme={theme} open={drawerOpen}>
+        <Modal open={whatsNewOpen} aria-labelledby="simple-modal-title" aria-describedby="simple-modal-description">
+          <WhatsNew handleClose={() => closeWhatsNew()} />
+        </Modal>
         {/* breadcrumb */}
         {container && (
           <Container maxWidth="lg">
