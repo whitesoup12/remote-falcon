@@ -7,7 +7,9 @@ import {
   deleteSequenceService,
   saveSequenceGroupService,
   deleteSequenceGroupService,
-  updateSequenceOrderService
+  updateSequenceOrderService,
+  deleteInactiveSequencesService,
+  deleteAllSequencesService
 } from 'services/controlPanel/sequences.services';
 import { setSequences } from 'store/slices/controlPanel';
 import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
@@ -242,4 +244,30 @@ export const reorderSequences = async (result, sequences, setShowLinearProgress,
   }
   fetchSequences();
   setShowLinearProgress(false);
+};
+
+export const deleteSequences = async (options, selectedIndex, setShowLinearProgress, dispatch, coreInfo, fetchSequences) => {
+  if (selectedIndex === 0) {
+    setShowLinearProgress(true);
+    const response = await deleteInactiveSequencesService();
+    if (response?.status === 200) {
+      showAlert({ dispatch, message: 'All Inactive Sequences Deleted' });
+      mixpanelTrack('Inactive Sequences Deleted', coreInfo);
+      await fetchSequences();
+    } else {
+      showAlert({ dispatch, alert: 'error' });
+    }
+    setShowLinearProgress(false);
+  } else if (selectedIndex === 1) {
+    setShowLinearProgress(true);
+    const response = await deleteAllSequencesService();
+    if (response?.status === 200) {
+      showAlert({ dispatch, message: 'All Sequences Deleted' });
+      mixpanelTrack('All Sequences Deleted', coreInfo);
+      await fetchSequences();
+    } else {
+      showAlert({ dispatch, alert: 'error' });
+    }
+    setShowLinearProgress(false);
+  }
 };

@@ -50,3 +50,13 @@ export const updateSequenceOrderService = async (sequences) => {
   const response = await axios.post('/remotefalcon/api/controlPanel/updateSequenceOrder', sequences);
   return response;
 };
+
+export const deleteInactiveSequencesService = async () => {
+  const response = await axios.delete('/remotefalcon/api/controlPanel/deleteInactiveSequences');
+  return response;
+};
+
+export const deleteAllSequencesService = async () => {
+  const response = await axios.delete('/remotefalcon/api/controlPanel/deleteAllSequences');
+  return response;
+};
