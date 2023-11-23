@@ -49,7 +49,6 @@ public class ApiController {
 
   @PostMapping(value = "/external/addSequenceToQueue")
   @RequiresApiAccess
-  @Deprecated
   public ResponseEntity<?> addSequenceToQueuev2(@RequestBody AddSequenceRequest request) {
     ViewerTokenDTO viewerTokenDTO = this.getViewerTokenDTO();
     if(viewerTokenDTO == null) {
@@ -60,7 +59,6 @@ public class ApiController {
 
   @PostMapping(value = "/external/voteForSequence")
   @RequiresApiAccess
-  @Deprecated
   public ResponseEntity<?> voteForSequencev2(@RequestBody AddSequenceRequest request, HttpServletRequest httpServletRequest) {
     ViewerTokenDTO viewerTokenDTO = this.getViewerTokenDTO();
     if(viewerTokenDTO == null) {

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -330,8 +329,11 @@ public class ViewerPageService {
   }
 
   private Integer currentQueueDepth(ViewerTokenDTO viewerTokenDTO) {
-    List<RemoteJuke> remoteJukes = this.remoteJukeRepository.findAllByRemoteToken(viewerTokenDTO.getRemoteToken());
-    return remoteJukes.size();
+    List<RemoteJuke> jukeboxRequestsFromFirstToLast = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(viewerTokenDTO.getRemoteToken());
+    List<PsaSequence> psaSequences = this.psaSequenceRepository.findAllByRemoteToken(viewerTokenDTO.getRemoteToken());
+    List<String> psaSequenceNames = psaSequences.stream().map(PsaSequence::getPsaSequenceName).toList();
+    long psasInQueue = jukeboxRequestsFromFirstToLast.stream().filter(remoteJuke -> psaSequenceNames.contains(remoteJuke.getNextPlaylist())).count();
+    return jukeboxRequestsFromFirstToLast.size() - (int) psasInQueue;
   }
 
   public ResponseEntity<List<String>> allJukeboxRequests() {
@@ -345,83 +347,107 @@ public class ViewerPageService {
 
   private List<String> allJukeboxRequests(ViewerTokenDTO viewerTokenDTO) {
     List<RemoteJuke> remoteJukes = this.getAllJukeboxRequestsWithDisplayName(viewerTokenDTO.getRemoteToken());
-    return remoteJukes.stream().filter(remoteJuke -> StringUtils.isNotEmpty(remoteJuke.getFuturePlaylist())).map(RemoteJuke::getSequence).collect(Collectors.toList());
+    if(remoteJukes.size() > 0) {
+      remoteJukes.remove(0);
+    }
+    return remoteJukes.stream().map(RemoteJuke::getSequence).filter(StringUtils::isNotEmpty).toList();
   }
 
   public ResponseEntity<AddSequenceResponse> addPlaylistToQueue(ViewerTokenDTO viewerTokenDTO, AddSequenceRequest request) {
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(viewerTokenDTO.getRemoteToken());
+    String remoteToken = viewerTokenDTO.getRemoteToken();
+
+    //Get initial data for checks
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
+    List<RemoteJuke> jukeboxRequestsFromFirstToLast = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(remoteToken);
+    List<PsaSequence> psaSequences = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
+
+    //Set data for checks
     int jukeboxDepth = remotePreference.getJukeboxDepth();
-    List<RemoteJuke> remoteJukes = this.getAllJukeboxRequests(viewerTokenDTO.getRemoteToken());
-    List<String> sequences = remoteJukes.stream().map(RemoteJuke::getSequence).collect(Collectors.toList());
-    if(jukeboxDepth != 0 && sequences.size() >= jukeboxDepth) {
+    List<String> psaSequenceNames = psaSequences.stream().map(PsaSequence::getPsaSequenceName).toList();
+    int numberOfPsasInQueue = (int) jukeboxRequestsFromFirstToLast.stream().filter(remoteJuke -> psaSequenceNames.contains(remoteJuke.getNextPlaylist())).count();
+
+    //Run checks
+    //Queue Depth Check - Check is current queue minus PSAs is greater than or equal to the allowable queue depth
+    if(jukeboxDepth != 0 && jukeboxRequestsFromFirstToLast.size() >= (jukeboxDepth + numberOfPsasInQueue)) {
       return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("QUEUE_FULL").build());
     }
+
+    //Location Check
     if(remotePreference.getEnableGeolocation()) {
       double distance = this.distance(remotePreference.getRemoteLatitude(), remotePreference.getRemoteLongitude(), request.getViewerLatitude(), request.getViewerLongitude());
       if(distance > remotePreference.getAllowedRadius()) {
         return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("INVALID_LOCATION").build());
       }
     }
-    List<String> sequencesByMostRecent = Lists.reverse(sequences);
-    List<String> sequencesRecentlyRequested = sequencesByMostRecent.stream().limit(remotePreference.getJukeboxRequestLimit()).toList();
+
+    //Currently Playing Check
+    Optional<CurrentPlaylist> currentlyPlaying = this.currentPlaylistRepository.findByRemoteToken(remoteToken);
+    if(currentlyPlaying.isPresent() && StringUtils.equalsIgnoreCase(currentlyPlaying.get().getCurrentPlaylist(), request.getSequence())) {
+      return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("SONG_REQUESTED").build());
+    }
+
+    //Request Limit Check
+    List<String> jukeboxRequestSequenceNamesFromFirstToLast = jukeboxRequestsFromFirstToLast.stream().map(RemoteJuke::getNextPlaylist).toList();
+    List<String> jukeboxRequestSequenceNamesFromLastToFirst = Lists.reverse(jukeboxRequestSequenceNamesFromFirstToLast);
+    List<String> sequencesRecentlyRequested = jukeboxRequestSequenceNamesFromLastToFirst.stream().limit(remotePreference.getJukeboxRequestLimit()).toList();
     if(sequencesRecentlyRequested.contains(request.getSequence())) {
       return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("SONG_REQUESTED").build());
     }
-    Optional<CurrentPlaylist> currentPlaylist = this.currentPlaylistRepository.findByRemoteToken(viewerTokenDTO.getRemoteToken());
-    if(currentPlaylist.isPresent() && StringUtils.equalsIgnoreCase(currentPlaylist.get().getCurrentPlaylist(), request.getSequence())) {
-      return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("SONG_REQUESTED").build());
-    }
-    RemoteJuke sequenceToAdd = RemoteJuke.builder()
-            .ownerRequested(false)
-            .remoteToken(viewerTokenDTO.getRemoteToken())
-            .build();
-    List<RemoteJuke> remoteJukesByMostRecent = Lists.reverse(remoteJukes);
-    Optional<RemoteJuke> mostCurrentRequest = remoteJukesByMostRecent.stream().findFirst();
 
-    int nextRequestSequence = 1;
-    //Check if requested sequence is actually a group
-    Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceGroup(viewerTokenDTO.getRemoteToken(), request.getSequence());
-    if(playlist.isPresent()) {
-      //Group request
-      List<RemoteJuke> sequencesToAdd = new ArrayList<>();
-      List<Playlist> groupedPlaylists = this.playlistRepository.findAllByRemoteTokenAndSequenceGroupOrderBySequenceOrderAsc(viewerTokenDTO.getRemoteToken(), request.getSequence());
-      if(mostCurrentRequest.isPresent()) {
-        nextRequestSequence = mostCurrentRequest.get().getFuturePlaylistSequence() + 1;
-      }
-      for(Playlist groupedPlaylist : groupedPlaylists) {
-        sequenceToAdd = RemoteJuke.builder()
+    //Checks Done
+    //Add Request
+    int futureRequestSequence = 1;
+    List<RemoteJuke> jukeboxRequestsFromLastToFirst = Lists.reverse(jukeboxRequestsFromFirstToLast);
+    Optional<RemoteJuke> mostRecentJukeboxRequest = jukeboxRequestsFromLastToFirst.stream().findFirst();
+    //Get the highest sequence number for requests, then add one
+    if(mostRecentJukeboxRequest.isPresent()) {
+      futureRequestSequence = mostRecentJukeboxRequest.get().getFuturePlaylistSequence() + 1;
+    }
+
+    //Check if Request is Grouped
+    Optional<Playlist> sequenceGroup = this.playlistRepository.findFirstByRemoteTokenAndSequenceGroup(remoteToken, request.getSequence());
+    if(sequenceGroup.isPresent()) {
+      //It's a group
+      List<RemoteJuke> sequencesInGroupToRequest = new ArrayList<>();
+      List<Playlist> sequencesInGroup = this.playlistRepository.findAllByRemoteTokenAndSequenceGroupOrderBySequenceOrderAsc(remoteToken, request.getSequence());
+
+      //Iterate through the sequences in the group
+      for(Playlist sequence : sequencesInGroup) {
+        sequencesInGroupToRequest.add(RemoteJuke.builder()
+                .remoteToken(remoteToken)
+                .nextPlaylist(sequence.getSequenceName())
+                .futurePlaylistSequence(futureRequestSequence)
                 .ownerRequested(false)
-                .remoteToken(viewerTokenDTO.getRemoteToken())
-                .build();
-        if(nextRequestSequence > 1) {
-          sequenceToAdd.setFuturePlaylist(groupedPlaylist.getSequenceName());
-        }else {
-          sequenceToAdd.setNextPlaylist(groupedPlaylist.getSequenceName());
-        }
-        sequenceToAdd.setFuturePlaylistSequence(nextRequestSequence);
-        sequencesToAdd.add(sequenceToAdd);
-        nextRequestSequence++;
+                .build());
+        futureRequestSequence++;
       }
-      this.remoteJukeRepository.saveAll(sequencesToAdd);
+      this.remoteJukeRepository.saveAll(sequencesInGroupToRequest);
     }else {
-      //Single request
-      if(mostCurrentRequest.isPresent()) {
-        nextRequestSequence = mostCurrentRequest.get().getFuturePlaylistSequence() + 1;
-        sequenceToAdd.setFuturePlaylist(request.getSequence());
-      }else {
-        sequenceToAdd.setNextPlaylist(request.getSequence());
-      }
-      sequenceToAdd.setFuturePlaylistSequence(nextRequestSequence);
-      this.remoteJukeRepository.save(sequenceToAdd);
+      //It's not a group, so just a single sequence request
+      this.remoteJukeRepository.save(RemoteJuke.builder()
+              .remoteToken(remoteToken)
+              .nextPlaylist(request.getSequence())
+              .futurePlaylistSequence(futureRequestSequence)
+              .ownerRequested(false)
+              .build());
     }
 
-    this.saveViewerJukeStats(viewerTokenDTO.getRemoteToken(), request.getSequence());
+    //Requests have been added, now for the stats
+    this.viewerJukeStatsRepository.save(ViewerJukeStats.builder()
+            .remoteToken(remoteToken)
+            .playlistName(request.getSequence())
+            .requestDateTime(ZonedDateTime.now())
+            .build());
+
+    //Add PSA if it is NOT being managed by RF
     if(remotePreference.getPsaEnabled() != null && remotePreference.getPsaEnabled() && !remotePreference.getManagePsa()) {
-      Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(viewerTokenDTO.getRemoteToken());
+      //Get next PSA to be played based on the last time the other PSAs were played
+      Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
       if(psaSequence.isPresent()) {
-        this.addPSAToQueue(viewerTokenDTO.getRemoteToken(), remotePreference.getPsaFrequency(), nextRequestSequence, psaSequence.get());
+        this.addPSAToQueue(remoteToken, remotePreference.getPsaFrequency(), futureRequestSequence, psaSequence.get());
       }
     }
+
     return ResponseEntity.status(200).build();
   }
 
@@ -492,49 +518,15 @@ public class ViewerPageService {
     return ResponseEntity.status(200).build();
   }
 
-  private List<RemoteJuke> getAllJukeboxRequests(String remoteToken) {
-    List<RemoteJuke> remoteJukes = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(remoteToken);
-    List<RemoteJuke> allJukeRequests = new ArrayList<>();
-    remoteJukes.forEach(juke -> {
-      if(!StringUtils.isEmpty(juke.getNextPlaylist())) {
-        Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(remoteToken, juke.getNextPlaylist());
-        playlist.ifPresent(value -> juke.setSequence(value.getSequenceName()));
-        allJukeRequests.add(juke);
-      }
-      if(!StringUtils.isEmpty(juke.getFuturePlaylist())) {
-        Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(remoteToken, juke.getFuturePlaylist());
-        playlist.ifPresent(value -> juke.setSequence(value.getSequenceName()));
-        allJukeRequests.add(juke);
-      }
-    });
-    return allJukeRequests;
-  }
-
   private List<RemoteJuke> getAllJukeboxRequestsWithDisplayName(String remoteToken) {
     List<RemoteJuke> remoteJukes = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(remoteToken);
     List<RemoteJuke> allJukeRequests = new ArrayList<>();
     remoteJukes.forEach(juke -> {
-      if(!StringUtils.isEmpty(juke.getNextPlaylist())) {
-        Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(remoteToken, juke.getNextPlaylist());
-        playlist.ifPresent(value -> juke.setSequence(value.getSequenceDisplayName()));
-        allJukeRequests.add(juke);
-      }
-      if(!StringUtils.isEmpty(juke.getFuturePlaylist())) {
-        Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(remoteToken, juke.getFuturePlaylist());
-        playlist.ifPresent(value -> juke.setSequence(value.getSequenceDisplayName()));
-        allJukeRequests.add(juke);
-      }
+      Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(remoteToken, juke.getNextPlaylist());
+      playlist.ifPresent(value -> juke.setSequence(value.getSequenceDisplayName()));
+      allJukeRequests.add(juke);
     });
     return allJukeRequests;
-  }
-
-  private void saveViewerJukeStats(String remoteToken, String playlist) {
-    ViewerJukeStats viewerJukeStats = ViewerJukeStats.builder()
-            .remoteToken(remoteToken)
-            .playlistName(playlist)
-            .requestDateTime(ZonedDateTime.now())
-            .build();
-    this.viewerJukeStatsRepository.save(viewerJukeStats);
   }
 
   private void saveViewerVoteStats(String remoteToken, String playlist) {
@@ -546,18 +538,17 @@ public class ViewerPageService {
     this.viewerVoteStatsRepository.save(viewerVoteStats);
   }
 
-  private void addPSAToQueue(String remoteToken, Integer psaFrequency, Integer nextRequestSequence, PsaSequence psaSequence) {
+  private void addPSAToQueue(String remoteToken, Integer psaFrequency, Integer futureRequestSequence, PsaSequence psaSequence) {
     ZonedDateTime todayOhHundred = ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0);
     int jukeStatsCount = this.viewerJukeStatsRepository.countAllByRemoteTokenAndRequestDateTimeAfter(remoteToken, todayOhHundred);
     if(jukeStatsCount % psaFrequency == 0) {
-      nextRequestSequence += 1;
-      RemoteJuke psaToAdd = RemoteJuke.builder()
-              .ownerRequested(false)
+      futureRequestSequence += 1;
+      this.remoteJukeRepository.save(RemoteJuke.builder()
               .remoteToken(remoteToken)
-              .futurePlaylistSequence(nextRequestSequence)
-              .futurePlaylist(psaSequence.getPsaSequenceName())
-              .build();
-      this.remoteJukeRepository.save(psaToAdd);
+              .futurePlaylistSequence(futureRequestSequence)
+              .nextPlaylist(psaSequence.getPsaSequenceName())
+              .ownerRequested(false)
+              .build());
 
       psaSequence.setPsaSequenceLastPlayed(ZonedDateTime.now());
       this.psaSequenceRepository.save(psaSequence);

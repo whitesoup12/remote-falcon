@@ -434,9 +434,11 @@ public class ViewerPageServiceTest {
   public void currentQueueDepth() {
     ViewerTokenDTO viewerTokenDTO = Mocks.viewerTokenDTO();
     List<RemoteJuke> remoteJukes = Mocks.remoteJukeList();
+    List<PsaSequence> psaSequences = Mocks.psaSequenceList();
 
     when(this.authUtil.getViewerJwtPayload()).thenReturn(viewerTokenDTO);
-    when(this.remoteJukeRepository.findAllByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
+    when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
+    when(this.psaSequenceRepository.findAllByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(psaSequences);
 
     ResponseEntity<Integer> response = this.viewerPageService.currentQueueDepth();
     assertNotNull(response);
@@ -492,7 +494,6 @@ public class ViewerPageServiceTest {
 
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
-    when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
     when(this.currentPlaylistRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Optional.empty());
 
     ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
@@ -515,7 +516,6 @@ public class ViewerPageServiceTest {
 
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
-    when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
 
     ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
@@ -537,7 +537,6 @@ public class ViewerPageServiceTest {
 
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
-    when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
     when(this.currentPlaylistRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Optional.empty());
 
     ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
@@ -563,7 +562,6 @@ public class ViewerPageServiceTest {
 
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
-    when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
 
     ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
@@ -582,10 +580,10 @@ public class ViewerPageServiceTest {
     CurrentPlaylist currentPlaylist = Mocks.currentPlaylist();
 
     AddSequenceRequest addSequenceRequest = Mocks.addSequenceRequest();
+    addSequenceRequest.setSequence("Sequence Three");
 
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
-    when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
 
     ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
     assertNotNull(response);
@@ -606,7 +604,6 @@ public class ViewerPageServiceTest {
 
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
-    when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
     when(this.currentPlaylistRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Optional.of(currentPlaylist));
 
     ResponseEntity<AddSequenceResponse> response = this.viewerPageService.addPlaylistToQueue(viewerTokenDTO, addSequenceRequest);
@@ -652,7 +649,6 @@ public class ViewerPageServiceTest {
 
     when(this.remotePreferenceRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(remoteJukes);
-    when(this.playlistRepository.findFirstByRemoteTokenAndSequenceName(eq(viewerTokenDTO.getRemoteToken()), anyString())).thenReturn(Optional.of(playlist));
     when(this.currentPlaylistRepository.findByRemoteToken(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Optional.empty());
     when(this.viewerJukeStatsRepository.countAllByRemoteTokenAndRequestDateTimeAfter(eq(viewerTokenDTO.getRemoteToken()), any(ZonedDateTime.class))).thenReturn(1);
     when(this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(eq(viewerTokenDTO.getRemoteToken()))).thenReturn(Optional.of(psaSequenceList.get(0)));

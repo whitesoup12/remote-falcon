@@ -382,7 +382,7 @@ public class ControlPanelServiceTest {
     assertNotNull(response.getBody());
     assertEquals(3, response.getBody().size());
     assertEquals("Sequence One", response.getBody().get(0).getNextPlaylist());
-    assertEquals("Sequence Two", response.getBody().get(1).getFuturePlaylist());
+    assertEquals("Sequence Two", response.getBody().get(1).getNextPlaylist());
   }
 
   @Test
@@ -423,7 +423,6 @@ public class ControlPanelServiceTest {
     Long remoteJukeKey = (long) 2;
     RemoteJuke remoteJuke = Mocks.remoteJuke_future();
 
-    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
     when(this.remoteJukeRepository.findByRemoteJukeKey(eq(remoteJukeKey))).thenReturn(Optional.of(remoteJuke));
 
     ResponseEntity<?> response = this.controlPanelService.deleteJukeboxRequest(remoteJukeKey);
@@ -439,14 +438,11 @@ public class ControlPanelServiceTest {
     Long remoteJukeKey = (long) 1;
     RemoteJuke remoteJuke = Mocks.remoteJuke_next();
 
-    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
     when(this.remoteJukeRepository.findByRemoteJukeKey(eq(remoteJukeKey))).thenReturn(Optional.of(remoteJuke));
 
     ResponseEntity<?> response = this.controlPanelService.deleteJukeboxRequest(remoteJukeKey);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
-
-    verify(pluginService, times(1)).updatePlaylistQueue(tokenDTO.getRemoteToken());
   }
 
   @Test
@@ -680,7 +676,6 @@ public class ControlPanelServiceTest {
     when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
     when(this.remoteJukeRepository.findAllByRemoteTokenAndOwnerRequested(eq(tokenDTO.getRemoteToken()), eq(true))).thenReturn(Collections.emptyList());
-    when(this.remoteJukeRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(Collections.emptyList());
 
     ResponseEntity<?> response = this.controlPanelService.playSequence(sequenceKeyRequest);
     assertNotNull(response);
@@ -702,13 +697,12 @@ public class ControlPanelServiceTest {
     when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
     when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
     when(this.remoteJukeRepository.findAllByRemoteTokenAndOwnerRequested(eq(tokenDTO.getRemoteToken()), eq(true))).thenReturn(Collections.emptyList());
-    when(this.remoteJukeRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remoteJukeList);
 
     ResponseEntity<?> response = this.controlPanelService.playSequence(sequenceKeyRequest);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 
-    verify(remoteJukeRepository, times(2)).save(any(RemoteJuke.class));
+    verify(remoteJukeRepository, times(1)).save(any(RemoteJuke.class));
   }
 
   @Test

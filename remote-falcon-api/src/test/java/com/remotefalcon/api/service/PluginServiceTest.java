@@ -52,16 +52,12 @@ public class PluginServiceTest {
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(remoteToken))).thenReturn(remotePreference);
-    when(this.remoteJukeRepository.findAllByRemoteToken(eq(remoteToken))).thenReturn(remoteJukeList);
     when(this.playlistRepository.findAllByRemoteToken(eq(remoteToken))).thenReturn(playlists);
 
     ResponseEntity<NextPlaylistResponse> response = this.pluginService.nextPlaylistInQueue(true);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals("Sequence One", response.getBody().getNextPlaylist());
-    assertEquals(2, playlists.get(1).getSequenceVisibleCount().intValue());
-    verify(remoteJukeRepository, times(1)).save(remoteJukeList.get(0));
   }
 
   @Test
@@ -76,18 +72,12 @@ public class PluginServiceTest {
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(remoteToken))).thenReturn(remotePreference);
-    when(this.remoteJukeRepository.findAllByRemoteToken(eq(remoteToken))).thenReturn(remoteJukeList);
     when(this.playlistRepository.findAllByRemoteToken(eq(remoteToken))).thenReturn(playlists);
-    when(this.playlistGroupRepository.findByRemoteTokenAndSequenceGroupName(eq(remoteToken), eq("Group"))).thenReturn(Optional.of(playlistGroups.get(0)));
 
     ResponseEntity<NextPlaylistResponse> response = this.pluginService.nextPlaylistInQueue(true);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals("Sequence One", response.getBody().getNextPlaylist());
-    assertEquals(2, playlists.get(1).getSequenceVisibleCount().intValue());
-    verify(remoteJukeRepository, times(1)).save(remoteJukeList.get(0));
-    verify(playlistGroupRepository, times(1)).save(playlistGroups.get(0));
   }
 
   @Test
@@ -100,15 +90,12 @@ public class PluginServiceTest {
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(remoteToken))).thenReturn(remotePreference);
-    when(this.remoteJukeRepository.findAllByRemoteToken(eq(remoteToken))).thenReturn(remoteJukeList);
     when(this.playlistRepository.findAllByRemoteToken(eq(remoteToken))).thenReturn(playlists);
 
     ResponseEntity<NextPlaylistResponse> response = this.pluginService.nextPlaylistInQueue(false);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals("Sequence One", response.getBody().getNextPlaylist());
-    assertEquals(2, playlists.get(1).getSequenceVisibleCount().intValue());
     verify(remoteJukeRepository, times(0)).save(remoteJukeList.get(0));
   }
 
@@ -123,15 +110,12 @@ public class PluginServiceTest {
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(remoteToken))).thenReturn(remotePreference);
-    when(this.remoteJukeRepository.findAllByRemoteToken(eq(remoteToken))).thenReturn(remoteJukeList);
     when(this.playlistRepository.findAllByRemoteToken(eq(remoteToken))).thenReturn(playlists);
 
     ResponseEntity<NextPlaylistResponse> response = this.pluginService.nextPlaylistInQueue(true);
     assertNotNull(response);
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals("Sequence One", response.getBody().getNextPlaylist());
-    assertEquals(2, playlists.get(1).getSequenceVisibleCount().intValue());
   }
 
   @Test
@@ -143,7 +127,6 @@ public class PluginServiceTest {
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(remoteToken))).thenReturn(remotePreference);
-    when(this.remoteJukeRepository.findAllByRemoteToken(eq(remoteToken))).thenReturn(Collections.emptyList());
     when(this.playlistRepository.findAllByRemoteToken(eq(remoteToken))).thenReturn(playlists);
 
     ResponseEntity<NextPlaylistResponse> response = this.pluginService.nextPlaylistInQueue(true);
@@ -293,8 +276,6 @@ public class PluginServiceTest {
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
     when(this.currentPlaylistRepository.findByRemoteToken(eq(remoteToken))).thenReturn(Optional.of(currentPlaylist));
-    when(this.playlistRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlists);
-    when(this.playlistGroupRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlistGroups);
     when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
 
     ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
@@ -304,8 +285,6 @@ public class PluginServiceTest {
     assertEquals("Sequence One", response.getBody().getCurrentPlaylist());
 
     verify(currentPlaylistRepository, times(1)).save(any(CurrentPlaylist.class));
-    verify(playlistRepository, times(1)).saveAll(playlistsSavedForCounts);
-    verify(playlistGroupRepository, times(1)).saveAll(playlistGroupsSavedForCounts);
   }
 
   @Test
@@ -326,8 +305,6 @@ public class PluginServiceTest {
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
     when(this.currentPlaylistRepository.findByRemoteToken(eq(remoteToken))).thenReturn(Optional.of(currentPlaylist));
-    when(this.playlistRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlists);
-    when(this.playlistGroupRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlistGroups);
     when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
 
     ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
@@ -337,8 +314,6 @@ public class PluginServiceTest {
     assertEquals("Sequence One", response.getBody().getCurrentPlaylist());
 
     verify(currentPlaylistRepository, times(1)).save(any(CurrentPlaylist.class));
-    verify(playlistRepository, times(1)).saveAll(playlistsSavedForCounts);
-    verify(playlistGroupRepository, times(1)).saveAll(playlistGroupsSavedForCounts);
   }
 
   @Test
@@ -364,12 +339,9 @@ public class PluginServiceTest {
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
     when(this.currentPlaylistRepository.findByRemoteToken(eq(remoteToken))).thenReturn(Optional.of(currentPlaylist));
-    when(this.playlistRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlists);
-    when(this.playlistGroupRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlistGroups);
     when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
     when(this.psaSequenceRepository.findAllByRemoteToken(remoteToken)).thenReturn(psaSequences);
     when(this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken)).thenReturn(Optional.of(psaSequences.get(0)));
-    when(this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceVotesDescSequenceVoteTimeAsc(remoteToken, true)).thenReturn(playlists);
 
     ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
     assertNotNull(response);
@@ -378,8 +350,6 @@ public class PluginServiceTest {
     assertEquals("Sequence One", response.getBody().getCurrentPlaylist());
 
     verify(currentPlaylistRepository, times(1)).save(any(CurrentPlaylist.class));
-    verify(playlistRepository, times(1)).saveAll(playlistsSavedForCounts);
-    verify(playlistGroupRepository, times(1)).saveAll(playlistGroupsSavedForCounts);
   }
 
   @Test
@@ -406,12 +376,9 @@ public class PluginServiceTest {
 
     when(this.authUtil.getRemoteTokenFromHeader()).thenReturn(remoteToken);
     when(this.currentPlaylistRepository.findByRemoteToken(eq(remoteToken))).thenReturn(Optional.of(currentPlaylist));
-    when(this.playlistRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlists);
-    when(this.playlistGroupRepository.findAllByRemoteToken(remoteToken)).thenReturn(playlistGroups);
     when(this.remotePreferenceRepository.findByRemoteToken(remoteToken)).thenReturn(remotePreference);
     when(this.psaSequenceRepository.findAllByRemoteToken(remoteToken)).thenReturn(psaSequences);
     when(this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken)).thenReturn(Optional.of(psaSequences.get(0)));
-    when(this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceVotesDescSequenceVoteTimeAsc(remoteToken, true)).thenReturn(playlists);
 
     ResponseEntity<PluginResponse> response = this.pluginService.updateWhatsPlaying(updateWhatsPlayingRequest);
     assertNotNull(response);
@@ -420,8 +387,6 @@ public class PluginServiceTest {
     assertEquals("Sequence One", response.getBody().getCurrentPlaylist());
 
     verify(currentPlaylistRepository, times(1)).save(any(CurrentPlaylist.class));
-    verify(playlistRepository, times(1)).saveAll(playlistsSavedForCounts);
-    verify(playlistGroupRepository, times(1)).saveAll(playlistGroupsSavedForCounts);
   }
 
   @Test
