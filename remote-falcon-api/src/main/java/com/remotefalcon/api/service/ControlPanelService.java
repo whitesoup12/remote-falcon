@@ -326,16 +326,9 @@ public class ControlPanelService {
     List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(tokenDTO.getRemoteToken());
     List<RemoteJuke> allJukeRequests = new ArrayList<>();
     remoteJukeList.forEach(juke -> {
-      if(!StringUtils.isEmpty(juke.getNextPlaylist())) {
-        Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(tokenDTO.getRemoteToken(), juke.getNextPlaylist());
-        playlist.ifPresent(value -> juke.setSequence(value.getSequenceDisplayName()));
-        allJukeRequests.add(juke);
-      }
-      if(!StringUtils.isEmpty(juke.getFuturePlaylist())) {
-        Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(tokenDTO.getRemoteToken(), juke.getFuturePlaylist());
-        playlist.ifPresent(value -> juke.setSequence(value.getSequenceDisplayName()));
-        allJukeRequests.add(juke);
-      }
+      Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(tokenDTO.getRemoteToken(), juke.getNextPlaylist());
+      playlist.ifPresent(value -> juke.setSequence(value.getSequenceDisplayName()));
+      allJukeRequests.add(juke);
     });
     return ResponseEntity.status(200).body(allJukeRequests);
   }
@@ -366,15 +359,8 @@ public class ControlPanelService {
   }
 
   public ResponseEntity<?> deleteJukeboxRequest(Long remoteJukeKey) {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
     Optional<RemoteJuke> requestToDelete = this.remoteJukeRepository.findByRemoteJukeKey(remoteJukeKey);
-    if(requestToDelete.isPresent()) {
-      if(StringUtils.isEmpty(requestToDelete.get().getNextPlaylist()) && !StringUtils.isEmpty(requestToDelete.get().getFuturePlaylist())) {
-        this.remoteJukeRepository.delete(requestToDelete.get());
-      }else {
-        this.pluginService.updatePlaylistQueue(tokenDTO.getRemoteToken());
-      }
-    }
+    requestToDelete.ifPresent(this.remoteJukeRepository::delete);
     return ResponseEntity.status(200).build();
   }
 
@@ -507,30 +493,12 @@ public class ControlPanelService {
       if(ownerAlreadyRequested) {
         return ResponseEntity.status(204).build();
       }
-      List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
-      Optional<RemoteJuke> nextSequence = remoteJukeList.stream().filter(juke -> !StringUtils.isEmpty(juke.getNextPlaylist())).findFirst();
-      if(nextSequence.isPresent()) {
-        RemoteJuke moveNextToFuture = RemoteJuke.builder()
-                .futurePlaylist(nextSequence.get().getNextPlaylist())
-                .futurePlaylistSequence(0)
-                .ownerRequested(false)
-                .remoteToken(tokenDTO.getRemoteToken())
-                .build();
-        this.remoteJukeRepository.save(moveNextToFuture);
-
-        nextSequence.get().setNextPlaylist(playlist.getSequenceName());
-        nextSequence.get().setFuturePlaylistSequence(null);
-        nextSequence.get().setOwnerRequested(true);
-        this.remoteJukeRepository.save(nextSequence.get());
-      }else {
-        RemoteJuke ownerRequestedSequence = RemoteJuke.builder()
-                .nextPlaylist(playlist.getSequenceName())
-                .futurePlaylistSequence(0)
-                .ownerRequested(true)
-                .remoteToken(tokenDTO.getRemoteToken())
-                .build();
-        this.remoteJukeRepository.save(ownerRequestedSequence);
-      }
+      this.remoteJukeRepository.save(RemoteJuke.builder()
+        .remoteToken(tokenDTO.getRemoteToken())
+        .nextPlaylist(playlist.getSequenceName())
+        .futurePlaylistSequence(0)
+        .ownerRequested(false)
+        .build());
     }else {
       boolean ownerAlreadyVoted = !this.playlistRepository.findAllByRemoteTokenAndOwnerVoted(tokenDTO.getRemoteToken(), true).isEmpty();
       if(ownerAlreadyVoted) {

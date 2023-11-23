@@ -326,13 +326,13 @@ public class Mocks {
     remoteJukes.add(RemoteJuke.builder()
             .remoteJukeKey((long) 2)
             .remoteToken("abc123")
-            .futurePlaylist("Sequence Two")
+            .nextPlaylist("Sequence Two")
             .futurePlaylistSequence(1)
             .build());
     remoteJukes.add(RemoteJuke.builder()
             .remoteJukeKey((long) 3)
             .remoteToken("abc123")
-            .futurePlaylist("Sequence Three")
+            .nextPlaylist("Sequence Three")
             .futurePlaylistSequence(3)
             .build());
     return remoteJukes;
@@ -357,7 +357,7 @@ public class Mocks {
     return RemoteJuke.builder()
             .remoteJukeKey((long) 2)
             .remoteToken("abc123")
-            .futurePlaylist("Sequence Two")
+            .nextPlaylist("Sequence Two")
             .futurePlaylistSequence(2)
             .build();
   }

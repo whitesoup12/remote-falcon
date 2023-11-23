@@ -58,7 +58,7 @@ public class PluginService {
   public ResponseEntity<NextPlaylistResponse> nextPlaylistInQueue(Boolean updateQueue) {
     String remoteToken = this.authUtil.getRemoteTokenFromHeader();
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
-    List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteToken(remoteToken);
+    List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(remoteToken);
     List<Playlist> playlists = this.playlistRepository.findAllByRemoteToken(remoteToken);
     Optional<RemoteJuke> currentSequence = remoteJukeList.stream().filter(juke -> StringUtils.isNotEmpty(juke.getNextPlaylist())).findFirst();
     NextPlaylistResponse nextPlaylistResponse = NextPlaylistResponse.builder()
@@ -90,8 +90,7 @@ public class PluginService {
         }
       }
       if(updateQueue) {
-        Optional<RemoteJuke> nextSequence = remoteJukeList.stream().filter(remoteJuke -> !StringUtils.isEmpty(remoteJuke.getFuturePlaylist())).findFirst();
-        this.updateQueue(currentSequence, nextSequence);
+        this.remoteJukeRepository.delete(currentSequence.get());
       }
     }
     return ResponseEntity.status(200).body(nextPlaylistResponse);
@@ -103,9 +102,8 @@ public class PluginService {
     }
     List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(remoteToken);
     Optional<RemoteJuke> currentSequence = remoteJukeList.stream().filter(remoteJuke -> !StringUtils.isEmpty(remoteJuke.getNextPlaylist())).findFirst();
-    Optional<RemoteJuke> nextSequence = remoteJukeList.stream().filter(remoteJuke -> !StringUtils.isEmpty(remoteJuke.getFuturePlaylist())).findFirst();
     if(currentSequence.isPresent()) {
-      this.updateQueue(currentSequence, nextSequence);
+      this.remoteJukeRepository.delete(currentSequence.get());
       return ResponseEntity.status(200).body(PluginResponse.builder().message("Success").build());
     }else {
       return ResponseEntity.status(200).body(PluginResponse.builder().message("Queue Empty").build());
@@ -190,56 +188,67 @@ public class PluginService {
 
   public ResponseEntity<PluginResponse> updateWhatsPlaying(UpdateWhatsPlayingRequest request) {
     String remoteToken = this.authUtil.getRemoteTokenFromHeader();
+    //If the current playing sequence is empty, that means we're idle and can clear now playing and up next
     if(StringUtils.isEmpty(request.getPlaylist())) {
       this.fppScheduleRepository.deleteByRemoteToken(remoteToken);
       this.currentPlaylistRepository.deleteByRemoteToken(remoteToken);
+      //Return cause there's nothing to do here...
+      return ResponseEntity.status(200).body(PluginResponse.builder().currentPlaylist(request.getPlaylist()).build());
+    }
+    //Get what's currently playing so we can update (if it exists) or save new
+    Optional<CurrentPlaylist> currentPlaylist = this.currentPlaylistRepository.findByRemoteToken(remoteToken);
+    if(currentPlaylist.isPresent()) {
+      currentPlaylist.get().setCurrentPlaylist(request.getPlaylist());
+      this.currentPlaylistRepository.save(currentPlaylist.get());
     }else {
-      Optional<CurrentPlaylist> currentPlaylist = this.currentPlaylistRepository.findByRemoteToken(remoteToken);
-      if(currentPlaylist.isPresent()) {
-        currentPlaylist.get().setCurrentPlaylist(request.getPlaylist());
-        this.currentPlaylistRepository.save(currentPlaylist.get());
-      }else {
-        this.currentPlaylistRepository.save(CurrentPlaylist.builder().remoteToken(remoteToken).currentPlaylist(request.getPlaylist()).build());
-      }
+      this.currentPlaylistRepository.save(CurrentPlaylist.builder().remoteToken(remoteToken).currentPlaylist(request.getPlaylist()).build());
+    }
 
-      RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
-      remotePreference.setSequencesPlayed(remotePreference.getSequencesPlayed() + 1);
+    //Do the managed PSA stuff
+    //Get prefs and update the sequences played count, but don't save just yet
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
+    int sequencesPlayed = remotePreference.getSequencesPlayed() + 1;
 
-      //PSA
-      if(remotePreference.getPsaEnabled() && remotePreference.getManagePsa()) {
-        int sequencesPlayed = remotePreference.getSequencesPlayed();
-        if(sequencesPlayed != 0 && sequencesPlayed % remotePreference.getPsaFrequency() == 0) {
-          Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
-          if(psaSequence.isPresent()) {
-            List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceVotesDescSequenceVoteTimeAsc(remoteToken, true);
+    //If PSA is enabled and we're managing it
+    if(remotePreference.getPsaEnabled() != null && remotePreference.getPsaEnabled() && remotePreference.getManagePsa()) {
+      //If sequences played is not 0 and is a dividend of the PSA frequency
+      if(sequencesPlayed != 0 && sequencesPlayed % remotePreference.getPsaFrequency() == 0) {
+        //Get PSAs ordered by which one needs to be played next
+        Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
+        if(psaSequence.isPresent()) {
+          //Let's take care of jukebox first
+          if(StringUtils.equalsIgnoreCase("JUKEBOX", remotePreference.getViewerControlMode())) {
+            this.remoteJukeRepository.save(RemoteJuke.builder()
+              .nextPlaylist(psaSequence.get().getPsaSequenceName())
+              .remoteToken(remoteToken)
+              .futurePlaylistSequence(-1)
+              .ownerRequested(false)
+              .build());
+          }else {
+            List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActive(remoteToken, true);
             Optional<Playlist> psaPlaylist = playlists.stream().filter(playlist -> StringUtils.equalsIgnoreCase(psaSequence.get().getPsaSequenceName(), playlist.getSequenceName())).findFirst();
             if(psaPlaylist.isPresent()) {
-              if(StringUtils.equalsIgnoreCase("VOTING", remotePreference.getViewerControlMode())) {
-                psaPlaylist.get().setSequenceVotes(11111);
-                this.playlistRepository.save(psaPlaylist.get());
-              }else {
-                this.remoteJukeRepository.save(RemoteJuke.builder()
-                        .remoteToken(remoteToken)
-                        .nextPlaylist(psaPlaylist.get().getSequenceName())
-                        .ownerRequested(true)
-                        .build());
-              }
-
-              psaSequence.get().setPsaSequenceLastPlayed(ZonedDateTime.now());
-              this.psaSequenceRepository.save(psaSequence.get());
+              psaPlaylist.get().setSequenceVotes(99999);
+              this.playlistRepository.save(psaPlaylist.get());
             }
           }
+          //Update when the PSA played last
+          psaSequence.get().setPsaSequenceLastPlayed(ZonedDateTime.now());
+          this.psaSequenceRepository.save(psaSequence.get());
         }
-        List<PsaSequence> psaSequences = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
-        boolean isPsaPlaying = psaSequences.stream().anyMatch(psaSequence -> StringUtils.equalsIgnoreCase(request.getPlaylist(), psaSequence.getPsaSequenceName()));
-        if(isPsaPlaying) {
-          remotePreference.setSequencesPlayed(remotePreference.getSequencesPlayed() - 1);
-        }
-        this.remotePreferenceRepository.save(remotePreference);
       }
     }
 
-    this.updateSequenceHideCounts(remoteToken);
+    //Now decide if we should update the sequences played
+    //Get all PSAs
+    List<PsaSequence> allPsaSequences = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
+    //Determine if any PSAs are same as Now Playing
+    boolean psaIsNowPlaying = allPsaSequences.stream().anyMatch(psaSequence -> StringUtils.equalsIgnoreCase(request.getPlaylist(), psaSequence.getPsaSequenceName()));
+    //If not, update the sequences played count
+    if(!psaIsNowPlaying) {
+      remotePreference.setSequencesPlayed(sequencesPlayed);
+      this.remotePreferenceRepository.save(remotePreference);
+    }
 
     return ResponseEntity.status(200).body(PluginResponse.builder().currentPlaylist(request.getPlaylist()).build());
   }
@@ -528,18 +537,6 @@ public class PluginService {
     remotePreference.setSequencesPlayed(0);
     this.remotePreferenceRepository.save(remotePreference);
     return ResponseEntity.status(200).body(PluginResponse.builder().viewerControlEnabled(StringUtils.equalsIgnoreCase("Y", request.getManagedPsaEnabled())).build());
-  }
-
-  private void updateQueue(Optional<RemoteJuke> currentSequence, Optional<RemoteJuke> nextSequence) {
-    if(currentSequence.isPresent()) {
-      if(nextSequence.isPresent()) {
-        currentSequence.get().setNextPlaylist(nextSequence.get().getFuturePlaylist());
-        this.remoteJukeRepository.save(currentSequence.get());
-        this.remoteJukeRepository.delete(nextSequence.get());
-      }else {
-        this.remoteJukeRepository.delete(currentSequence.get());
-      }
-    }
   }
 
   //TODO - Need this same function for sequence groups.
