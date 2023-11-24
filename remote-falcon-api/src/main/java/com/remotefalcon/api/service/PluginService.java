@@ -250,6 +250,9 @@ public class PluginService {
       this.remotePreferenceRepository.save(remotePreference);
     }
 
+    //Update hide sequence counts
+    this.updateSequenceHideCounts(remoteToken);
+
     return ResponseEntity.status(200).body(PluginResponse.builder().currentPlaylist(request.getPlaylist()).build());
   }
 
