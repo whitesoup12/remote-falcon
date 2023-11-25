@@ -356,6 +356,10 @@ public class ViewerPageService {
   public ResponseEntity<AddSequenceResponse> addPlaylistToQueue(ViewerTokenDTO viewerTokenDTO, AddSequenceRequest request) {
     String remoteToken = viewerTokenDTO.getRemoteToken();
 
+    if(StringUtils.isEmpty(request.getSequence())) {
+      return ResponseEntity.status(200).build();
+    }
+
     //Get initial data for checks
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
     List<RemoteJuke> jukeboxRequestsFromFirstToLast = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(remoteToken);
@@ -453,6 +457,9 @@ public class ViewerPageService {
 
   public ResponseEntity<AddSequenceResponse> voteForPlaylist(ViewerTokenDTO viewerTokenDTO, AddSequenceRequest request, HttpServletRequest httpServletRequest) {
     String ipAddress = this.clientUtil.getClientIp(httpServletRequest);
+    if(StringUtils.isEmpty(request.getSequence())) {
+      return ResponseEntity.status(200).build();
+    }
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(viewerTokenDTO.getRemoteToken());
     boolean checkIfVoted = remotePreference.getCheckIfVoted() != null && remotePreference.getCheckIfVoted();
     boolean viewerVoteSaved = false;
