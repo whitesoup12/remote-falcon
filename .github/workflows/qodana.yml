@@ -45,7 +45,7 @@ jobs:
       uses: JetBrains/qodana-action@v2023.2
       timeout-minutes: 20
       with:
-        args: "-i,./remote-falcon-api,--linter,jetbrains/qodana-jvm:2023.2-eap"
+        args: "-i,remote-falcon-api,--linter,jetbrains/qodana-jvm:2023.2-eap"
         pr-mode: false
       env:
         QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
