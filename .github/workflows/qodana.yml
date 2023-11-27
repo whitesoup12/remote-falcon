@@ -24,6 +24,7 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
   qodana-rf-web:
+    needs: qodana-rf-api
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
