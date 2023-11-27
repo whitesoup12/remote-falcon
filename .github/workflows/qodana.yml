@@ -20,7 +20,7 @@ jobs:
         with:
           args: |
             --source-directory,remote-falcon-api
-          artifact-name: qodana-backend
+          artifact-name: qodana-rf-api
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
   qodana-rf-web:
@@ -36,5 +36,6 @@ jobs:
         with:
           args: |
             --source-directory,remote-falcon-web
+          artifact-name: qodana-rf-web
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
