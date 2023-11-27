@@ -19,7 +19,7 @@ jobs:
         uses: JetBrains/qodana-action@v2023.2
         with:
           args: |
-            --source-directory,remote-falcon-api
+            --project-dir,remote-falcon-api
           artifact-name: qodana-rf-api
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
@@ -36,7 +36,7 @@ jobs:
         uses: JetBrains/qodana-action@v2023.2
         with:
           args: |
-            --source-directory,remote-falcon-web
+            --project-dir,remote-falcon-web
           artifact-name: qodana-rf-web
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
