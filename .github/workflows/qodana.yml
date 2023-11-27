@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          args: --source-directory,./remote-falcon-api
+          args: --source-directory,remote-falcon-api
           fetch-depth: 0
       - name: 'Use qodana-rf-api Config'
         run: cp qodana-rf-api.yaml qodana.yaml
@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          args: --source-directory,./remote-falcon-web
+          args: --source-directory,remote-falcon-web
           fetch-depth: 0
       - name: 'Use qodana-rf-web Config'
         run: cp qodana-rf-web.yaml qodana.yaml
