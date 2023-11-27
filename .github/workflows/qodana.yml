@@ -12,12 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          args: --source-directory,remote-falcon-api
           fetch-depth: 0
       - name: 'Use qodana-rf-api Config'
         run: cp qodana-rf-api.yaml qodana.yaml
       - name: 'Qodana Scan RF API'
         uses: JetBrains/qodana-action@v2023.2
+        with:
+          args: |
+            --source-directory,remote-falcon-api
+          artifact-name: qodana-backend
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
   qodana-rf-web:
@@ -25,11 +28,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          args: --source-directory,remote-falcon-web
           fetch-depth: 0
       - name: 'Use qodana-rf-web Config'
         run: cp qodana-rf-web.yaml qodana.yaml
       - name: 'Qodana Scan RF Web'
         uses: JetBrains/qodana-action@v2023.2
+        with:
+          args: |
+            --source-directory,remote-falcon-web
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
