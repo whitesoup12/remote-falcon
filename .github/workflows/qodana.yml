@@ -5,61 +5,59 @@ on:
   push:
     branches:
       - main
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
   
 jobs:
   qodana-rf-api:
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the project
         uses: actions/checkout@v3
-        
-      - name: Skip the API scan
-        id: skip-scan
-        uses: fkirc/skip-duplicate-actions@master
-        with:
-          paths: '["remote-falcon-api/**"]'
-        
-      - name: Scan the project
-        if: steps.skip-scan.outputs.should_skip != 'true'
+      - name: Scan API
         uses: JetBrains/qodana-action@v2023.2
         timeout-minutes: 20
         with:
           args: --project-dir,remote-falcon-api
-          results-dir: ${{ runner.temp }}/qodana/results-rf-api
-          artifact-name: qodana-report-rf-api
-          cache-dir: ${{ runner.temp }}/qodana/caches-rf-api
-          additional-cache-hash: ${{ github.sha }}-rf-api
-          pr-mode: false # otherwise, it adds the --changes flag and the check fails
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+  qodana-rf-api-coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v2
+      with:
+        java-version: '17'
+        distribution: 'adopt'
+        cache: 'maven'
+    - name: Validate Maven Wrapper
+      run: mvn --version
+      working-directory: JVM/intellij-coverage-agent/maven
+    - name: Run Tests
+      run: mvn test
+      working-directory: JVM/intellij-coverage-agent/maven
+    - name: Archive coverage data
+      uses: actions/upload-artifact@v2
+      with:
+        name: maven-coverage-data
+        path: JVM/intellij-coverage-agent/maven/.qodana/code-coverage
+    - name: Qodana Scan
+      uses: JetBrains/qodana-action@v2023.2
+      timeout-minutes: 20
+      with:
+        args: "--project-dir,remote-falcon-api,-i,JVM/intellij-coverage-agent/maven,--linter,jetbrains/qodana-jvm:2023.2-eap"
+        pr-mode: false
+      env:
+        QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
   qodana-rf-web:
-    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the project
         uses: actions/checkout@v3
-        
-      - name: Skip the Web scan
-        id: skip-scan
-        uses: fkirc/skip-duplicate-actions@master
-        with:
-          paths: '["remote-falcon-web/**"]'
-        
-      - name: Scan the project
-        if: steps.skip-scan.outputs.should_skip != 'true'
+      - name: Scan Web
         uses: JetBrains/qodana-action@v2023.2
         timeout-minutes: 20
         with:
           args: --project-dir,remote-falcon-web
-          results-dir: ${{ runner.temp }}/qodana/results-rf-web
-          artifact-name: qodana-report-rf-web
-          cache-dir: ${{ runner.temp }}/qodana/caches-rf-web
-          additional-cache-hash: ${{ github.sha }}-rf-web
-          pr-mode: false # otherwise, it adds the --changes flag and the check fails
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
