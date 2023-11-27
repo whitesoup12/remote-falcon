@@ -166,7 +166,8 @@ CREATE TABLE `REMOTES` (
   PRIMARY KEY (`remoteKey`),
   UNIQUE KEY `remotes_remoteSubdomain_idx` (`remoteSubdomain`),
   UNIQUE KEY `remotes_remoteToken_idx` (`remoteToken`),
-  KEY `remotes_remoteToken_reomteSubdomain` (`remoteToken`,`remoteSubdomain`)
+  KEY `remotes_remoteToken_reomteSubdomain` (`remoteToken`,`remoteSubdomain`),
+  KEY `remotes_email` (`email`);
 );
 
 CREATE TABLE `REMOTE_JUKE` (
@@ -227,7 +228,8 @@ CREATE TABLE `REMOTE_VIEWER_PAGES` (
   `viewerPageName` varchar(100) NOT NULL,
   `viewerPageActive` varchar(1) NOT NULL DEFAULT 'Y',
   `viewerPageHtml` mediumtext NOT NULL,
-  PRIMARY KEY (`remoteViewerPageKey`)
+  PRIMARY KEY (`remoteViewerPageKey`),
+  KEY `viewer_pages_token` (`remoteToken`)
 );
 
 CREATE TABLE `REMOTE_VIEWER_PAGE_TEMPLATES` (
@@ -235,7 +237,8 @@ CREATE TABLE `REMOTE_VIEWER_PAGE_TEMPLATES` (
   `viewerPageTemplateName` varchar(100) NOT NULL,
   `viewerPageTemplateHtml` mediumtext NOT NULL,
   `isActive` varchar(1) NOT NULL DEFAULT 'Y',
-  PRIMARY KEY (`remoteViewerPageTemplateKey`)
+  PRIMARY KEY (`remoteViewerPageTemplateKey`),
+  KEY `viewer_pages_key_token_html_name` (`remoteViewerPageKey`, `remoteToken`, `viewerPageActive`, `viewerPageName`)
 );
 
 CREATE TABLE `REMOTE_VIEWER_VOTES` (
@@ -282,7 +285,8 @@ CREATE TABLE `VIEWER_PAGE_STATS` (
   `pageVisitIp` varchar(50) DEFAULT NULL,
   `pageVisitDateTime` datetime DEFAULT NULL,
   PRIMARY KEY (`viewerPageStatKey`),
-  KEY `viewer_page_stats_pageVisitDateTime_pageVisitIp_idx` (`pageVisitDateTime`,`pageVisitIp`)
+  KEY `viewer_page_stats_pageVisitDateTime_pageVisitIp_idx` (`pageVisitDateTime`,`pageVisitIp`),
+  KEY `page_stats_token` (`remoteToken`)
 );
 
 CREATE TABLE `VIEWER_VOTE_STATS` (
