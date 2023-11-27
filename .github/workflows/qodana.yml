@@ -9,6 +9,9 @@ on:
 jobs:
   qodana:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./remote-falcon-api
     steps:
       - uses: actions/checkout@v3
         with:
@@ -16,4 +19,4 @@ jobs:
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2023.2
         env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN_RF_API }}
