@@ -32,20 +32,20 @@ jobs:
         cache: 'maven'
     - name: Validate Maven Wrapper
       run: mvn --version
-      working-directory: JVM/intellij-coverage-agent/maven
+      working-directory: ./remote-falcon-api
     - name: Run Tests
       run: mvn test
-      working-directory: JVM/intellij-coverage-agent/maven
+      working-directory: ./remote-falcon-api
     - name: Archive coverage data
       uses: actions/upload-artifact@v2
       with:
         name: maven-coverage-data
-        path: JVM/intellij-coverage-agent/maven/.qodana/code-coverage
+        path: ./remote-falcon-api/.qodana/code-coverage
     - name: Qodana Scan
       uses: JetBrains/qodana-action@v2023.2
       timeout-minutes: 20
       with:
-        args: "--project-dir,remote-falcon-api,-i,JVM/intellij-coverage-agent/maven,--linter,jetbrains/qodana-jvm:2023.2-eap"
+        args: "-i,./remote-falcon-api,--linter,jetbrains/qodana-jvm:2023.2-eap"
         pr-mode: false
       env:
         QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
