@@ -1,4 +1,4 @@
-API: [![SonarCloud](https://github.com/whitesoup12/remote-falcon/actions/workflows/sonarcloud-api.yml/badge.svg)](https://github.com/whitesoup12/remote-falcon/actions/workflows/sonarcloud-api.yml)
+[![SonarCloud](https://github.com/whitesoup12/remote-falcon/actions/workflows/sonarcloud-api.yml/badge.svg)](https://github.com/whitesoup12/remote-falcon/actions/workflows/sonarcloud-api.yml)
 
 # Remote Falcon
 
