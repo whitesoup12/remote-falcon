@@ -33,7 +33,8 @@ import {
   handleCurrentLongitudeChange,
   handlePsaSequenceChange,
   handleViewerPresentModeChange,
-  handleCheckViewerPresentChange
+  handleCheckViewerPresentChange,
+  saveGPSLocation
 } from './helpers';
 import InteractionSettings from './InteractionSettings';
 import JukeboxSettings from './JukeboxSettings';
@@ -340,7 +341,18 @@ const ViewerSettings = () => {
                             setCoreInfo
                           )
                         }
-                        refreshLocation={() => refreshLocation(setCurrentLatitude, setCurrentLongitude, dispatch)}
+                        saveGPSLocation={() =>
+                          saveGPSLocation(
+                            dispatch,
+                            coreInfo,
+                            remotePrefs,
+                            currentLatitude,
+                            currentLongitude,
+                            setShowLinearProgress,
+                            setRemotePrefs,
+                            setCoreInfo
+                          )
+                        }
                       />
                     </RFTab>
                   </CardContent>

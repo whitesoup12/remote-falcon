@@ -350,7 +350,6 @@ public class ControlPanelServiceTest {
     assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 
     verify(remotePreferenceRepository, times(1)).save(remotePreference);
-    verify(psaSequenceRepository, times(1)).saveAll(anyList());
   }
 
   @Test

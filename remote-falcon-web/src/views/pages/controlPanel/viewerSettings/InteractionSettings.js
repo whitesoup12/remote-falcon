@@ -6,6 +6,8 @@ import PropTypes from 'prop-types';
 
 import MainCard from 'ui-component/cards/MainCard';
 
+import { saveGPSLocation } from './helpers';
+
 const viewerPresentModes = [
   { label: 'GPS Location', id: 'gps' },
   { label: 'Code', id: 'code' }
@@ -25,7 +27,8 @@ const InteractionSettings = ({
   handlePsaSequenceChange,
   handleViewerPresentModeChange,
   handleCheckViewerPresentChange,
-  saveViewerSettings
+  saveViewerSettings,
+  saveGPSLocation
 }) => (
   <Grid item xs={12}>
     <MainCard content={false}>
@@ -239,6 +242,11 @@ const InteractionSettings = ({
                     </Stack>
                     <Typography component="div" variant="caption">
                       Location of the show. Defaults to detected location, but can be changed if needed.
+                      {currentLatitude === 0 && currentLongitude === 0 && (
+                        <Typography component="div" color="#f44336">
+                          Location could not be detected! Please ensure location permissions are allowed.
+                        </Typography>
+                      )}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} md={6} lg={4}>
@@ -265,7 +273,7 @@ const InteractionSettings = ({
                       </Grid>
                       <Grid item xs={1} md={1} lg={1}>
                         <Tooltip placement="top" title="Save Custom Location">
-                          <IconButton color="primary" size="large" onClick={saveViewerSettings}>
+                          <IconButton color="primary" size="large" onClick={saveGPSLocation}>
                             <SaveTwoToneIcon sx={{ fontSize: '1.5rem' }} />
                           </IconButton>
                         </Tooltip>
@@ -410,7 +418,7 @@ InteractionSettings.propTypes = {
   handleViewerPresentModeChange: PropTypes.func,
   handleCheckViewerPresentChange: PropTypes.func,
   saveViewerSettings: PropTypes.func,
-  refreshLocation: PropTypes.func
+  saveGPSLocation: PropTypes.func
 };
 
 export default InteractionSettings;

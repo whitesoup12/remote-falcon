@@ -25,10 +25,6 @@ export const saveViewerSettings = async (
     updatedRemotePrefs.enableGeolocation = false;
     updatedRemotePrefs.enableLocationCode = false;
   }
-  if (updatedRemotePrefs.enableGeolocation) {
-    updatedRemotePrefs.remoteLatitude = currentLatitude;
-    updatedRemotePrefs.remoteLongitude = currentLongitude;
-  }
   const response = await saveRemotePrefsService(updatedRemotePrefs);
   if (response?.status === 200) {
     dispatch(setRemotePrefs({ ...updatedRemotePrefs }));
