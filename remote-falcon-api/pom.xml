@@ -236,6 +236,18 @@
                         <configuration>
                             <outputDirectory>${project.basedir}/.qodana/code-coverage/</outputDirectory>
                             <formats>XML</formats>
+                            <excludes>
+                                <exclude>com/remotefalcon/api/aop/*</exclude>
+                                <exclude>com/remotefalcon/api/configuration/*</exclude>
+                                <exclude>com/remotefalcon/api/dto/*</exclude>
+                                <exclude>com/remotefalcon/api/entity/*</exclude>
+                                <exclude>com/remotefalcon/api/enums/*</exclude>
+                                <exclude>com/remotefalcon/api/model/*</exclude>
+                                <exclude>com/remotefalcon/api/repository/*</exclude>
+                                <exclude>com/remotefalcon/api/request/*</exclude>
+                                <exclude>com/remotefalcon/api/response/*</exclude>
+                                <exclude>com/remotefalcon/api/Application.class</exclude>
+                            </excludes>
                         </configuration>
                     </execution>
                 </executions>

@@ -1,3 +1,5 @@
+[![Qodana RF API](https://github.com/whitesoup12/remote-falcon/actions/workflows/qodana-api.yml/badge.svg)](https://github.com/whitesoup12/remote-falcon/actions/workflows/qodana-api.yml)
+
 # Remote Falcon
 
 - [What Is Remote Falcon?](#what-is-remote-falcon)
