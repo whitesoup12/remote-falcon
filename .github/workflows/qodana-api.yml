@@ -10,9 +10,6 @@ on:
 jobs:
   qodana:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: remote-falcon-api
     steps:
     - name: Checkout Code
       uses: actions/checkout@v3
@@ -29,9 +26,11 @@ jobs:
 
     - name: Validate Maven Wrapper
       run: mvn --version
+      working-directory: remote-falcon-api
 
     - name: Run Tests
       run: mvn test
+      working-directory: remote-falcon-api
       
     - name: Archive coverage data
       uses: actions/upload-artifact@v2
