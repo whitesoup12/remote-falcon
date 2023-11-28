@@ -33,7 +33,7 @@ Now that you have the code, it's time to get Remote Falcon Web up and running. H
 4. **Create the local env file** - Before running Remote Falcon Web, you will need to create a new file named `.env.local`. In this file, add the following properties:
 ```
 REACT_APP_HOST_ENV=local
-REACT_APP_BASE_API_PATH=http://locahost:8080
+REACT_APP_BASE_API_PATH=http://localhost:8080
 #REACT_APP_DATADOG_CLIENT_TOKEN=
 #REACT_APP_MIXPANEL_API_KEY=
 REACT_APP_JWT_VIEWER_SIGN_KEY=1234567890
