@@ -8,7 +8,7 @@ on:
       - 'remote-falcon-api/**'
 jobs:
   build:
-    name: Build and analyze
+    name: Build image and push
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
