@@ -28,4 +28,4 @@ jobs:
         with:
           context: ./remote-falcon-api
           push: true
-          tags: whitesoup12/remote-falcon-api:${GITHUB_SHA}
+          tags: whitesoup12/remote-falcon-api:${{ github.sha }}
