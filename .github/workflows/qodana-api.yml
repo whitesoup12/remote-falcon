@@ -40,12 +40,11 @@ jobs:
         path: remote-falcon-api/.qodana/code-coverage
 
     - name: Qodana Scan
-      uses: JetBrains/qodana-action@main
+      uses: JetBrains/qodana-action@2023.2
       env:
         QODANA_TOKEN: ${{ secrets.QODANA_RF_API_TOKEN }}
       with:
-        pr-mode: true
         args: |
-          --source-directory,remote-falcon-api,
+          --project-dir,remote-falcon-api,
           --linter,jetbrains/qodana-jvm:2023.2,
           --fail-threshold,1
