@@ -42,7 +42,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: maven-coverage-data
-        path: .qodana/code-coverage
+        path: remote-falcon-api/.qodana/code-coverage
 
     - name: Qodana Scan
       uses: JetBrains/qodana-action@main
@@ -50,5 +50,4 @@ jobs:
         QODANA_TOKEN: ${{ secrets.QODANA_RF_API_TOKEN }}
       with:
         args: |
-          --project-dir,remote-falcon-api,
-          --linter,jetbrains/qodana-jvm:2023.2-eap
+          --project-dir,remote-falcon-api
