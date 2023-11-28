@@ -1,5 +1,6 @@
-name: SonarCloud
+name: SonarCloud Remote Falcon API
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - main
