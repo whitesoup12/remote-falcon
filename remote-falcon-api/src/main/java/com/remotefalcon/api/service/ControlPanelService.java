@@ -294,17 +294,17 @@ public class ControlPanelService {
       request.setRemotePrefToken(remotePreference.getRemotePrefToken());
       this.remotePreferenceRepository.save(request);
 
-      List<PsaSequence> psaSequenceList = this.psaSequenceRepository.findAllByRemoteTokenOrderByPsaSequenceOrderAsc(tokenDTO.getRemoteToken());
-      if(CollectionUtils.isNotEmpty(psaSequenceList)) {
-        this.psaSequenceRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-      }
-
-      if(request.getPsaSequenceList() != null) {
+      if(remotePreference.getPsaEnabled() && request.getPsaSequenceList() != null) {
         for(PsaSequence psaSequence : request.getPsaSequenceList()) {
           psaSequence.setRemoteToken(tokenDTO.getRemoteToken());
           psaSequence.setPsaSequenceLastPlayed(ZonedDateTime.now());
         }
         this.psaSequenceRepository.saveAll(request.getPsaSequenceList());
+      }
+
+      List<PsaSequence> psaSequenceList = this.psaSequenceRepository.findAllByRemoteTokenOrderByPsaSequenceOrderAsc(tokenDTO.getRemoteToken());
+      if(!remotePreference.getPsaEnabled() && CollectionUtils.isNotEmpty(psaSequenceList)) {
+        this.psaSequenceRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
       }
 
       List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
