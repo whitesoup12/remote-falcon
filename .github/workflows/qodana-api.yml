@@ -50,4 +50,5 @@ jobs:
         QODANA_TOKEN: ${{ secrets.QODANA_RF_API_TOKEN }}
       with:
         args: |
-          --project-dir,remote-falcon-api
+          --project-dir,remote-falcon-api,
+          --linter,jetbrains/qodana-jvm:2023.2
