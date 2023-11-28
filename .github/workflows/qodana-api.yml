@@ -31,22 +31,19 @@ jobs:
 
     - name: Validate Maven Wrapper
       run: mvn --version
-      working-directory: remote-falcon-api
 
     - name: Run Tests
       run: mvn test
-      working-directory: remote-falcon-api
       
     - name: Archive coverage data
       uses: actions/upload-artifact@v2
       with:
         name: maven-coverage-data
-        path: remote-falcon-api/.qodana/code-coverage
 
     - name: Qodana Scan
       uses: JetBrains/qodana-action@main
       env:
         QODANA_TOKEN: ${{ secrets.QODANA_RF_API_TOKEN }}
       with:
-        args: "-i,remote-falcon-api,--linter,jetbrains/qodana-jvm:2023.2-eap"
-        pr-mode: false
+        args: |
+          --linter,jetbrains/qodana-jvm:2023.2-eap
