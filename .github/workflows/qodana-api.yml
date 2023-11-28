@@ -44,6 +44,7 @@ jobs:
       env:
         QODANA_TOKEN: ${{ secrets.QODANA_RF_API_TOKEN }}
       with:
+        pr-mode: true
         args: |
           --project-dir,remote-falcon-api,
           --linter,jetbrains/qodana-jvm:2023.2,
