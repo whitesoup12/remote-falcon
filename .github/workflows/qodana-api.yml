@@ -46,6 +46,6 @@ jobs:
       with:
         pr-mode: true
         args: |
-          --project-dir,remote-falcon-api,
+          --source-directory,remote-falcon-api,
           --linter,jetbrains/qodana-jvm:2023.2,
           --fail-threshold,1
