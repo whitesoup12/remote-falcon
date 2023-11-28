@@ -6,6 +6,11 @@ on:
       - main
     paths:
       - 'remote-falcon-api/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'remote-falcon-api/**'
   
 jobs:
   qodana:
