@@ -1,11 +1,6 @@
 name: Qodana RF API
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'remote-falcon-api/**'
   push:
     branches:
       - main
@@ -49,6 +44,6 @@ jobs:
         QODANA_TOKEN: ${{ secrets.QODANA_RF_API_TOKEN }}
       with:
         args: |
-          --source-directory,remote-falcon-api,
+          --project-dir,remote-falcon-api,
           --linter,jetbrains/qodana-jvm:2023.2,
           --fail-threshold,1
