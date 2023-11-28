@@ -167,7 +167,7 @@ CREATE TABLE `REMOTES` (
   UNIQUE KEY `remotes_remoteSubdomain_idx` (`remoteSubdomain`),
   UNIQUE KEY `remotes_remoteToken_idx` (`remoteToken`),
   KEY `remotes_remoteToken_reomteSubdomain` (`remoteToken`,`remoteSubdomain`),
-  KEY `remotes_email` (`email`);
+  KEY `remotes_email` (`email`)
 );
 
 CREATE TABLE `REMOTE_JUKE` (
@@ -237,8 +237,7 @@ CREATE TABLE `REMOTE_VIEWER_PAGE_TEMPLATES` (
   `viewerPageTemplateName` varchar(100) NOT NULL,
   `viewerPageTemplateHtml` mediumtext NOT NULL,
   `isActive` varchar(1) NOT NULL DEFAULT 'Y',
-  PRIMARY KEY (`remoteViewerPageTemplateKey`),
-  KEY `viewer_pages_key_token_html_name` (`remoteViewerPageKey`, `remoteToken`, `viewerPageActive`, `viewerPageName`)
+  PRIMARY KEY (`remoteViewerPageTemplateKey`)
 );
 
 CREATE TABLE `REMOTE_VIEWER_VOTES` (
