@@ -37,11 +37,6 @@ jobs:
 
     - name: Run Tests
       run: mvn test
-      
-    - name: Archive coverage data
-      uses: actions/upload-artifact@v2
-      with:
-        name: maven-coverage-data
 
     - name: Qodana Scan
       uses: JetBrains/qodana-action@main
@@ -49,4 +44,4 @@ jobs:
         QODANA_TOKEN: ${{ secrets.QODANA_RF_API_TOKEN }}
       with:
         args: |
-          --linter,jetbrains/qodana-jvm:2023.2-eap
+          --linter,jetbrains/qodana-jvm:2023.2-eape
