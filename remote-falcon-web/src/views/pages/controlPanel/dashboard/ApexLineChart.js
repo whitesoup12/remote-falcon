@@ -76,6 +76,7 @@ const ApexLineChart = ({ ...otherProps }) => {
         borderColor: grey200
       },
       tooltip: {
+        followCursor: true,
         theme: navType === 'dark' ? 'dark' : 'light',
         y: {
           formatter(value) {

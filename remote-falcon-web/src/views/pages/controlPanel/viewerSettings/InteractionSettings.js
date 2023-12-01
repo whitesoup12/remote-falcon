@@ -6,8 +6,6 @@ import PropTypes from 'prop-types';
 
 import MainCard from 'ui-component/cards/MainCard';
 
-import { saveGPSLocation } from './helpers';
-
 const viewerPresentModes = [
   { label: 'GPS Location', id: 'gps' },
   { label: 'Code', id: 'code' }

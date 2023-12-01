@@ -128,7 +128,7 @@ const DashboardCharts = ({ ...otherProps }) => {
         <DashboardChartsSkeleton />
       ) : (
         <Grid item xs={12} md={6} lg={6}>
-          <MainCard title="Unique Viewers by Date">
+          <MainCard title="Unique Viewers by Date" sx={{ overflow: 'visible' }}>
             <ApexLineChart chartData={uniqueViewersByDate(dashboardStats)} />
           </MainCard>
         </Grid>
@@ -137,7 +137,7 @@ const DashboardCharts = ({ ...otherProps }) => {
         <DashboardChartsSkeleton />
       ) : (
         <Grid item xs={12} md={6} lg={6}>
-          <MainCard title="Total Viewers by Date">
+          <MainCard title="Total Viewers by Date" sx={{ overflow: 'visible' }}>
             <ApexLineChart chartData={totalViewersByDate(dashboardStats)} />
           </MainCard>
         </Grid>
@@ -147,7 +147,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       ) : (
         otherProps.viewerControlMode === 'jukebox' && (
           <Grid item xs={12} md={6} lg={6}>
-            <MainCard title="Sequence Requests by Date">
+            <MainCard title="Sequence Requests by Date" sx={{ overflow: 'visible' }}>
               <ApexLineChart chartData={sequenceRequestsByDate(dashboardStats)} />
             </MainCard>
           </Grid>
@@ -158,7 +158,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       ) : (
         otherProps.viewerControlMode === 'jukebox' && (
           <Grid item xs={12} md={6} lg={6}>
-            <MainCard title="Sequence Requests">
+            <MainCard title="Sequence Requests" sx={{ overflow: 'visible' }}>
               <ApexBarChart chartData={sequenceRequests(dashboardStats)} />
             </MainCard>
           </Grid>
@@ -169,7 +169,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       ) : (
         otherProps.viewerControlMode === 'voting' && (
           <Grid item xs={12} md={6} lg={6}>
-            <MainCard title="Sequence Votes by Date">
+            <MainCard title="Sequence Votes by Date" sx={{ overflow: 'visible' }}>
               <ApexLineChart chartData={sequenceVotesByDate(dashboardStats)} />
             </MainCard>
           </Grid>
@@ -180,7 +180,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       ) : (
         otherProps.viewerControlMode === 'voting' && (
           <Grid item xs={12} md={6} lg={6}>
-            <MainCard title="Sequence Votes">
+            <MainCard title="Sequence Votes" sx={{ overflow: 'visible' }}>
               <ApexBarChart chartData={sequenceVotes(dashboardStats)} />
             </MainCard>
           </Grid>
@@ -191,7 +191,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       ) : (
         otherProps.viewerControlMode === 'voting' && (
           <Grid item xs={12} md={6} lg={6}>
-            <MainCard title="Total Wins by Date">
+            <MainCard title="Total Wins by Date" sx={{ overflow: 'visible' }}>
               <ApexLineChart chartData={sequenceVoteWinsByDate(dashboardStats)} />
             </MainCard>
           </Grid>
@@ -202,7 +202,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       ) : (
         otherProps.viewerControlMode === 'voting' && (
           <Grid item xs={12} md={6} lg={6}>
-            <MainCard title="Sequence Wins">
+            <MainCard title="Sequence Wins" sx={{ overflow: 'visible' }}>
               <ApexBarChart chartData={sequenceVoteWins(dashboardStats)} />
             </MainCard>
           </Grid>
