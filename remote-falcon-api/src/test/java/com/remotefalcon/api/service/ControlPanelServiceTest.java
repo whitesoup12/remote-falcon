@@ -343,7 +343,6 @@ public class ControlPanelServiceTest {
 
     when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
     when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
-    when(this.psaSequenceRepository.findAllByRemoteTokenOrderByPsaSequenceOrderAsc(eq(tokenDTO.getRemoteToken()))).thenReturn(psaSequenceList);
 
     ResponseEntity<?> response = this.controlPanelService.saveRemotePrefs(remotePreference);
     assertNotNull(response);
