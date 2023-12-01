@@ -398,6 +398,14 @@ public class ViewerPageService {
       return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("SONG_REQUESTED").build());
     }
 
+    //Request Limit Check for Schedule
+    Optional<FppSchedule> fppSchedule = this.fppScheduleRepository.findFirstByRemoteToken(remoteToken);
+    if(fppSchedule.isPresent()) {
+      if(StringUtils.equalsIgnoreCase(request.getSequence(), fppSchedule.get().getNextScheduledSequence())) {
+        return ResponseEntity.status(202).body(AddSequenceResponse.builder().message("SONG_REQUESTED").build());
+      }
+    }
+
     //Checks Done
     //Add Request
     int futureRequestSequence = 1;

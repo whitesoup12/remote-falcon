@@ -291,40 +291,42 @@ const ExternalViewerPage = () => {
               const categorizedSequencesArray = [];
               const categorizedSequencesToIterate = _.cloneDeep(externalViewerPageDetails?.sequences);
               _.map(categorizedSequencesToIterate, (categorizedSequence) => {
-                if (categorizedSequence.sequenceCategory === sequence.sequenceCategory) {
-                  sequenceImageElement = [<></>];
-                  if (
-                    categorizedSequence &&
-                    categorizedSequence.sequenceImageUrl &&
-                    categorizedSequence.sequenceImageUrl.replace(/\s/g, '').length
-                  ) {
-                    const classname = `sequence-image sequence-image-${categorizedSequence.sequenceKey}`;
-                    sequenceImageElement = (
-                      <img
-                        alt={categorizedSequence.sequenceName}
-                        className={classname}
-                        src={categorizedSequence.sequenceImageUrl}
-                        data-key={categorizedSequence.sequenceName}
-                      />
+                if (categorizedSequence.sequenceVisible) {
+                  if (categorizedSequence.sequenceCategory === sequence.sequenceCategory) {
+                    sequenceImageElement = [<></>];
+                    if (
+                      categorizedSequence &&
+                      categorizedSequence.sequenceImageUrl &&
+                      categorizedSequence.sequenceImageUrl.replace(/\s/g, '').length
+                    ) {
+                      const classname = `sequence-image sequence-image-${categorizedSequence.sequenceKey}`;
+                      sequenceImageElement = (
+                        <img
+                          alt={categorizedSequence.sequenceName}
+                          className={classname}
+                          src={categorizedSequence.sequenceImageUrl}
+                          data-key={categorizedSequence.sequenceName}
+                        />
+                      );
+                    }
+                    const categorizedVotingListClassname = `cell-vote-playlist cell-vote-playlist-${sequence.sequenceKey}`;
+                    const categorizedVotingListArtistClassname = `cell-vote-playlist-artist cell-vote-playlist-artist-${sequence.sequenceKey}`;
+                    const theElement = (
+                      <>
+                        <div
+                          className={categorizedVotingListClassname}
+                          onClick={(e) => voteForSequence(e)}
+                          data-key={categorizedSequence.sequenceName}
+                        >
+                          {sequenceImageElement}
+                          {categorizedSequence.sequenceDisplayName}
+                          <div className={categorizedVotingListArtistClassname}>{categorizedSequence.sequenceArtist}</div>
+                        </div>
+                        <div className="cell-vote">{categorizedSequence.sequenceVotes}</div>
+                      </>
                     );
+                    categorizedSequencesArray.push(theElement);
                   }
-                  const categorizedVotingListClassname = `cell-vote-playlist cell-vote-playlist-${sequence.sequenceKey}`;
-                  const categorizedVotingListArtistClassname = `cell-vote-playlist-artist cell-vote-playlist-artist-${sequence.sequenceKey}`;
-                  const theElement = (
-                    <>
-                      <div
-                        className={categorizedVotingListClassname}
-                        onClick={(e) => voteForSequence(e)}
-                        data-key={categorizedSequence.sequenceName}
-                      >
-                        {sequenceImageElement}
-                        {categorizedSequence.sequenceDisplayName}
-                        <div className={categorizedVotingListArtistClassname}>{categorizedSequence.sequenceArtist}</div>
-                      </div>
-                      <div className="cell-vote">{categorizedSequence.sequenceVotes}</div>
-                    </>
-                  );
-                  categorizedSequencesArray.push(theElement);
                 }
               });
 
@@ -356,39 +358,41 @@ const ExternalViewerPage = () => {
             const categorizedSequencesArray = [];
             const categorizedSequencesToIterate = _.cloneDeep(externalViewerPageDetails?.sequences);
             _.map(categorizedSequencesToIterate, (categorizedSequence) => {
-              if (categorizedSequence.sequenceCategory === sequence.sequenceCategory) {
-                sequenceImageElement = [<></>];
-                if (
-                  categorizedSequence &&
-                  categorizedSequence.sequenceImageUrl &&
-                  categorizedSequence.sequenceImageUrl.replace(/\s/g, '').length
-                ) {
-                  const classname = `sequence-image sequence-image-${categorizedSequence.sequenceKey}`;
-                  sequenceImageElement = (
-                    <img
-                      alt={categorizedSequence.sequenceName}
-                      className={classname}
-                      src={categorizedSequence.sequenceImageUrl}
-                      data-key={categorizedSequence.sequenceName}
-                    />
+              if (categorizedSequence.sequenceVisible) {
+                if (categorizedSequence.sequenceCategory === sequence.sequenceCategory) {
+                  sequenceImageElement = [<></>];
+                  if (
+                    categorizedSequence &&
+                    categorizedSequence.sequenceImageUrl &&
+                    categorizedSequence.sequenceImageUrl.replace(/\s/g, '').length
+                  ) {
+                    const classname = `sequence-image sequence-image-${categorizedSequence.sequenceKey}`;
+                    sequenceImageElement = (
+                      <img
+                        alt={categorizedSequence.sequenceName}
+                        className={classname}
+                        src={categorizedSequence.sequenceImageUrl}
+                        data-key={categorizedSequence.sequenceName}
+                      />
+                    );
+                  }
+                  const categorizedJukeboxListClassname = `jukebox-list jukebox-list-${categorizedSequence.sequenceKey}`;
+                  const categorizedJukeboxListArtistClassname = `jukebox-list-artist jukebox-list-artist-${categorizedSequence.sequenceKey}`;
+                  const theElement = (
+                    <>
+                      <div
+                        className={categorizedJukeboxListClassname}
+                        onClick={(e) => addSequenceToQueue(e)}
+                        data-key={categorizedSequence.sequenceName}
+                      >
+                        {sequenceImageElement}
+                        {categorizedSequence.sequenceDisplayName}
+                        <div className={categorizedJukeboxListArtistClassname}>{categorizedSequence.sequenceArtist}</div>
+                      </div>
+                    </>
                   );
+                  categorizedSequencesArray.push(theElement);
                 }
-                const categorizedJukeboxListClassname = `jukebox-list jukebox-list-${categorizedSequence.sequenceKey}`;
-                const categorizedJukeboxListArtistClassname = `jukebox-list-artist jukebox-list-artist-${categorizedSequence.sequenceKey}`;
-                const theElement = (
-                  <>
-                    <div
-                      className={categorizedJukeboxListClassname}
-                      onClick={(e) => addSequenceToQueue(e)}
-                      data-key={categorizedSequence.sequenceName}
-                    >
-                      {sequenceImageElement}
-                      {categorizedSequence.sequenceDisplayName}
-                      <div className={categorizedJukeboxListArtistClassname}>{categorizedSequence.sequenceArtist}</div>
-                    </div>
-                  </>
-                );
-                categorizedSequencesArray.push(theElement);
               }
             });
 
