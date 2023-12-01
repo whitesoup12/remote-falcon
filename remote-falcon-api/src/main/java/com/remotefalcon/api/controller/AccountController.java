@@ -1,11 +1,13 @@
 package com.remotefalcon.api.controller;
 
 import com.remotefalcon.api.aop.RequiresAccess;
+import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.entity.PasswordReset;
 import com.remotefalcon.api.entity.Remote;
 import com.remotefalcon.api.response.CheckExistsResponse;
 import com.remotefalcon.api.response.RemoteResponse;
 import com.remotefalcon.api.service.AccountService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class AccountController {
   }
 
   @PostMapping(value = "/account/signUp")
-  public ResponseEntity<RemoteResponse> signUp(@RequestBody Remote request, HttpServletRequest httpServletRequest) {
+  public ResponseEntity<Show> signUp(@RequestBody Show request, HttpServletRequest httpServletRequest) {
     return accountService.signUp(request, httpServletRequest);
   }
 

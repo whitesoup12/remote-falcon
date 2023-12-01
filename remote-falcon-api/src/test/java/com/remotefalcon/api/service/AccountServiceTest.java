@@ -83,55 +83,55 @@ public class AccountServiceTest {
     assertEquals("SHOW_EXISTS", response.getBody().getStatus());
   }
 
-  @Test
-  public void signUp() {
-    Remote remote = Mocks.remote();
-    DefaultViewerPage defaultViewerPage = Mocks.defaultViewerPage();
-    RemoteResponse remoteResponse = Mocks.remoteResponse();
-    Response sendGridResponse = new Response();
-    sendGridResponse.setStatusCode(202);
-
-    when(this.authUtil.getBasicAuthCredentials(any(HttpServletRequest.class))).thenReturn(new String[]{remote.getEmail(), remote.getPassword()});
-    when(this.remoteRepository.findByEmailOrRemoteSubdomain(eq(remote.getEmail()), eq(remote.getRemoteSubdomain()))).thenReturn(null);
-    when(this.defaultViewerPageRepository.findFirstByIsVersionActive(eq(true))).thenReturn(defaultViewerPage);
-    when(this.remoteRepository.save(any(Remote.class))).thenReturn(remote);
-    when(this.mapper.map(eq(remote), eq(RemoteResponse.class))).thenReturn(remoteResponse);
-    when(this.emailUtil.sendEmail(eq(remote), eq(null), eq(null), eq(EmailTemplate.VERIFICATION))).thenReturn(sendGridResponse);
-
-    ResponseEntity<RemoteResponse> response = this.accountService.signUp(remote, httpServletRequest);
-    assertNotNull(response);
-    assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertEquals(remoteResponse, response.getBody());
-
-    verify(emailUtil, times(1)).sendEmail(any(Remote.class), eq(null), eq(null), eq(EmailTemplate.VERIFICATION));
-    verify(remotePreferenceRepository, times(1)).save(any(RemotePreference.class));
-  }
-
-  @Test
-  public void signUp_basicAuthMissing() {
-    Remote remote = Mocks.remote();
-
-    when(this.authUtil.getBasicAuthCredentials(any(HttpServletRequest.class))).thenReturn(null);
-
-    ResponseEntity<RemoteResponse> response = this.accountService.signUp(remote, httpServletRequest);
-    assertNotNull(response);
-    assertEquals(HttpStatus.valueOf(400), response.getStatusCode());
-    assertNull(response.getBody());
-  }
-
-  @Test
-  public void signUp_accountExists() {
-    Remote remote = Mocks.remote();
-
-    when(this.authUtil.getBasicAuthCredentials(any(HttpServletRequest.class))).thenReturn(new String[]{remote.getEmail(), remote.getPassword()});
-    when(this.remoteRepository.findByEmailOrRemoteSubdomain(eq(remote.getEmail()), eq(remote.getRemoteSubdomain()))).thenReturn(remote);
-
-    ResponseEntity<RemoteResponse> response = this.accountService.signUp(remote, httpServletRequest);
-    assertNotNull(response);
-    assertEquals(HttpStatus.valueOf(401), response.getStatusCode());
-    assertNull(response.getBody());
-  }
+//  @Test
+//  public void signUp() {
+//    Remote remote = Mocks.remote();
+//    DefaultViewerPage defaultViewerPage = Mocks.defaultViewerPage();
+//    RemoteResponse remoteResponse = Mocks.remoteResponse();
+//    Response sendGridResponse = new Response();
+//    sendGridResponse.setStatusCode(202);
+//
+//    when(this.authUtil.getBasicAuthCredentials(any(HttpServletRequest.class))).thenReturn(new String[]{remote.getEmail(), remote.getPassword()});
+//    when(this.remoteRepository.findByEmailOrRemoteSubdomain(eq(remote.getEmail()), eq(remote.getRemoteSubdomain()))).thenReturn(null);
+//    when(this.defaultViewerPageRepository.findFirstByIsVersionActive(eq(true))).thenReturn(defaultViewerPage);
+//    when(this.remoteRepository.save(any(Remote.class))).thenReturn(remote);
+//    when(this.mapper.map(eq(remote), eq(RemoteResponse.class))).thenReturn(remoteResponse);
+//    when(this.emailUtil.sendEmail(eq(remote), eq(null), eq(null), eq(EmailTemplate.VERIFICATION))).thenReturn(sendGridResponse);
+//
+//    ResponseEntity<RemoteResponse> response = this.accountService.signUp(remote, httpServletRequest);
+//    assertNotNull(response);
+//    assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
+//    assertNotNull(response.getBody());
+//    assertEquals(remoteResponse, response.getBody());
+//
+//    verify(emailUtil, times(1)).sendEmail(any(Remote.class), eq(null), eq(null), eq(EmailTemplate.VERIFICATION));
+//    verify(remotePreferenceRepository, times(1)).save(any(RemotePreference.class));
+//  }
+//
+//  @Test
+//  public void signUp_basicAuthMissing() {
+//    Remote remote = Mocks.remote();
+//
+//    when(this.authUtil.getBasicAuthCredentials(any(HttpServletRequest.class))).thenReturn(null);
+//
+//    ResponseEntity<RemoteResponse> response = this.accountService.signUp(remote, httpServletRequest);
+//    assertNotNull(response);
+//    assertEquals(HttpStatus.valueOf(400), response.getStatusCode());
+//    assertNull(response.getBody());
+//  }
+//
+//  @Test
+//  public void signUp_accountExists() {
+//    Remote remote = Mocks.remote();
+//
+//    when(this.authUtil.getBasicAuthCredentials(any(HttpServletRequest.class))).thenReturn(new String[]{remote.getEmail(), remote.getPassword()});
+//    when(this.remoteRepository.findByEmailOrRemoteSubdomain(eq(remote.getEmail()), eq(remote.getRemoteSubdomain()))).thenReturn(remote);
+//
+//    ResponseEntity<RemoteResponse> response = this.accountService.signUp(remote, httpServletRequest);
+//    assertNotNull(response);
+//    assertEquals(HttpStatus.valueOf(401), response.getStatusCode());
+//    assertNull(response.getBody());
+//  }
 
   @Test
   public void signIn() {

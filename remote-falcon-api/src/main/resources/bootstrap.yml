@@ -8,6 +8,9 @@ info:
     artifact: remote-falcon-api
 
 spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/remotefalcon
   application:
     name: remote-falcon-api
   jpa:

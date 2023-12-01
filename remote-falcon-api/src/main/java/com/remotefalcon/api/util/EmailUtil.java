@@ -30,7 +30,7 @@ public class EmailUtil {
   @Value("${BASE_APP_URL}")
   String baseAppUrl;
 
-  public Response sendEmail(Remote remote, PasswordReset passwordResets, ExternalApiAccess externalApiAccess, EmailTemplate emailTemplate) {
+  public Response sendEmail(Show show, PasswordReset passwordResets, ExternalApiAccess externalApiAccess, EmailTemplate emailTemplate) {
     Response response = new Response();
     try {
       Mail mail = new Mail();

@@ -34,7 +34,7 @@ export const signUpService = async (showName, email, password, firstName, lastNa
   const response = await axios.post(
     '/remotefalcon/api/account/signUp',
     {
-      remoteName: showName,
+      showName,
       firstName,
       lastName
     },
