@@ -15,12 +15,9 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   datasource:
+    url: jdbc:${DATABASE_URL}
     hikari:
-      minimumIdle: 2
-      maximumPoolSize: 10
-      idleTimeout: 120000
-      connectionTimeout: 300000
-      leakDetectionThreshold: 300000
+      maximum-pool-size: 50
 
 management:
   endpoints:
