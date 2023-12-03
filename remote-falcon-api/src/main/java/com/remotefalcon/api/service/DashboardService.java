@@ -8,6 +8,7 @@ import com.remotefalcon.api.model.ViewerVoteStatsSequenceVotes;
 import com.remotefalcon.api.model.ViewerVoteWinStatsSequenceWins;
 import com.remotefalcon.api.repository.*;
 import com.remotefalcon.api.request.DashboardRequest;
+import com.remotefalcon.api.response.DashboardLiveStats;
 import com.remotefalcon.api.response.DashboardStats;
 import com.remotefalcon.api.util.AuthUtil;
 import com.remotefalcon.api.util.ExcelUtil;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -92,64 +92,80 @@ public class DashboardService {
     return ResponseEntity.status(200).body(dashboardStats);
   }
 
-  public ResponseEntity<Integer> activeViewers() {
-    TokenDTO tokenDTO = this.jwtUtil.getJwtPayload();
-    List<ActiveViewer> activeViewers = this.activeViewerRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
-    List<ActiveViewer> activeViewersFiltered = activeViewers.stream().filter(viewer -> viewer.getLastUpdateDateTime().isAfter(ZonedDateTime.now().minus(5, ChronoUnit.SECONDS))).toList();
-    List<ActiveViewer> activeViewersToDelete = activeViewers.stream().filter(viewer -> viewer.getLastUpdateDateTime().isBefore(ZonedDateTime.now().minus(5, ChronoUnit.SECONDS))).toList();
-    this.activeViewerRepository.deleteAll(activeViewersToDelete.stream().toList());
-    return ResponseEntity.status(200).body(activeViewersFiltered.size());
-  }
-
-  public ResponseEntity<Integer> totalViewers(DashboardRequest dashboardRequest) {
+  public ResponseEntity<DashboardLiveStats> dashboardLiveStats(DashboardRequest dashboardRequest) {
     TokenDTO tokenDTO = this.jwtUtil.getJwtPayload();
     this.parseZonedDateTimeFromDateString(dashboardRequest);
     List<LocalDate> datesBetween = getDatesBetween(dashboardRequest);
 
-    List<ViewerPageStats> viewerPageVisitsByDate = this.viewerPageVisitsByDate(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween);
+    DashboardLiveStats liveStats = new DashboardLiveStats();
+
+    //Gather
+    CompletableFuture<Integer> activeViewers = CompletableFuture.supplyAsync(() -> activeViewers(tokenDTO.getRemoteToken()));
+    CompletableFuture<Integer> totalViewers = CompletableFuture.supplyAsync(() -> totalViewers(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween));
+    CompletableFuture<Integer> currentRequests = CompletableFuture.supplyAsync(() -> currentRequests(tokenDTO.getRemoteToken()));
+    CompletableFuture<Integer> totalRequests = CompletableFuture.supplyAsync(() -> totalRequests(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween));
+
+    //Execute
+    try {
+      liveStats.setActiveViewers(activeViewers.get());
+      liveStats.setTotalViewers(totalViewers.get());
+      liveStats.setCurrentRequests(currentRequests.get());
+      liveStats.setTotalRequests(totalRequests.get());
+    } catch (ExecutionException | InterruptedException e) {
+      log.error("Error getting live stats", e);
+    }
+
+    return ResponseEntity.status(200).body(liveStats);
+  }
+
+  private Integer activeViewers(String remoteToken) {
+    List<ActiveViewer> activeViewers = this.activeViewerRepository.findAllByRemoteToken(remoteToken);
+    List<ActiveViewer> activeViewersFiltered = activeViewers.stream().filter(viewer -> viewer.getLastUpdateDateTime().isAfter(ZonedDateTime.now().minusSeconds(5))).toList();
+    List<ActiveViewer> activeViewersToDelete = activeViewers.stream().filter(viewer -> viewer.getLastUpdateDateTime().isBefore(ZonedDateTime.now().minusSeconds(5))).toList();
+    this.activeViewerRepository.deleteAll(activeViewersToDelete.stream().toList());
+    return activeViewersFiltered.size();
+  }
+
+  private Integer totalViewers(DashboardRequest dashboardRequest, String remoteToken, List<LocalDate> datesBetween) {
+    List<ViewerPageStats> viewerPageVisitsByDate = this.viewerPageVisitsByDate(dashboardRequest, remoteToken, datesBetween);
     Integer uniqueVisits = 0;
     if(CollectionUtils.isNotEmpty(viewerPageVisitsByDate)) {
       uniqueVisits = viewerPageVisitsByDate.get(0).getUniqueVisits();
     }
-    return ResponseEntity.status(200).body(uniqueVisits);
+    return uniqueVisits;
   }
 
-  public ResponseEntity<Integer> currentRequests() {
-    TokenDTO tokenDTO = this.jwtUtil.getJwtPayload();
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+  private Integer currentRequests(String remoteToken) {
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
     if(StringUtils.equalsIgnoreCase("JUKEBOX", remotePreference.getViewerControlMode())) {
-      List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
-      return ResponseEntity.status(200).body(remoteJukeList.size());
+      List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteToken(remoteToken);
+      return remoteJukeList.size();
     }else {
-      List<Playlist> playlists = this.viewerPageService.playlists(ViewerTokenDTO.builder().remoteToken(tokenDTO.getRemoteToken()).build());
+      List<Playlist> playlists = this.viewerPageService.playlists(ViewerTokenDTO.builder().remoteToken(remoteToken).build());
       int currentVotes = 0;
       if(CollectionUtils.isNotEmpty(playlists)) {
         currentVotes = playlists.stream().mapToInt(Playlist::getSequenceVotes).sum();
       }
-      return ResponseEntity.status(200).body(currentVotes);
+      return currentVotes;
     }
   }
 
-  public ResponseEntity<Integer> totalRequests(DashboardRequest dashboardRequest) {
-    TokenDTO tokenDTO = this.jwtUtil.getJwtPayload();
-    this.parseZonedDateTimeFromDateString(dashboardRequest);
-    List<LocalDate> datesBetween = getDatesBetween(dashboardRequest);
-
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+  private Integer totalRequests(DashboardRequest dashboardRequest, String remoteToken, List<LocalDate> datesBetween) {
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
     if(StringUtils.equalsIgnoreCase("JUKEBOX", remotePreference.getViewerControlMode())) {
-      List<ViewerJukeStats> jukeboxRequestsByDate = this.jukeboxRequestsByDate(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween);
+      List<ViewerJukeStats> jukeboxRequestsByDate = this.jukeboxRequestsByDate(dashboardRequest, remoteToken, datesBetween);
       Integer totalRequests = 0;
       if(CollectionUtils.isNotEmpty(jukeboxRequestsByDate)) {
         totalRequests = jukeboxRequestsByDate.get(0).getTotalRequests();
       }
-      return ResponseEntity.status(200).body(totalRequests);
+      return totalRequests;
     }else {
-      List<ViewerVoteStats> viewerVoteStatsByDate = this.viewerVoteStatsByDate(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween);
+      List<ViewerVoteStats> viewerVoteStatsByDate = this.viewerVoteStatsByDate(dashboardRequest, remoteToken, datesBetween);
       Integer totalVotes = 0;
       if(CollectionUtils.isNotEmpty(viewerVoteStatsByDate)) {
         totalVotes = viewerVoteStatsByDate.get(0).getTotalVotes();
       }
-      return ResponseEntity.status(200).body(totalVotes);
+      return totalVotes;
     }
   }
 
