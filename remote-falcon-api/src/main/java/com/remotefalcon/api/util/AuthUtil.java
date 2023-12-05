@@ -6,12 +6,14 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.dto.TokenDTO;
 import com.remotefalcon.api.dto.ViewerTokenDTO;
 import com.remotefalcon.api.entity.ExternalApiAccess;
 import com.remotefalcon.api.entity.Remote;
 import com.remotefalcon.api.repository.ExternalApiAccessRepository;
 import com.remotefalcon.api.repository.RemoteRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -44,16 +44,16 @@ public class AuthUtil {
     this.externalApiAccessRepository = externalApiAccessRepository;
   }
 
-  public String signJwt(Remote remote) {
+  public String signJwt(Show show) {
     Map<String, Object> jwtPayload = new HashMap<String, Object>();
-    jwtPayload.put("remoteToken", remote.getRemoteToken());
-    jwtPayload.put("email", remote.getEmail());
-    jwtPayload.put("remoteSubdomain", remote.getRemoteSubdomain());
+    jwtPayload.put("showToken", show.getShowToken());
+    jwtPayload.put("email", show.getEmail());
+    jwtPayload.put("showSubdomain", show.getShowSubdomain());
     try {
       Algorithm algorithm = Algorithm.HMAC256(jwtSignKey);
       return JWT.create().withClaim("user-data", jwtPayload)
               .withIssuer("remotefalcon")
-              .withExpiresAt(Date.from(ZonedDateTime.now().plus(30, ChronoUnit.DAYS).toInstant()))
+              .withExpiresAt(Date.from(ZonedDateTime.now().plusDays(30).toInstant()))
               .sign(algorithm);
     } catch (JWTCreationException e) {
       log.error("Error creating JWT", e);

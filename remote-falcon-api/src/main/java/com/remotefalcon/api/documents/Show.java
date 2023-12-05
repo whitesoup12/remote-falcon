@@ -1,11 +1,11 @@
 package com.remotefalcon.api.documents;
 
-import jakarta.persistence.Id;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -21,9 +21,9 @@ public class Show {
     private String lastName;
     private String remoteToken;
     private Boolean emailVerified;
-    private ZonedDateTime createdDate;
-    private ZonedDateTime lastLoginDate;
-    private ZonedDateTime expireDate;
+    private LocalDateTime createdDate;
+    private LocalDateTime lastLoginDate;
+    private LocalDateTime expireDate;
     private String pluginVersion;
     private String fppVersion;
     private String lastLoginIp;
@@ -57,4 +57,6 @@ public class Show {
     private Boolean makeItSnow;
     private Boolean managePsa;
     private Integer sequencesPlayed;
+
+    private String serviceToken;
 }

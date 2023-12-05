@@ -203,7 +203,7 @@ public class ControlPanelService {
             .createdDate(ZonedDateTime.now())
             .build();
     this.externalApiAccessRepository.save(externalApiAccess);
-    Response response = this.emailUtil.sendEmail(remote, null, externalApiAccess, EmailTemplate.REQUEST_API_ACCESS);
+    Response response = this.emailUtil.sendEmail(null, null, externalApiAccess, EmailTemplate.REQUEST_API_ACCESS);
     if(response.getStatusCode() != 202) {
       this.externalApiAccessRepository.delete(externalApiAccess);
       return ResponseEntity.status(HttpStatus.valueOf(403)).build();
@@ -765,7 +765,7 @@ public class ControlPanelService {
       remote.setEmail(updatedEmail);
       remote.setEmailVerified(false);
       this.remoteRepository.save(remote);
-      this.emailUtil.sendEmail(remote, null, null, EmailTemplate.VERIFICATION);
+      this.emailUtil.sendEmail(null, null, null, EmailTemplate.VERIFICATION);
       return ResponseEntity.status(200).build();
     }
     return ResponseEntity.status(400).build();

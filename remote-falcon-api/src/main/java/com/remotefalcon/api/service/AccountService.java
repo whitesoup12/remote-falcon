@@ -2,15 +2,14 @@ package com.remotefalcon.api.service;
 
 import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.dto.TokenDTO;
-import com.remotefalcon.api.entity.DefaultViewerPage;
 import com.remotefalcon.api.entity.PasswordReset;
 import com.remotefalcon.api.entity.Remote;
-import com.remotefalcon.api.entity.RemotePreference;
 import com.remotefalcon.api.enums.EmailTemplate;
 import com.remotefalcon.api.enums.ViewerControlMode;
-import com.remotefalcon.api.repository.*;
-import com.remotefalcon.api.response.CheckExistsResponse;
-import com.remotefalcon.api.response.RemoteResponse;
+import com.remotefalcon.api.repository.PasswordResetRepository;
+import com.remotefalcon.api.repository.RemotePreferenceRepository;
+import com.remotefalcon.api.repository.RemoteRepository;
+import com.remotefalcon.api.repository.ShowRepository;
 import com.remotefalcon.api.util.AuthUtil;
 import com.remotefalcon.api.util.ClientUtil;
 import com.remotefalcon.api.util.EmailUtil;
@@ -24,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -33,7 +33,6 @@ public class AccountService {
   private final RemoteRepository remoteRepository;
   private final PasswordResetRepository passwordResetRepository;
   private final RemotePreferenceRepository remotePreferenceRepository;
-  private final DefaultViewerPageRepository defaultViewerPageRepository;
   private final EmailUtil emailUtil;
   private final DozerBeanMapper mapper;
   private final AuthUtil authUtil;
@@ -42,67 +41,15 @@ public class AccountService {
 
   @Autowired
   public AccountService(RemoteRepository remoteRepository, PasswordResetRepository passwordResetRepository, RemotePreferenceRepository remotePreferenceRepository,
-                        DefaultViewerPageRepository defaultViewerPageRepository, EmailUtil emailUtil, DozerBeanMapper mapper, AuthUtil authUtil, ClientUtil clientUtil,
-                        ShowRepository showRepository) {
+                        EmailUtil emailUtil, DozerBeanMapper mapper, AuthUtil authUtil, ClientUtil clientUtil, ShowRepository showRepository) {
     this.remoteRepository = remoteRepository;
     this.passwordResetRepository = passwordResetRepository;
     this.remotePreferenceRepository = remotePreferenceRepository;
-    this.defaultViewerPageRepository = defaultViewerPageRepository;
     this.emailUtil = emailUtil;
     this.mapper = mapper;
     this.authUtil = authUtil;
     this.clientUtil = clientUtil;
     this.showRepository = showRepository;
-  }
-
-  public ResponseEntity<CheckExistsResponse> checkRemoteOrEmailExists(Remote request) {
-    Remote remoteByEmail = this.remoteRepository.findByEmail(request.getEmail());
-    if (remoteByEmail != null) {
-      return ResponseEntity.status(HttpStatus.valueOf(401)).body(CheckExistsResponse.builder().status("EMAIL_EXISTS").build());
-    }
-    Remote remoteBySubdomain = this.remoteRepository.findByRemoteSubdomain(request.getRemoteSubdomain());
-    if (remoteBySubdomain != null) {
-      return ResponseEntity.status(HttpStatus.valueOf(401)).body(CheckExistsResponse.builder().status("SHOW_EXISTS").build());
-    }
-    return ResponseEntity.status(HttpStatus.valueOf(204)).build();
-  }
-
-  public ResponseEntity<RemoteResponse> signUp_old(Remote request, HttpServletRequest httpServletRequest) {
-    String remoteSubdomain = request.getRemoteName().replaceAll("\\s", "").toLowerCase();
-    String[] basicAuthCredentials = this.authUtil.getBasicAuthCredentials(httpServletRequest);
-    if (basicAuthCredentials != null) {
-      String email = basicAuthCredentials[0];
-      String password = basicAuthCredentials[1];
-      Remote remote = this.remoteRepository.findByEmailOrRemoteSubdomain(email, remoteSubdomain);
-      if (remote != null) {
-        return ResponseEntity.status(HttpStatus.valueOf(401)).build();
-      }
-      String remoteToken = validateRemoteToken(RandomUtil.generateToken(25));
-      BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-      String hashedPassword = passwordEncoder.encode(password);
-      request.setEmail(email);
-      request.setPassword(hashedPassword);
-      request.setRemoteToken(remoteToken);
-      request.setRemoteSubdomain(remoteSubdomain);
-      request.setCreatedDate(ZonedDateTime.now());
-      request.setLastLoginDate(ZonedDateTime.now());
-      request.setExpireDate(ZonedDateTime.now().plus(1, ChronoUnit.YEARS));
-      request.setEmailVerified(false);
-      request.setActiveTheme("dark");
-      request.setUserRole("USER");
-      DefaultViewerPage defaultViewerPage = this.defaultViewerPageRepository.findFirstByIsVersionActive(true);
-      request.setHtmlContent(defaultViewerPage.getHtmlContent());
-      remote = this.remoteRepository.save(request);
-      Response response = this.emailUtil.sendEmail(remote, null, null, EmailTemplate.VERIFICATION);
-      if(response.getStatusCode() != 202) {
-        this.remoteRepository.delete(request);
-        return ResponseEntity.status(HttpStatus.valueOf(403)).build();
-      }
-      this.insertDefaultRemotePrefs(remote.getRemoteToken());
-      RemoteResponse remoteResponse = this.mapper.map(remote, RemoteResponse.class);
-      return ResponseEntity.status(HttpStatus.valueOf(200)).body(remoteResponse);
-    }
-    return ResponseEntity.status(HttpStatus.valueOf(400)).build();
   }
 
   public ResponseEntity<Show> signUp(Show request, HttpServletRequest httpServletRequest) {
@@ -115,143 +62,77 @@ public class AccountService {
       if (show.isPresent()) {
         return ResponseEntity.status(HttpStatus.valueOf(401)).build();
       }
-      String showToken = validateRemoteToken(RandomUtil.generateToken(25));
+      String showToken = this.validateShowToken(RandomUtil.generateToken(25));
       BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
       String hashedPassword = passwordEncoder.encode(password);
 
-      Show newShow = this.buildNewShow(email, hashedPassword, showToken, showSubdomain);
+      Show newShow = this.buildNewShow(request, email, hashedPassword, showToken, showSubdomain);
 
-      Response response = this.emailUtil.sendEmail(newShow, null, null, EmailTemplate.VERIFICATION);
-      if(response.getStatusCode() != 202) {
-        this.remoteRepository.delete(request);
+      Response emailResponse = this.emailUtil.sendEmail(newShow, null, null, EmailTemplate.VERIFICATION);
+      if(emailResponse.getStatusCode() != 202) {
         return ResponseEntity.status(HttpStatus.valueOf(403)).build();
       }
 
       newShow = this.showRepository.save(newShow);
+      //No need to send password back in the response
+      newShow.setPassword(null);
       return ResponseEntity.status(HttpStatus.valueOf(200)).body(newShow);
     }
-    return ResponseEntity.status(HttpStatus.valueOf(200)).build();
+    return ResponseEntity.status(HttpStatus.valueOf(400)).build();
   }
 
-  private Show buildNewShow(String email, String password, String showToken, String showSubdomain) {
+  private Show buildNewShow(Show request, String email, String password, String showToken, String showSubdomain) {
     return Show.builder()
             .email(email)
             .password(password)
             .showToken(showToken)
+            .showName(request.getShowName())
             .showSubdomain(showSubdomain)
-            .createdDate(ZonedDateTime.now())
-            .lastLoginDate(ZonedDateTime.now())
-            .expireDate(ZonedDateTime.now().plusYears(1))
+            .firstName(request.getFirstName())
+            .lastName(request.getLastName())
+            .createdDate(LocalDateTime.now())
             .emailVerified(false)
-            .userRole("USER")
-            .viewerControlEnabled(true)
-            .viewerControlMode(ViewerControlMode.JUKEBOX.viewerControlMode)
-            .resetVotes(false)
-            .jukeboxDepth(0)
-            .enableGeolocation(false)
-            .enableLocationCode(false)
-            .remoteLatitude(0.0F)
-            .remoteLongitude(0.0F)
-            .allowedRadius(0.5F)
-            .interruptSchedule(false)
-            .jukeboxRequestLimit(3)
-            .jukeboxHistoryLimit(3)
-            .apiAccessRequested(false)
-            .autoSwitchControlModeSize(0)
-            .autoSwitchControlModeToggled(false)
-            .hideSequenceCount(0)
-            .psaEnabled(false)
-            .checkIfVoted(false)
-            .makeItSnow(false)
             .build();
   }
 
-  private String validateRemoteToken(String remoteToken) {
-    Remote remote = this.remoteRepository.findByRemoteToken(remoteToken);
-    if(remote == null) {
-      return remoteToken;
+  private String validateShowToken(String showToken) {
+    Optional<Show> show = this.showRepository.findByShowToken(showToken);
+    if(show.isEmpty()) {
+      return showToken;
     }else {
-      validateRemoteToken(RandomUtil.generateToken(25));
+      validateShowToken(RandomUtil.generateToken(25));
     }
     return null;
   }
 
-  private void insertDefaultRemotePrefs(String remoteToken) {
-    RemotePreference remotePreference = RemotePreference.builder()
-            .remoteToken(remoteToken)
-            .viewerModeEnabled(true)
-            .viewerControlEnabled(true)
-            .viewerControlMode(ViewerControlMode.JUKEBOX.viewerControlMode)
-            .resetVotes(false)
-            .jukeboxDepth(0)
-            .enableGeolocation(false)
-            .enableLocationCode(false)
-            .remoteLatitude(0.0F)
-            .remoteLongitude(0.0F)
-            .allowedRadius(0.5F)
-            .messageDisplayTime(6)
-            .interruptSchedule(false)
-            .jukeboxRequestLimit(3)
-            .jukeboxHistoryLimit(3)
-            .apiAccessRequested(false)
-            .autoSwitchControlModeSize(0)
-            .autoSwitchControlModeToggled(false)
-            .hideSequenceCount(0)
-            .psaEnabled(false)
-            .checkIfVoted(false)
-            .makeItSnow(false)
-            .build();
-    this.remotePreferenceRepository.save(remotePreference);
-  }
-
-  public ResponseEntity<RemoteResponse> signIn(HttpServletRequest httpServletRequest) {
+  public ResponseEntity<Show> signIn(HttpServletRequest httpServletRequest) {
     String[] basicAuthCredentials = this.authUtil.getBasicAuthCredentials(httpServletRequest);
-    String ipAddress = this.clientUtil.getClientIp(httpServletRequest);
     if (basicAuthCredentials != null) {
+      String ipAddress = this.clientUtil.getClientIp(httpServletRequest);
       String email = basicAuthCredentials[0];
       String password = basicAuthCredentials[1];
-      Remote remote = this.remoteRepository.findByEmail(email);
-      if (remote == null) {
+      Optional<Show> optionalShow = this.showRepository.findByEmail(email);
+      if (optionalShow.isEmpty()) {
         return ResponseEntity.status(HttpStatus.valueOf(401)).build();
       }
+      Show show = optionalShow.get();
       BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-      boolean passwordsMatch = passwordEncoder.matches(password, remote.getPassword());
+      boolean passwordsMatch = passwordEncoder.matches(password, show.getPassword());
       if (passwordsMatch) {
-        if (!remote.getEmailVerified()) {
+        if (!show.getEmailVerified()) {
           return ResponseEntity.status(HttpStatus.valueOf(403)).build();
         }
-        remote.setLastLoginDate(ZonedDateTime.now());
-        remote.setExpireDate(ZonedDateTime.now().plus(1, ChronoUnit.YEARS));
-        remote.setLastLoginIp(ipAddress);
-        this.remoteRepository.save(remote);
-        String jwtToken = this.authUtil.signJwt(remote);
-        RemoteResponse remoteResponse = this.mapper.map(remote, RemoteResponse.class);
-        RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remote.getRemoteToken());
-        if(remotePreference != null && remotePreference.getViewerControlMode() != null) {
-          remoteResponse.setViewerControlMode(remotePreference.getViewerControlMode());
-        }else {
-          remoteResponse.setViewerControlMode("JUKEBOX");
+        show.setLastLoginDate(LocalDateTime.now());
+        show.setExpireDate(LocalDateTime.now().plusYears(1));
+        show.setLastLoginIp(ipAddress);
+        this.showRepository.save(show);
+        if(show.getViewerControlMode() == null) {
+          show.setViewerControlMode(ViewerControlMode.JUKEBOX.name());
         }
-        remoteResponse.setServiceToken(jwtToken);
-        return ResponseEntity.status(HttpStatus.valueOf(200)).body(remoteResponse);
+        String jwtToken = this.authUtil.signJwt(show);
+        show.setServiceToken(jwtToken);
+        return ResponseEntity.status(HttpStatus.valueOf(200)).body(show);
       }
-    }
-    return ResponseEntity.status(HttpStatus.valueOf(401)).build();
-  }
-
-  public ResponseEntity<?> requestResetPassword(PasswordReset request) {
-    Remote remote = this.remoteRepository.findByEmail(request.getEmail());
-    if (remote != null) {
-      request.setRemoteToken(remote.getRemoteToken());
-      request.setPasswordResetLink(request.getPasswordResetLink());
-      request.setPasswordResetExpiry(ZonedDateTime.now().plus(1, ChronoUnit.DAYS));
-      this.passwordResetRepository.deleteByEmail(request.getEmail());
-      this.passwordResetRepository.save(request);
-      Response response = this.emailUtil.sendEmail(remote, request, null, EmailTemplate.FORGOT_PASSWORD);
-      if(response.getStatusCode() != 202) {
-        return ResponseEntity.status(HttpStatus.valueOf(403)).build();
-      }
-      return ResponseEntity.status(HttpStatus.valueOf(200)).build();
     }
     return ResponseEntity.status(HttpStatus.valueOf(401)).build();
   }
@@ -265,19 +146,10 @@ public class AccountService {
       request.setPasswordResetExpiry(ZonedDateTime.now().plus(1, ChronoUnit.DAYS));
       this.passwordResetRepository.deleteByEmail(request.getEmail());
       this.passwordResetRepository.save(request);
-      Response response = this.emailUtil.sendEmail(remote, request, null, EmailTemplate.FORGOT_PASSWORD);
+      Response response = this.emailUtil.sendEmail(null, request, null, EmailTemplate.FORGOT_PASSWORD);
       if(response.getStatusCode() != 202) {
         return ResponseEntity.status(HttpStatus.valueOf(403)).build();
       }
-      return ResponseEntity.status(HttpStatus.valueOf(200)).build();
-    }
-    return ResponseEntity.status(HttpStatus.valueOf(401)).build();
-  }
-
-  public ResponseEntity<?> resendVerificationEmail(Remote request) {
-    Remote remote = this.remoteRepository.findByEmail(request.getEmail());
-    if (remote != null) {
-      this.emailUtil.sendEmail(remote, null, null, EmailTemplate.VERIFICATION);
       return ResponseEntity.status(HttpStatus.valueOf(200)).build();
     }
     return ResponseEntity.status(HttpStatus.valueOf(401)).build();
@@ -297,7 +169,7 @@ public class AccountService {
     PasswordReset passwordReset = this.passwordResetRepository.findByPasswordResetLinkAndPasswordResetExpiryGreaterThan(request.getPasswordResetLink(), ZonedDateTime.now());
     if (passwordReset != null) {
       Remote remote = this.remoteRepository.findByRemoteToken(passwordReset.getRemoteToken());
-      String jwt = this.authUtil.signJwt(remote);
+      String jwt = this.authUtil.signJwt(null);
       return ResponseEntity.status(HttpStatus.valueOf(200)).body(jwt);
     }
     return ResponseEntity.status(HttpStatus.valueOf(401)).build();
