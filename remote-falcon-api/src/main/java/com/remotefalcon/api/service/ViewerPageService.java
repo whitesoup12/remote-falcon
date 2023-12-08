@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.dozer.DozerBeanMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -49,7 +48,6 @@ public class ViewerPageService {
   private final PsaSequenceRepository psaSequenceRepository;
   private final RemoteViewerPagesRepository remoteViewerPagesRepository;
   private final DefaultViewerPageRepository defaultViewerPageRepository;
-  private final DozerBeanMapper mapper;
 
   @Autowired
   public ViewerPageService(PlaylistRepository playlistRepository, RemoteRepository remoteRepository, RemotePreferenceRepository remotePreferenceRepository,
@@ -58,7 +56,7 @@ public class ViewerPageService {
                            ViewerJukeStatsRepository viewerJukeStatsRepository, RemoteViewerVoteRepository remoteViewerVoteRepository,
                            FppScheduleRepository fppScheduleRepository, AuthUtil authUtil, ClientUtil clientUtil,
                            PlaylistGroupRepository playlistGroupRepository, PsaSequenceRepository psaSequenceRepository, RemoteViewerPagesRepository remoteViewerPagesRepository,
-                           DefaultViewerPageRepository defaultViewerPageRepository, DozerBeanMapper mapper) {
+                           DefaultViewerPageRepository defaultViewerPageRepository) {
     this.playlistRepository = playlistRepository;
     this.remoteRepository = remoteRepository;
     this.remotePreferenceRepository = remotePreferenceRepository;
@@ -77,7 +75,6 @@ public class ViewerPageService {
     this.psaSequenceRepository = psaSequenceRepository;
     this.remoteViewerPagesRepository = remoteViewerPagesRepository;
     this.defaultViewerPageRepository = defaultViewerPageRepository;
-    this.mapper = mapper;
   }
 
   public ResponseEntity<ExternalViewerPageDetailsResponse> externalViewerPageDetails(ViewerTokenDTO viewerTokenDTO) {
@@ -121,8 +118,8 @@ public class ViewerPageService {
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(viewerTokenDTO.getRemoteToken());
     List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceOrderAsc(viewerTokenDTO.getRemoteToken(), true);
     List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(viewerTokenDTO.getRemoteToken());
-    playlists = playlists.stream().filter(playlist -> playlist.getSequenceVotes() != -1).toList();
-    playlistGroups = playlistGroups.stream().filter(playlistGroup -> playlistGroup.getSequenceGroupVotes() != -1).toList();
+    playlists = playlists.stream().filter(playlist -> playlist.getSequenceVotes() != -1).filter(playlist -> playlist.getSequenceVisibleCount() == 0).toList();
+    playlistGroups = playlistGroups.stream().filter(playlistGroup -> playlistGroup.getSequenceGroupVotes() != -1).filter(playlistGroup -> playlistGroup.getSequenceGroupVisibleCount() == 0).toList();
 
     List<Playlist> groupedPlaylists = new ArrayList<>();
     for(Playlist playlist : playlists) {
