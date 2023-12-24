@@ -1,36 +1,53 @@
-package com.remotefalcon.api.controller;
+package com.remotefalcon.api.controller.legacy;
 
 import com.remotefalcon.api.aop.RequiresAccess;
-import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.entity.PasswordReset;
 import com.remotefalcon.api.entity.Remote;
-import com.remotefalcon.api.service.AccountService;
+import com.remotefalcon.api.response.CheckExistsResponse;
+import com.remotefalcon.api.response.RemoteResponse;
+import com.remotefalcon.api.service.legacy.AccountServiceLegacy;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+//@RestController
 @RequiredArgsConstructor
-public class AccountController {
-  private final AccountService accountService;
+public class AccountControllerLegacy {
+  @Autowired
+  private AccountServiceLegacy accountService;
+
+  @PostMapping(value = "/account/checkRemoteOrEmailExists")
+  public ResponseEntity<CheckExistsResponse> checkRemoteOrEmailExists(@RequestBody Remote request) {
+    return accountService.checkRemoteOrEmailExists(request);
+  }
 
   @PostMapping(value = "/account/signUp")
-  public ResponseEntity<Show> signUp(@RequestBody Show request, HttpServletRequest httpServletRequest) {
+  public ResponseEntity<RemoteResponse> signUp(@RequestBody Remote request, HttpServletRequest httpServletRequest) {
     return accountService.signUp(request, httpServletRequest);
   }
 
   @PostMapping(value = "/account/signIn")
-  public ResponseEntity<Show> signIn(HttpServletRequest httpServletRequest) {
+  public ResponseEntity<RemoteResponse> signIn(HttpServletRequest httpServletRequest) {
     return accountService.signIn(httpServletRequest);
+  }
+
+  @PostMapping(value = "/account/requestResetPassword")
+  public ResponseEntity<?> requestResetPassword(@RequestBody PasswordReset request) {
+    return accountService.requestResetPassword(request);
   }
 
   @PostMapping(value = "/account/forgotPassword")
   public ResponseEntity<?> forgotPassword(@RequestBody PasswordReset request) {
     return accountService.forgotPassword(request);
+  }
+
+  @PostMapping(value = "/account/resendVerificationEmail")
+  public ResponseEntity<?> resendVerificationEmail(@RequestBody Remote request) {
+    return accountService.resendVerificationEmail(request);
   }
 
   @PostMapping(value = "/account/verifyEmail")

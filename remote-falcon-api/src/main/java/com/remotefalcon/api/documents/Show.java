@@ -1,5 +1,6 @@
 package com.remotefalcon.api.documents;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -58,5 +59,6 @@ public class Show {
     private Boolean managePsa;
     private Integer sequencesPlayed;
 
+    @JsonIgnore
     private String serviceToken;
 }

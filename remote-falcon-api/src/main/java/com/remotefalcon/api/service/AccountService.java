@@ -125,12 +125,14 @@ public class AccountService {
         show.setLastLoginDate(LocalDateTime.now());
         show.setExpireDate(LocalDateTime.now().plusYears(1));
         show.setLastLoginIp(ipAddress);
-        this.showRepository.save(show);
         if(show.getViewerControlMode() == null) {
           show.setViewerControlMode(ViewerControlMode.JUKEBOX.name());
         }
+        this.showRepository.save(show);
         String jwtToken = this.authUtil.signJwt(show);
         show.setServiceToken(jwtToken);
+        //No need to send password back in the response
+        show.setPassword(null);
         return ResponseEntity.status(HttpStatus.valueOf(200)).body(show);
       }
     }
