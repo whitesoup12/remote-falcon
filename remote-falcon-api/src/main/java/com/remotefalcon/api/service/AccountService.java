@@ -5,6 +5,7 @@ import com.remotefalcon.api.dto.TokenDTO;
 import com.remotefalcon.api.entity.PasswordReset;
 import com.remotefalcon.api.entity.Remote;
 import com.remotefalcon.api.enums.EmailTemplate;
+import com.remotefalcon.api.enums.UserRole;
 import com.remotefalcon.api.enums.ViewerControlMode;
 import com.remotefalcon.api.repository.PasswordResetRepository;
 import com.remotefalcon.api.repository.RemotePreferenceRepository;
@@ -66,7 +67,7 @@ public class AccountService {
       BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
       String hashedPassword = passwordEncoder.encode(password);
 
-      Show newShow = this.buildNewShow(request, email, hashedPassword, showToken, showSubdomain);
+      Show newShow = this.createDefaultShowDocument(request, email, hashedPassword, showToken, showSubdomain);
 
       Response emailResponse = this.emailUtil.sendEmail(newShow, null, null, EmailTemplate.VERIFICATION);
       if(emailResponse.getStatusCode() != 202) {
@@ -81,17 +82,35 @@ public class AccountService {
     return ResponseEntity.status(HttpStatus.valueOf(400)).build();
   }
 
-  private Show buildNewShow(Show request, String email, String password, String showToken, String showSubdomain) {
+  private Show createDefaultShowDocument(Show request, String email, String password, String showToken, String showSubdomain) {
     return Show.builder()
+            .showToken(showToken)
             .email(email)
             .password(password)
-            .showToken(showToken)
             .showName(request.getShowName())
             .showSubdomain(showSubdomain)
             .firstName(request.getFirstName())
             .lastName(request.getLastName())
-            .createdDate(LocalDateTime.now())
             .emailVerified(false)
+            .createdDate(LocalDateTime.now())
+            .expireDate(LocalDateTime.now().plusDays(90))
+            .userRole(UserRole.USER.name())
+            .viewerControlEnabled(false)
+            .viewerControlMode(ViewerControlMode.JUKEBOX.name())
+            .resetVotes(false)
+            .jukeboxDepth(0)
+            .enableGeolocation(false)
+            .remoteLatitude(0.0F)
+            .remoteLongitude(0.0F)
+            .allowedRadius(1.0F)
+            .checkIfVoted(false)
+            .psaEnabled(false)
+            .jukeboxRequestLimit(0)
+            .enableLocationCode(false)
+            .hideSequenceCount(0)
+            .makeItSnow(false)
+            .managePsa(false)
+            .sequencesPlayed(0)
             .build();
   }
 

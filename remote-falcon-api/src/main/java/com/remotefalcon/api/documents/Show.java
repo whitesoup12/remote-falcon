@@ -20,7 +20,6 @@ public class Show {
     private String showSubdomain;
     private String firstName;
     private String lastName;
-    private String remoteToken;
     private Boolean emailVerified;
     private LocalDateTime createdDate;
     private LocalDateTime lastLoginDate;
@@ -42,7 +41,6 @@ public class Show {
     private Float remoteLongitude;
     private Float allowedRadius;
     private Boolean checkIfVoted;
-    private Boolean interruptSchedule;
     private Boolean psaEnabled;
     private String psaSequence;
     private Integer psaFrequency;
