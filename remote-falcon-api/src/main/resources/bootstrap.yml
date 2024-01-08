@@ -17,7 +17,7 @@ spring:
   datasource:
     url: jdbc:${DATABASE_URL}
     hikari:
-      maximum-pool-size: ${CONNECTION_POOL_SIZE}
+      maximum-pool-size: 10
 
 management:
   endpoints:
