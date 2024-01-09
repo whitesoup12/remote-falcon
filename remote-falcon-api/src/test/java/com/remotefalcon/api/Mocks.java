@@ -68,9 +68,9 @@ public class Mocks {
 
   public static TokenDTO tokenDTO() {
     return TokenDTO.builder()
-            .remoteToken("abc123")
+            .showToken("abc123")
             .email("email@gmail.com")
-            .remoteSubdomain("awesomeshow")
+            .showSubdomain("awesomeshow")
             .build();
   }
 
@@ -497,8 +497,8 @@ public class Mocks {
 
   public static ViewerTokenDTO viewerTokenDTO() {
     return ViewerTokenDTO.builder()
-            .subdomain("awesomeshow")
-            .remoteToken("abc123")
+            .showSubdomain("awesomeshow")
+            .showToken("abc123")
             .build();
   }
 

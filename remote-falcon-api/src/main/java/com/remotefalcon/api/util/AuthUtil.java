@@ -13,6 +13,7 @@ import com.remotefalcon.api.entity.ExternalApiAccess;
 import com.remotefalcon.api.entity.Remote;
 import com.remotefalcon.api.repository.ExternalApiAccessRepository;
 import com.remotefalcon.api.repository.RemoteRepository;
+import com.remotefalcon.api.repository.ShowRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,6 +32,7 @@ import java.util.*;
 public class AuthUtil {
   private final RemoteRepository remoteRepository;
   private final ExternalApiAccessRepository externalApiAccessRepository;
+  private final ShowRepository showRepository;
 
   @Value("${JWT_SIGN_KEY}")
   String jwtSignKey;
@@ -39,9 +41,11 @@ public class AuthUtil {
   String jwtViewerSignKey;
 
   @Autowired
-  public AuthUtil(RemoteRepository remoteRepository, ExternalApiAccessRepository externalApiAccessRepository) {
+  public AuthUtil(RemoteRepository remoteRepository, ExternalApiAccessRepository externalApiAccessRepository,
+                  ShowRepository showRepository) {
     this.remoteRepository = remoteRepository;
     this.externalApiAccessRepository = externalApiAccessRepository;
+    this.showRepository = showRepository;
   }
 
   public String signJwt(Show show) {
@@ -67,9 +71,9 @@ public class AuthUtil {
     DecodedJWT decodedJWT = JWT.decode(token);
     Map<String, Object> userDataMap = decodedJWT.getClaim("user-data").asMap();
     return TokenDTO.builder()
-            .remoteToken((String) userDataMap.get("remoteToken"))
+            .showToken((String) userDataMap.get("showToken"))
             .email((String) userDataMap.get("email"))
-            .remoteSubdomain((String) userDataMap.get("remoteSubdomain"))
+            .showSubdomain((String) userDataMap.get("showSubdomain"))
             .build();
   }
 
@@ -80,15 +84,12 @@ public class AuthUtil {
       return null;
     }
     DecodedJWT decodedJWT = JWT.decode(token);
-    String subdomain = decodedJWT.getClaims().get("subdomain").asString();
-    Remote remote = this.remoteRepository.findByRemoteSubdomain(subdomain);
-    if(remote == null) {
-      return null;
-    }
-    return ViewerTokenDTO.builder()
-            .subdomain(subdomain)
-            .remoteToken(remote.getRemoteToken())
-            .build();
+    String showSubdomain = decodedJWT.getClaims().get("showSubdomain").asString();
+    Optional<Show> show = this.showRepository.findByShowSubdomain(showSubdomain);
+      return show.map(value -> ViewerTokenDTO.builder()
+              .showSubdomain(showSubdomain)
+              .showToken(value.getShowToken())
+              .build()).orElse(null);
   }
 
   public ExternalApiAccess getApiAccessFromApiJwt() {
@@ -137,7 +138,7 @@ public class AuthUtil {
   public Boolean isAdminJwtValid(HttpServletRequest httpServletRequest) throws JWTVerificationException {
     if(this.isJwtValid(httpServletRequest)) {
       TokenDTO tokenDTO = this.getJwtPayload();
-      Remote remote = this.remoteRepository.findByRemoteTokenAndUserRole(tokenDTO.getRemoteToken(), "ADMIN");
+      Remote remote = this.remoteRepository.findByRemoteTokenAndUserRole(tokenDTO.getShowToken(), "ADMIN");
       return remote != null;
     }
     return false;

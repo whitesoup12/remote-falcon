@@ -67,9 +67,9 @@ public class AuthUtilLegacy {
     DecodedJWT decodedJWT = JWT.decode(token);
     Map<String, Object> userDataMap = decodedJWT.getClaim("user-data").asMap();
     return TokenDTO.builder()
-            .remoteToken((String) userDataMap.get("remoteToken"))
+            .showToken((String) userDataMap.get("showToken"))
             .email((String) userDataMap.get("email"))
-            .remoteSubdomain((String) userDataMap.get("remoteSubdomain"))
+            .showSubdomain((String) userDataMap.get("showSubdomain"))
             .build();
   }
 
@@ -86,8 +86,8 @@ public class AuthUtilLegacy {
       return null;
     }
     return ViewerTokenDTO.builder()
-            .subdomain(subdomain)
-            .remoteToken(remote.getRemoteToken())
+            .showSubdomain(subdomain)
+            .showToken(remote.getRemoteToken())
             .build();
   }
 
@@ -137,7 +137,7 @@ public class AuthUtilLegacy {
   public Boolean isAdminJwtValid(HttpServletRequest httpServletRequest) throws JWTVerificationException {
     if(this.isJwtValid(httpServletRequest)) {
       TokenDTO tokenDTO = this.getJwtPayload();
-      Remote remote = this.remoteRepository.findByRemoteTokenAndUserRole(tokenDTO.getRemoteToken(), "ADMIN");
+      Remote remote = this.remoteRepository.findByRemoteTokenAndUserRole(tokenDTO.getShowToken(), "ADMIN");
       return remote != null;
     }
     return false;

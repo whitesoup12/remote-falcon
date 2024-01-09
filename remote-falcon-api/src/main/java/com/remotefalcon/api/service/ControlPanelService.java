@@ -105,9 +105,9 @@ public class ControlPanelService {
 
   public ResponseEntity<RemoteResponse> coreInfo() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
     RemoteResponse remoteResponse = this.mapper.map(remote, RemoteResponse.class);
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
     if(remotePreference != null) {
       remoteResponse.setViewerControlMode(remotePreference.getViewerControlMode());
     }
@@ -118,16 +118,16 @@ public class ControlPanelService {
 
   public ResponseEntity<?> deleteViewerStats() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    this.viewerPageStatsRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.viewerJukeStatsRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.viewerVoteStatsRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.viewerVoteWinStatsRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
+    this.viewerPageStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.viewerJukeStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.viewerVoteStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.viewerVoteWinStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
     return ResponseEntity.status(200).build();
   }
 
   public ResponseEntity<?> updateActiveTheme(ActiveThemeRequest request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
     remote.setActiveTheme(request.getActiveTheme());
     this.remoteRepository.save(remote);
     return ResponseEntity.status(200).build();
@@ -135,7 +135,7 @@ public class ControlPanelService {
 
   public ResponseEntity<?> updatePassword(HttpServletRequest httpServletRequest) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
     String password = this.authUtil.getPasswordFromHeader(httpServletRequest);
     String updatedPassword = this.authUtil.getUpdatedPasswordFromHeader(httpServletRequest);
     if (updatedPassword != null) {
@@ -155,7 +155,7 @@ public class ControlPanelService {
 
   public ResponseEntity<?> updateShowName(UpdateShowName request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
     if(remote != null) {
       remote.setRemoteName(request.getRemoteName());
       remote.setRemoteSubdomain(request.getRemoteSubdomain());
@@ -168,7 +168,7 @@ public class ControlPanelService {
   public ResponseEntity<UserProfile> userProfile(UserProfile request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
     String remoteSubdomain = request.getRemoteName().replaceAll("\\s", "").toLowerCase();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
     Remote existingRemote = this.remoteRepository.findByEmailOrRemoteSubdomain(null, remoteSubdomain);
     if(remote != null) {
       if(existingRemote != null && !StringUtils.equalsIgnoreCase(remote.getRemoteSubdomain(), existingRemote.getRemoteSubdomain())) {
@@ -188,8 +188,8 @@ public class ControlPanelService {
 
   public ResponseEntity<?> requestApiAccess() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
-    ExternalApiAccess externalApiAccess = this.externalApiAccessRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
+    ExternalApiAccess externalApiAccess = this.externalApiAccessRepository.findByRemoteToken(tokenDTO.getShowToken());
     if(externalApiAccess != null) {
       return ResponseEntity.status(204).build();
     }
@@ -198,12 +198,12 @@ public class ControlPanelService {
     externalApiAccess = ExternalApiAccess.builder()
             .accessToken(accessToken)
             .accessSecret(secretKey)
-            .remoteToken(tokenDTO.getRemoteToken())
+            .remoteToken(tokenDTO.getShowToken())
             .isActive(true)
             .createdDate(ZonedDateTime.now())
             .build();
     this.externalApiAccessRepository.save(externalApiAccess);
-    Response response = this.emailUtil.sendEmail(null, null, externalApiAccess, EmailTemplate.REQUEST_API_ACCESS);
+    Response response = this.emailUtil.sendEmail(null, externalApiAccess, EmailTemplate.REQUEST_API_ACCESS);
     if(response.getStatusCode() != 202) {
       this.externalApiAccessRepository.delete(externalApiAccess);
       return ResponseEntity.status(HttpStatus.valueOf(403)).build();
@@ -214,31 +214,31 @@ public class ControlPanelService {
   public ResponseEntity<?> deleteAccount() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
 
-    this.activeViewerRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.currentPlaylistRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.externalApiAccessRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.fppScheduleRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.pageGalleryHeartsRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.passwordResetRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.playlistRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.remoteJukeRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.remotePreferenceRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.remoteRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.remoteViewerVoteRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.viewerJukeStatsRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.viewerPageMetaRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.viewerPageStatsRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.viewerVoteStatsRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-    this.viewerVoteWinStatsRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
+    this.activeViewerRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.currentPlaylistRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.externalApiAccessRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.fppScheduleRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.pageGalleryHeartsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.passwordResetRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.playlistRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.remoteJukeRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.remotePreferenceRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.remoteRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.remoteViewerVoteRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.viewerJukeStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.viewerPageMetaRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.viewerPageStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.viewerVoteStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.viewerVoteWinStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
 
     return ResponseEntity.status(200).build();
   }
 
   public ResponseEntity<RemotePreference> remotePrefs() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
-    List<PsaSequence> psaSequenceList = this.psaSequenceRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
-    List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
+    List<PsaSequence> psaSequenceList = this.psaSequenceRepository.findAllByRemoteToken(tokenDTO.getShowToken());
+    List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     if(remotePreference != null) {
       remotePreference.setPsaSequenceList(psaSequenceList);
       List<String> viewerPages = remoteViewerPages.stream().map(RemoteViewerPages::getViewerPageName).toList();
@@ -252,25 +252,25 @@ public class ControlPanelService {
 
   public ResponseEntity<List<Playlist>> sequences() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenOrderBySequenceOrderAsc(tokenDTO.getRemoteToken());
+    List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenOrderBySequenceOrderAsc(tokenDTO.getShowToken());
     return ResponseEntity.status(200).body(playlists);
   }
 
   public ResponseEntity<List<Playlist>> inactiveSequences() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceKeyAsc(tokenDTO.getRemoteToken(), false);
+    List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceKeyAsc(tokenDTO.getShowToken(), false);
     return ResponseEntity.status(200).body(playlists);
   }
 
   public ResponseEntity<Integer> currentQueueDepth() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     return ResponseEntity.status(200).body(remoteJukeList.size());
   }
 
   public ResponseEntity<?> customLocation(CustomLocationRequest request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
     if(remotePreference != null) {
       remotePreference.setRemoteLatitude(request.getRemoteLatitude());
       remotePreference.setRemoteLongitude(request.getRemoteLongitude());
@@ -284,25 +284,25 @@ public class ControlPanelService {
 
   public ResponseEntity<?> saveRemotePrefs(RemotePreference request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
     if(remotePreference != null) {
       if(request.getViewerControlEnabled() != remotePreference.getViewerControlEnabled()
               || request.getManagePsa() != remotePreference.getManagePsa()) {
         request.setSequencesPlayed(0);
       }
-      request.setRemoteToken(tokenDTO.getRemoteToken());
+      request.setRemoteToken(tokenDTO.getShowToken());
       request.setRemotePrefToken(remotePreference.getRemotePrefToken());
       this.remotePreferenceRepository.save(request);
 
-      this.psaSequenceRepository.deleteAllByRemoteToken(tokenDTO.getRemoteToken());
+      this.psaSequenceRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
 
       for(PsaSequence psaSequence : request.getPsaSequenceList()) {
-        psaSequence.setRemoteToken(tokenDTO.getRemoteToken());
+        psaSequence.setRemoteToken(tokenDTO.getShowToken());
         psaSequence.setPsaSequenceLastPlayed(ZonedDateTime.now());
       }
       this.psaSequenceRepository.saveAll(request.getPsaSequenceList());
 
-      List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+      List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getShowToken());
       remoteViewerPages.forEach(viewerPage -> {
         viewerPage.setViewerPageActive(false);
         if(StringUtils.equalsIgnoreCase(request.getActiveRemoteViewerPage(), viewerPage.getViewerPageName())) {
@@ -318,10 +318,10 @@ public class ControlPanelService {
 
   public ResponseEntity<List<RemoteJuke>> allJukeboxRequests() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(tokenDTO.getRemoteToken());
+    List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(tokenDTO.getShowToken());
     List<RemoteJuke> allJukeRequests = new ArrayList<>();
     remoteJukeList.forEach(juke -> {
-      Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(tokenDTO.getRemoteToken(), juke.getNextPlaylist());
+      Optional<Playlist> playlist = this.playlistRepository.findFirstByRemoteTokenAndSequenceName(tokenDTO.getShowToken(), juke.getNextPlaylist());
       playlist.ifPresent(value -> juke.setSequence(value.getSequenceDisplayName()));
       allJukeRequests.add(juke);
     });
@@ -330,23 +330,23 @@ public class ControlPanelService {
 
   public ResponseEntity<?> purgeQueue() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    this.remoteJukeRepository.deleteByRemoteToken(tokenDTO.getRemoteToken());
+    this.remoteJukeRepository.deleteByRemoteToken(tokenDTO.getShowToken());
 
-    List<Playlist> playlists = this.playlistRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<Playlist> playlists = this.playlistRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     playlists.forEach(playlist -> {
       playlist.setSequenceVisibleCount(0);
       playlist.setSequenceVotes(0);
     });
     this.playlistRepository.saveAll(playlists);
 
-    List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     playlistGroups.forEach(playlistGroup -> {
       playlistGroup.setSequenceGroupVisibleCount(0);
       playlistGroup.setSequenceGroupVotes(0);
     });
     this.playlistGroupRepository.saveAll(playlistGroups);
 
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
     remotePreference.setSequencesPlayed(0);
     this.remotePreferenceRepository.save(remotePreference);
 
@@ -361,7 +361,7 @@ public class ControlPanelService {
 
   public ResponseEntity<?> resetAllVotes() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceOrderAsc(tokenDTO.getRemoteToken(), true);
+    List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceOrderAsc(tokenDTO.getShowToken(), true);
     playlists.forEach(playlist -> {
       playlist.setSequenceVotes(0);
       playlist.setOwnerVoted(false);
@@ -369,17 +369,17 @@ public class ControlPanelService {
       playlist.setSequenceVotes(0);
     });
     this.playlistRepository.saveAll(playlists.stream().toList());
-    List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     playlistGroups.forEach(playlistGroup -> {
       playlistGroup.setSequenceGroupVotes(0);
       playlistGroup.setSequenceGroupVisibleCount(0);
       playlistGroup.setSequenceGroupVotes(0);
     });
     this.playlistGroupRepository.saveAll(playlistGroups.stream().toList());
-    List<RemoteViewerVote> remoteViewerVotes = this.remoteViewerVoteRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<RemoteViewerVote> remoteViewerVotes = this.remoteViewerVoteRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     this.remoteViewerVoteRepository.deleteAll(remoteViewerVotes.stream().toList());
 
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
     remotePreference.setSequencesPlayed(0);
     this.remotePreferenceRepository.save(remotePreference);
 
@@ -388,16 +388,16 @@ public class ControlPanelService {
 
   public ResponseEntity<ViewerPageMeta> getViewerPageMeta() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    ViewerPageMeta viewerPageMeta = this.viewerPageMetaRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    ViewerPageMeta viewerPageMeta = this.viewerPageMetaRepository.findByRemoteToken(tokenDTO.getShowToken());
     return ResponseEntity.status(200).body(viewerPageMeta);
   }
 
   public ResponseEntity<ViewerPageMeta> saveViewerPageMeta(ViewerPageMeta request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    ViewerPageMeta viewerPageMeta = this.viewerPageMetaRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    ViewerPageMeta viewerPageMeta = this.viewerPageMetaRepository.findByRemoteToken(tokenDTO.getShowToken());
     if(viewerPageMeta == null) {
       viewerPageMeta = ViewerPageMeta.builder()
-              .remoteToken(tokenDTO.getRemoteToken())
+              .remoteToken(tokenDTO.getShowToken())
               .build();
     }
     viewerPageMeta.setViewerPageTitle(request.getViewerPageTitle());
@@ -409,14 +409,14 @@ public class ControlPanelService {
   public ResponseEntity<Boolean> checkViewerPageModified() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
     DefaultViewerPage defaultViewerPage = this.defaultViewerPageRepository.findFirstByIsVersionActive(true);
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
     boolean isViewerPageModified = !StringUtils.equalsIgnoreCase(defaultViewerPage.getHtmlContent(), remote.getHtmlContent());
     return ResponseEntity.status(200).body(isViewerPageModified);
   }
 
   public ResponseEntity<?> updateViewerPagePublic(@RequestBody ViewerPagePublicRequest request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
     remotePreference.setViewerPagePublic(request.getViewerPagePublic());
     this.remotePreferenceRepository.save(remotePreference);
     return ResponseEntity.status(200).build();
@@ -430,13 +430,13 @@ public class ControlPanelService {
 
   public ResponseEntity<String> getViewerPageContent() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
     return ResponseEntity.status(200).body(remote.getHtmlContent());
   }
 
   public ResponseEntity<?> saveViewerPageContent(Remote request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
     remote.setHtmlContent(request.getHtmlContent());
     this.remoteRepository.save(remote);
     return ResponseEntity.status(200).build();
@@ -450,7 +450,7 @@ public class ControlPanelService {
 
   public ResponseEntity<?> toggleSequenceVisibility(SequenceKeyRequest request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Playlist playlist = this.playlistRepository.findByRemoteTokenAndSequenceKey(tokenDTO.getRemoteToken(), request.getSequenceKey());
+    Playlist playlist = this.playlistRepository.findByRemoteTokenAndSequenceKey(tokenDTO.getShowToken(), request.getSequenceKey());
     playlist.setSequenceVisible(!playlist.getSequenceVisible());
     this.playlistRepository.save(playlist);
     return ResponseEntity.status(200).build();
@@ -458,7 +458,7 @@ public class ControlPanelService {
 
   public ResponseEntity<?> deleteSequence(Long sequenceKey) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Playlist playlist = this.playlistRepository.findByRemoteTokenAndSequenceKey(tokenDTO.getRemoteToken(), sequenceKey);
+    Playlist playlist = this.playlistRepository.findByRemoteTokenAndSequenceKey(tokenDTO.getShowToken(), sequenceKey);
     if(playlist != null) {
       this.playlistRepository.delete(playlist);
     }
@@ -467,35 +467,35 @@ public class ControlPanelService {
 
   public ResponseEntity<?> deleteInactiveSequences() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceKeyAsc(tokenDTO.getRemoteToken(), false);
+    List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceKeyAsc(tokenDTO.getShowToken(), false);
     this.playlistRepository.deleteAll(playlists);
     return ResponseEntity.status(200).build();
   }
 
   public ResponseEntity<?> deleteAllSequences() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<Playlist> playlists = this.playlistRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<Playlist> playlists = this.playlistRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     this.playlistRepository.deleteAll(playlists);
     return ResponseEntity.status(200).build();
   }
 
   public ResponseEntity<?> playSequence(@RequestBody SequenceKeyRequest request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken());
-    Playlist playlist = this.playlistRepository.findByRemoteTokenAndSequenceKey(tokenDTO.getRemoteToken(), request.getSequenceKey());
+    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
+    Playlist playlist = this.playlistRepository.findByRemoteTokenAndSequenceKey(tokenDTO.getShowToken(), request.getSequenceKey());
     if(StringUtils.equalsIgnoreCase("JUKEBOX", remotePreference.getViewerControlMode())) {
-      boolean ownerAlreadyRequested = !this.remoteJukeRepository.findAllByRemoteTokenAndOwnerRequested(tokenDTO.getRemoteToken(), true).isEmpty();
+      boolean ownerAlreadyRequested = !this.remoteJukeRepository.findAllByRemoteTokenAndOwnerRequested(tokenDTO.getShowToken(), true).isEmpty();
       if(ownerAlreadyRequested) {
         return ResponseEntity.status(204).build();
       }
       this.remoteJukeRepository.save(RemoteJuke.builder()
-        .remoteToken(tokenDTO.getRemoteToken())
+        .remoteToken(tokenDTO.getShowToken())
         .nextPlaylist(playlist.getSequenceName())
         .futurePlaylistSequence(0)
         .ownerRequested(false)
         .build());
     }else {
-      boolean ownerAlreadyVoted = !this.playlistRepository.findAllByRemoteTokenAndOwnerVoted(tokenDTO.getRemoteToken(), true).isEmpty();
+      boolean ownerAlreadyVoted = !this.playlistRepository.findAllByRemoteTokenAndOwnerVoted(tokenDTO.getShowToken(), true).isEmpty();
       if(ownerAlreadyVoted) {
         return ResponseEntity.status(204).build();
       }
@@ -514,7 +514,7 @@ public class ControlPanelService {
   public ResponseEntity<?> updateSequenceDetails(List<Playlist> request) {
      TokenDTO tokenDTO = this.authUtil.getJwtPayload();
     this.playlistRepository.saveAll(request.stream().toList());
-    List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     playlistGroups.forEach(playlistGroup -> {
       int playlistsInGroup = 0;
       for(Playlist playlist : request) {
@@ -552,7 +552,7 @@ public class ControlPanelService {
 
   public ResponseEntity<List<PageGalleryHearts>> viewerPagesHearted() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<PageGalleryHearts> pageGalleryHearts = this.pageGalleryHeartsRepository.findAllByRemoteTokenAndViewerPageHeartedTrue(tokenDTO.getRemoteToken());
+    List<PageGalleryHearts> pageGalleryHearts = this.pageGalleryHeartsRepository.findAllByRemoteTokenAndViewerPageHeartedTrue(tokenDTO.getShowToken());
     return ResponseEntity.status(200).body(pageGalleryHearts);
   }
 
@@ -569,10 +569,10 @@ public class ControlPanelService {
 
   public ResponseEntity<?> toggleViewerPageHeart(@RequestBody PageGalleryHearts request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    PageGalleryHearts pageGalleryHeart = this.pageGalleryHeartsRepository.findByRemoteTokenAndViewerPage(tokenDTO.getRemoteToken(), request.getViewerPage());
+    PageGalleryHearts pageGalleryHeart = this.pageGalleryHeartsRepository.findByRemoteTokenAndViewerPage(tokenDTO.getShowToken(), request.getViewerPage());
     if(pageGalleryHeart == null) {
       pageGalleryHeart = PageGalleryHearts.builder()
-              .remoteToken(tokenDTO.getRemoteToken())
+              .remoteToken(tokenDTO.getShowToken())
               .viewerPage(request.getViewerPage())
               .viewerPageHearted(true)
               .build();
@@ -593,9 +593,9 @@ public class ControlPanelService {
 
   public ResponseEntity<List<PlaylistGroup>> getSequenceGroups() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<PlaylistGroup> playlistGroups = this.playlistGroupRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     playlistGroups.forEach(group -> {
-      List<Playlist> playlistsInGroup = this.playlistRepository.findAllByRemoteTokenAndSequenceGroupOrderBySequenceOrderAsc(tokenDTO.getRemoteToken(), group.getSequenceGroupName());
+      List<Playlist> playlistsInGroup = this.playlistRepository.findAllByRemoteTokenAndSequenceGroupOrderBySequenceOrderAsc(tokenDTO.getShowToken(), group.getSequenceGroupName());
       group.setSequenceNamesInGroup(playlistsInGroup.stream().map(Playlist::getSequenceName).toList());
     });
     return ResponseEntity.status(200).body(playlistGroups);
@@ -603,7 +603,7 @@ public class ControlPanelService {
 
   public ResponseEntity<?> saveSequenceGroup(PlaylistGroup request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    request.setRemoteToken(tokenDTO.getRemoteToken());
+    request.setRemoteToken(tokenDTO.getShowToken());
     request.setSequenceGroupVoteTime(ZonedDateTime.now());
     request.setSequenceGroupVotes(0);
     request.setSequenceGroupVotesTotal(0);
@@ -616,7 +616,7 @@ public class ControlPanelService {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
     Optional<PlaylistGroup> playlistGroup = this.playlistGroupRepository.findBySequenceGroupKey(sequenceGroupKey);
     if(playlistGroup.isPresent()) {
-      List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndSequenceGroupOrderBySequenceOrderAsc(tokenDTO.getRemoteToken(), playlistGroup.get().getSequenceGroupName());
+      List<Playlist> playlists = this.playlistRepository.findAllByRemoteTokenAndSequenceGroupOrderBySequenceOrderAsc(tokenDTO.getShowToken(), playlistGroup.get().getSequenceGroupName());
       List<Playlist> playlistsToUpdate = new ArrayList<>();
       playlists.forEach(playlist -> {
         playlist.setSequenceGroup(null);
@@ -630,20 +630,20 @@ public class ControlPanelService {
 
   public ResponseEntity<List<RemoteViewerPages>> getRemoteViewerPages() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     return ResponseEntity.ok(remoteViewerPages);
   }
 
   public ResponseEntity<RemoteViewerPages> addRemoteViewerPage(RemoteViewerPages request) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Optional<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findFirstByRemoteTokenAndViewerPageName(tokenDTO.getRemoteToken(), request.getViewerPageName());
+    Optional<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findFirstByRemoteTokenAndViewerPageName(tokenDTO.getShowToken(), request.getViewerPageName());
     if(remoteViewerPages.isPresent()) {
       return ResponseEntity.status(204).build();
     }
-    List<RemoteViewerPages> allRemoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<RemoteViewerPages> allRemoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     allRemoteViewerPages.forEach(viewerPage -> viewerPage.setViewerPageActive(false));
     this.remoteViewerPagesRepository.saveAll(allRemoteViewerPages);
-    request.setRemoteToken(tokenDTO.getRemoteToken());
+    request.setRemoteToken(tokenDTO.getShowToken());
     request.setViewerPageActive(true);
     this.remoteViewerPagesRepository.save(request);
     return ResponseEntity.ok(request);
@@ -651,9 +651,9 @@ public class ControlPanelService {
 
   public ResponseEntity<?> deleteRemoteViewerPage(Long remoteViewerPageKey) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Optional<RemoteViewerPages> remoteViewerPage = this.remoteViewerPagesRepository.findByRemoteTokenAndRemoteViewerPageKey(tokenDTO.getRemoteToken(), remoteViewerPageKey);
+    Optional<RemoteViewerPages> remoteViewerPage = this.remoteViewerPagesRepository.findByRemoteTokenAndRemoteViewerPageKey(tokenDTO.getShowToken(), remoteViewerPageKey);
     remoteViewerPage.ifPresent(this.remoteViewerPagesRepository::delete);
-    List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     if(CollectionUtils.isNotEmpty(remoteViewerPages)) {
       remoteViewerPages.get(0).setViewerPageActive(true);
       this.remoteViewerPagesRepository.save(remoteViewerPages.get(0));
@@ -669,9 +669,9 @@ public class ControlPanelService {
 
   public ResponseEntity<?> easterEggFound() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Optional<EasterEgg> easterEggOptional = this.easterEggRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Optional<EasterEgg> easterEggOptional = this.easterEggRepository.findByRemoteToken(tokenDTO.getShowToken());
     if(easterEggOptional.isEmpty()) {
-      this.easterEggRepository.save(EasterEgg.builder().remoteToken(tokenDTO.getRemoteToken()).build());
+      this.easterEggRepository.save(EasterEgg.builder().remoteToken(tokenDTO.getShowToken()).build());
     }
     return ResponseEntity.status(200).build();
   }
@@ -705,7 +705,7 @@ public class ControlPanelService {
 
   public ResponseEntity<List<Notifications>> getNotifications() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<Notifications> notifications = this.notificationsRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<Notifications> notifications = this.notificationsRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     Collections.reverse(notifications);
     return ResponseEntity.ok(notifications);
   }
@@ -721,7 +721,7 @@ public class ControlPanelService {
 
   public ResponseEntity<?> markAllNotificationsAsRead() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    List<Notifications> notifications = this.notificationsRepository.findAllByRemoteToken(tokenDTO.getRemoteToken());
+    List<Notifications> notifications = this.notificationsRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     notifications.forEach(notification -> {
       notification.setNotificationRead(true);
     });
@@ -752,7 +752,7 @@ public class ControlPanelService {
 
   public ResponseEntity<?> updateEmail(HttpServletRequest httpServletRequest) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
     if(remote == null) {
       return ResponseEntity.status(401).build();
     }
@@ -765,7 +765,7 @@ public class ControlPanelService {
       remote.setEmail(updatedEmail);
       remote.setEmailVerified(false);
       this.remoteRepository.save(remote);
-      this.emailUtil.sendEmail(null, null, null, EmailTemplate.VERIFICATION);
+      this.emailUtil.sendEmail(null, null, EmailTemplate.VERIFICATION);
       return ResponseEntity.status(200).build();
     }
     return ResponseEntity.status(400).build();

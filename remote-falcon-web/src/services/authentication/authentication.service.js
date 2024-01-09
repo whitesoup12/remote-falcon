@@ -48,9 +48,9 @@ export const signUpService = async (showName, email, password, firstName, lastNa
   return response;
 };
 
-export const verifyEmailService = async (remoteToken) => {
+export const verifyEmailService = async (showToken) => {
   const response = await axios.post('/remotefalcon/api/account/verifyEmail', {
-    remoteToken
+    showToken
   });
   return response;
 };

@@ -70,7 +70,7 @@
 //    RemoteResponse remoteResponse = Mocks.remoteResponse();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
 //    when(this.mapper.map(eq(remote), eq(RemoteResponse.class))).thenReturn(remoteResponse);
 //
 //    ResponseEntity<RemoteResponse> response = this.controlPanelService.coreInfo();
@@ -90,10 +90,10 @@
 //    assertNotNull(response);
 //    assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 //
-//    verify(viewerPageStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(viewerJukeStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(viewerVoteStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(viewerVoteWinStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
+//    verify(viewerPageStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(viewerJukeStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(viewerVoteStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(viewerVoteWinStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
 //  }
 //
 //  @Test
@@ -102,7 +102,7 @@
 //    Remote remote = Mocks.remote();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
 //
 //    ResponseEntity<?> response = this.controlPanelService.updateActiveTheme(ActiveThemeRequest.builder().activeTheme("light").build());
 //    assertNotNull(response);
@@ -118,7 +118,7 @@
 //    remote.setPassword("$2a$10$13H52SG1HDtiaJm9Q1ZxYOrtruKD7aVnXE62QLyrKfdxuv.voWQ9.");
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
 //    when(this.authUtil.getPasswordFromHeader(any(HttpServletRequest.class))).thenReturn("password");
 //    when(this.authUtil.getUpdatedPasswordFromHeader(any(HttpServletRequest.class))).thenReturn("newPassword");
 //
@@ -135,7 +135,7 @@
 //    Remote remote = Mocks.remote();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(null);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(null);
 //
 //    ResponseEntity<?> response = this.controlPanelService.updatePassword(httpServletRequest);
 //    assertNotNull(response);
@@ -149,7 +149,7 @@
 //    UpdateShowName updateShowName = Mocks.updateShowName();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
 //
 //    ResponseEntity<?> response = this.controlPanelService.updateShowName(updateShowName);
 //    assertNotNull(response);
@@ -165,7 +165,7 @@
 //    UpdateShowName updateShowName = Mocks.updateShowName();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(null);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(null);
 //
 //    ResponseEntity<?> response = this.controlPanelService.updateShowName(updateShowName);
 //    assertNotNull(response);
@@ -181,8 +181,8 @@
 //    sendGridResponse.setStatusCode(202);
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
-//    when(this.externalApiAccessRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(null);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
+//    when(this.externalApiAccessRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(null);
 //    when(this.emailUtil.sendEmail(eq(remote), eq(null), any(), eq(EmailTemplate.REQUEST_API_ACCESS))).thenReturn(sendGridResponse);
 //
 //    ResponseEntity<?> response = this.controlPanelService.requestApiAccess();
@@ -200,8 +200,8 @@
 //    ExternalApiAccess externalApiAccess = Mocks.externalApiAccess();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
-//    when(this.externalApiAccessRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(externalApiAccess);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
+//    when(this.externalApiAccessRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(externalApiAccess);
 //
 //    ResponseEntity<?> response = this.controlPanelService.requestApiAccess();
 //    assertNotNull(response);
@@ -218,22 +218,22 @@
 //    assertNotNull(response);
 //    assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 //
-//    verify(activeViewerRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(currentPlaylistRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(externalApiAccessRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(fppScheduleRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(pageGalleryHeartsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(passwordResetRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(playlistRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(remoteJukeRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(remotePreferenceRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(remoteRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(remoteViewerVoteRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(viewerJukeStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(viewerPageMetaRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(viewerPageStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(viewerVoteStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
-//    verify(viewerVoteWinStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getRemoteToken());
+//    verify(activeViewerRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(currentPlaylistRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(externalApiAccessRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(fppScheduleRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(pageGalleryHeartsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(passwordResetRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(playlistRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(remoteJukeRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(remotePreferenceRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(remoteRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(remoteViewerVoteRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(viewerJukeStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(viewerPageMetaRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(viewerPageStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(viewerVoteStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
+//    verify(viewerVoteWinStatsRepository, times(1)).deleteAllByRemoteToken(tokenDTO.getShowToken());
 //  }
 //
 //  @Test
@@ -244,9 +244,9 @@
 //    List<RemoteViewerPages> remoteViewerPages = Mocks.remoteViewerPages();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
-//    when(this.psaSequenceRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(psaSequenceList);
-//    when(this.remoteViewerPagesRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remoteViewerPages);
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remotePreference);
+//    when(this.psaSequenceRepository.findAllByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(psaSequenceList);
+//    when(this.remoteViewerPagesRepository.findAllByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remoteViewerPages);
 //
 //    ResponseEntity<RemotePreference> response = this.controlPanelService.remotePrefs();
 //    assertNotNull(response);
@@ -262,9 +262,9 @@
 //    List<RemoteViewerPages> remoteViewerPages = Mocks.remoteViewerPages();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(null);
-//    when(this.psaSequenceRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(null);
-//    when(this.remoteViewerPagesRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remoteViewerPages);
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(null);
+//    when(this.psaSequenceRepository.findAllByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(null);
+//    when(this.remoteViewerPagesRepository.findAllByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remoteViewerPages);
 //
 //    ResponseEntity<RemotePreference> response = this.controlPanelService.remotePrefs();
 //    assertNotNull(response);
@@ -277,7 +277,7 @@
 //    List<Playlist> sequences = Mocks.sequences();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.playlistRepository.findAllByRemoteTokenOrderBySequenceOrderAsc(eq(tokenDTO.getRemoteToken()))).thenReturn(sequences);
+//    when(this.playlistRepository.findAllByRemoteTokenOrderBySequenceOrderAsc(eq(tokenDTO.getShowToken()))).thenReturn(sequences);
 //
 //    ResponseEntity<List<Playlist>> response = this.controlPanelService.sequences();
 //    assertNotNull(response);
@@ -292,7 +292,7 @@
 //    List<RemoteJuke> remoteJukeList = Mocks.remoteJukeList();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteJukeRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remoteJukeList);
+//    when(this.remoteJukeRepository.findAllByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remoteJukeList);
 //
 //    ResponseEntity<Integer> response = this.controlPanelService.currentQueueDepth();
 //    assertNotNull(response);
@@ -308,7 +308,7 @@
 //    CustomLocationRequest customLocationRequest = Mocks.customLocationRequest();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remotePreference);
 //
 //    ResponseEntity<?> response = this.controlPanelService.customLocation(customLocationRequest);
 //    assertNotNull(response);
@@ -324,7 +324,7 @@
 //    CustomLocationRequest customLocationRequest = Mocks.customLocationRequest();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(null);
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(null);
 //
 //    ResponseEntity<?> response = this.controlPanelService.customLocation(customLocationRequest);
 //    assertNotNull(response);
@@ -342,7 +342,7 @@
 //    remotePreference.setManagePsa(true);
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remotePreference);
 //
 //    ResponseEntity<?> response = this.controlPanelService.saveRemotePrefs(remotePreference);
 //    assertNotNull(response);
@@ -357,7 +357,7 @@
 //    RemotePreference remotePreference = Mocks.remotePreference();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(null);
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(null);
 //
 //    ResponseEntity<?> response = this.controlPanelService.saveRemotePrefs(remotePreference);
 //    assertNotNull(response);
@@ -372,7 +372,7 @@
 //    List<RemoteJuke> remoteJukeList = Mocks.remoteJukeList();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(tokenDTO.getRemoteToken()))).thenReturn(remoteJukeList);
+//    when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(tokenDTO.getShowToken()))).thenReturn(remoteJukeList);
 //
 //    ResponseEntity<List<RemoteJuke>> response = this.controlPanelService.allJukeboxRequests();
 //    assertNotNull(response);
@@ -390,7 +390,7 @@
 //    remoteJukeList = remoteJukeList.stream().findFirst().stream().toList();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(tokenDTO.getRemoteToken()))).thenReturn(remoteJukeList);
+//    when(this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(eq(tokenDTO.getShowToken()))).thenReturn(remoteJukeList);
 //
 //    ResponseEntity<List<RemoteJuke>> response = this.controlPanelService.allJukeboxRequests();
 //    assertNotNull(response);
@@ -406,13 +406,13 @@
 //    RemotePreference remotePreference = Mocks.remotePreference();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken())).thenReturn(remotePreference);
+//    when(this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken())).thenReturn(remotePreference);
 //
 //    ResponseEntity<?> response = this.controlPanelService.purgeQueue();
 //    assertNotNull(response);
 //    assertEquals(HttpStatus.valueOf(200), response.getStatusCode());
 //
-//    verify(remoteJukeRepository, times(1)).deleteByRemoteToken(tokenDTO.getRemoteToken());
+//    verify(remoteJukeRepository, times(1)).deleteByRemoteToken(tokenDTO.getShowToken());
 //  }
 //
 //  @Test
@@ -452,10 +452,10 @@
 //    RemotePreference remotePreference = Mocks.remotePreference();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getRemoteToken())).thenReturn(remotePreference);
-//    when(this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceOrderAsc(eq(tokenDTO.getRemoteToken()), eq(true))).thenReturn(sequences);
-//    when(this.remoteViewerVoteRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remoteViewerVotes);
-//    when(this.playlistGroupRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(playlistGroupList);
+//    when(this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken())).thenReturn(remotePreference);
+//    when(this.playlistRepository.findAllByRemoteTokenAndIsSequenceActiveOrderBySequenceOrderAsc(eq(tokenDTO.getShowToken()), eq(true))).thenReturn(sequences);
+//    when(this.remoteViewerVoteRepository.findAllByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remoteViewerVotes);
+//    when(this.playlistGroupRepository.findAllByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(playlistGroupList);
 //
 //    ResponseEntity<?> response = this.controlPanelService.resetAllVotes();
 //    assertNotNull(response);
@@ -472,7 +472,7 @@
 //    ViewerPageMeta viewerPageMeta = Mocks.viewerPageMeta();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.viewerPageMetaRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(viewerPageMeta);
+//    when(this.viewerPageMetaRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(viewerPageMeta);
 //
 //    ResponseEntity<ViewerPageMeta> response = this.controlPanelService.getViewerPageMeta();
 //    assertNotNull(response);
@@ -487,7 +487,7 @@
 //    ViewerPageMeta viewerPageMeta = Mocks.viewerPageMeta();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.viewerPageMetaRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(viewerPageMeta);
+//    when(this.viewerPageMetaRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(viewerPageMeta);
 //
 //    ResponseEntity<ViewerPageMeta> response = this.controlPanelService.saveViewerPageMeta(viewerPageMeta);
 //    assertNotNull(response);
@@ -504,7 +504,7 @@
 //    ViewerPageMeta viewerPageMeta = Mocks.viewerPageMeta();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.viewerPageMetaRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(null);
+//    when(this.viewerPageMetaRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(null);
 //
 //    ResponseEntity<ViewerPageMeta> response = this.controlPanelService.saveViewerPageMeta(viewerPageMeta);
 //    assertNotNull(response);
@@ -524,7 +524,7 @@
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
 //    when(this.defaultViewerPageRepository.findFirstByIsVersionActive(eq(true))).thenReturn(defaultViewerPage);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
 //
 //    ResponseEntity<Boolean> response = this.controlPanelService.checkViewerPageModified();
 //    assertNotNull(response);
@@ -543,7 +543,7 @@
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
 //    when(this.defaultViewerPageRepository.findFirstByIsVersionActive(eq(true))).thenReturn(defaultViewerPage);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
 //
 //    ResponseEntity<Boolean> response = this.controlPanelService.checkViewerPageModified();
 //    assertNotNull(response);
@@ -559,7 +559,7 @@
 //    ViewerPagePublicRequest viewerPagePublicRequest = Mocks.viewerPagePublicRequest();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remotePreference);
 //
 //    ResponseEntity<?> response = this.controlPanelService.updateViewerPagePublic(viewerPagePublicRequest);
 //    assertNotNull(response);
@@ -589,7 +589,7 @@
 //    Remote remote = Mocks.remote();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
 //
 //    ResponseEntity<String> response = this.controlPanelService.getViewerPageContent();
 //    assertNotNull(response);
@@ -604,7 +604,7 @@
 //    Remote remote = Mocks.remote();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
 //
 //    ResponseEntity<?> response = this.controlPanelService.saveViewerPageContent(remote);
 //    assertNotNull(response);
@@ -620,7 +620,7 @@
 //    SequenceKeyRequest sequenceKeyRequest = Mocks.sequenceKeyRequest();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
+//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getShowToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
 //
 //    ResponseEntity<?> response = this.controlPanelService.toggleSequenceVisibility(sequenceKeyRequest);
 //    assertNotNull(response);
@@ -636,7 +636,7 @@
 //    Long sequenceKey = (long) 1;
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(sequenceKey))).thenReturn(playlist);
+//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getShowToken()), eq(sequenceKey))).thenReturn(playlist);
 //
 //    ResponseEntity<?> response = this.controlPanelService.deleteSequence(sequenceKey);
 //    assertNotNull(response);
@@ -652,7 +652,7 @@
 //    Long sequenceKey = (long) 1;
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(sequenceKey))).thenReturn(null);
+//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getShowToken()), eq(sequenceKey))).thenReturn(null);
 //
 //    ResponseEntity<?> response = this.controlPanelService.deleteSequence(sequenceKey);
 //    assertNotNull(response);
@@ -671,9 +671,9 @@
 //    SequenceKeyRequest sequenceKeyRequest = Mocks.sequenceKeyRequest();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
-//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
-//    when(this.remoteJukeRepository.findAllByRemoteTokenAndOwnerRequested(eq(tokenDTO.getRemoteToken()), eq(true))).thenReturn(Collections.emptyList());
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remotePreference);
+//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getShowToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
+//    when(this.remoteJukeRepository.findAllByRemoteTokenAndOwnerRequested(eq(tokenDTO.getShowToken()), eq(true))).thenReturn(Collections.emptyList());
 //
 //    ResponseEntity<?> response = this.controlPanelService.playSequence(sequenceKeyRequest);
 //    assertNotNull(response);
@@ -692,9 +692,9 @@
 //    SequenceKeyRequest sequenceKeyRequest = Mocks.sequenceKeyRequest();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
-//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
-//    when(this.remoteJukeRepository.findAllByRemoteTokenAndOwnerRequested(eq(tokenDTO.getRemoteToken()), eq(true))).thenReturn(Collections.emptyList());
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remotePreference);
+//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getShowToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
+//    when(this.remoteJukeRepository.findAllByRemoteTokenAndOwnerRequested(eq(tokenDTO.getShowToken()), eq(true))).thenReturn(Collections.emptyList());
 //
 //    ResponseEntity<?> response = this.controlPanelService.playSequence(sequenceKeyRequest);
 //    assertNotNull(response);
@@ -712,9 +712,9 @@
 //    SequenceKeyRequest sequenceKeyRequest = Mocks.sequenceKeyRequest();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
-//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
-//    when(this.remoteJukeRepository.findAllByRemoteTokenAndOwnerRequested(eq(tokenDTO.getRemoteToken()), eq(true))).thenReturn(remoteJukeList);
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remotePreference);
+//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getShowToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
+//    when(this.remoteJukeRepository.findAllByRemoteTokenAndOwnerRequested(eq(tokenDTO.getShowToken()), eq(true))).thenReturn(remoteJukeList);
 //
 //    ResponseEntity<?> response = this.controlPanelService.playSequence(sequenceKeyRequest);
 //    assertNotNull(response);
@@ -730,9 +730,9 @@
 //    SequenceKeyRequest sequenceKeyRequest = Mocks.sequenceKeyRequest();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
-//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
-//    when(this.playlistRepository.findAllByRemoteTokenAndOwnerVoted(eq(tokenDTO.getRemoteToken()), eq(true))).thenReturn(Collections.emptyList());
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remotePreference);
+//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getShowToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
+//    when(this.playlistRepository.findAllByRemoteTokenAndOwnerVoted(eq(tokenDTO.getShowToken()), eq(true))).thenReturn(Collections.emptyList());
 //
 //    ResponseEntity<?> response = this.controlPanelService.playSequence(sequenceKeyRequest);
 //    assertNotNull(response);
@@ -751,9 +751,9 @@
 //    SequenceKeyRequest sequenceKeyRequest = Mocks.sequenceKeyRequest();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remotePreference);
-//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getRemoteToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
-//    when(this.playlistRepository.findAllByRemoteTokenAndOwnerVoted(eq(tokenDTO.getRemoteToken()), eq(true))).thenReturn(playlists);
+//    when(this.remotePreferenceRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remotePreference);
+//    when(this.playlistRepository.findByRemoteTokenAndSequenceKey(eq(tokenDTO.getShowToken()), eq(playlist.getSequenceKey()))).thenReturn(playlist);
+//    when(this.playlistRepository.findAllByRemoteTokenAndOwnerVoted(eq(tokenDTO.getShowToken()), eq(true))).thenReturn(playlists);
 //
 //    ResponseEntity<?> response = this.controlPanelService.playSequence(sequenceKeyRequest);
 //    assertNotNull(response);
@@ -779,7 +779,7 @@
 //    List<PlaylistGroup> playlistGroupList = Mocks.playlistGroupList();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.playlistGroupRepository.findAllByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(playlistGroupList);
+//    when(this.playlistGroupRepository.findAllByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(playlistGroupList);
 //
 //    ResponseEntity<?> response = this.controlPanelService.updateSequenceDetails(playlists);
 //    assertNotNull(response);
@@ -821,7 +821,7 @@
 //    List<PageGalleryHearts> pageGalleryHearts = Mocks.pageGalleryHeartsList();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.pageGalleryHeartsRepository.findAllByRemoteTokenAndViewerPageHeartedTrue(eq(tokenDTO.getRemoteToken()))).thenReturn(pageGalleryHearts);
+//    when(this.pageGalleryHeartsRepository.findAllByRemoteTokenAndViewerPageHeartedTrue(eq(tokenDTO.getShowToken()))).thenReturn(pageGalleryHearts);
 //
 //    ResponseEntity<List<PageGalleryHearts>> response = this.controlPanelService.viewerPagesHearted();
 //    assertNotNull(response);
@@ -849,7 +849,7 @@
 //    PageGalleryHearts pageGalleryHearts = Mocks.pageGalleryHearts();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.pageGalleryHeartsRepository.findByRemoteTokenAndViewerPage(eq(tokenDTO.getRemoteToken()), eq(pageGalleryHearts.getViewerPage()))).thenReturn(pageGalleryHearts);
+//    when(this.pageGalleryHeartsRepository.findByRemoteTokenAndViewerPage(eq(tokenDTO.getShowToken()), eq(pageGalleryHearts.getViewerPage()))).thenReturn(pageGalleryHearts);
 //
 //    ResponseEntity<?> response = this.controlPanelService.toggleViewerPageHeart(pageGalleryHearts);
 //    assertNotNull(response);
@@ -864,7 +864,7 @@
 //    PageGalleryHearts pageGalleryHearts = Mocks.pageGalleryHearts();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.pageGalleryHeartsRepository.findByRemoteTokenAndViewerPage(eq(tokenDTO.getRemoteToken()), eq(pageGalleryHearts.getViewerPage()))).thenReturn(null);
+//    when(this.pageGalleryHeartsRepository.findByRemoteTokenAndViewerPage(eq(tokenDTO.getShowToken()), eq(pageGalleryHearts.getViewerPage()))).thenReturn(null);
 //
 //    ResponseEntity<?> response = this.controlPanelService.toggleViewerPageHeart(pageGalleryHearts);
 //    assertNotNull(response);

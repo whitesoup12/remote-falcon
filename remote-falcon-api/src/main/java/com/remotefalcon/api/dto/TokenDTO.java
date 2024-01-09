@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TokenDTO {
-  private String remoteToken;
+  private String showToken;
   private String email;
-  private String remoteSubdomain;
+  private String showSubdomain;
 }

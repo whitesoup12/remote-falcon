@@ -343,8 +343,8 @@
 //    PasswordReset passwordReset = Mocks.passwordReset();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
-//    when(this.passwordResetRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(passwordReset);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
+//    when(this.passwordResetRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(passwordReset);
 //    when(this.authUtil.getPasswordFromHeader(any(HttpServletRequest.class))).thenReturn("newPassword");
 //
 //    ResponseEntity<?> response = this.accountService.resetPassword(httpServletRequest);
@@ -360,7 +360,7 @@
 //    TokenDTO tokenDTO = Mocks.tokenDTO();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(null);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(null);
 //
 //    ResponseEntity<?> response = this.accountService.resetPassword(httpServletRequest);
 //    assertNotNull(response);
@@ -373,7 +373,7 @@
 //    Remote remote = Mocks.remote();
 //
 //    when(this.authUtil.getJwtPayload()).thenReturn(tokenDTO);
-//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getRemoteToken()))).thenReturn(remote);
+//    when(this.remoteRepository.findByRemoteToken(eq(tokenDTO.getShowToken()))).thenReturn(remote);
 //    when(this.authUtil.getPasswordFromHeader(any(HttpServletRequest.class))).thenReturn(null);
 //
 //    ResponseEntity<?> response = this.accountService.resetPassword(httpServletRequest);

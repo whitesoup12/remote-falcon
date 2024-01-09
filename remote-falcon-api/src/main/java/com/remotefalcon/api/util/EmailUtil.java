@@ -2,7 +2,6 @@ package com.remotefalcon.api.util;
 
 import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.entity.ExternalApiAccess;
-import com.remotefalcon.api.entity.PasswordReset;
 import com.remotefalcon.api.enums.EmailTemplate;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -30,13 +29,13 @@ public class EmailUtil {
   @Value("${BASE_APP_URL}")
   String baseAppUrl;
 
-  public Response sendEmail(Show show, PasswordReset passwordResets, ExternalApiAccess externalApiAccess, EmailTemplate emailTemplate) {
+  public Response sendEmail(Show show, ExternalApiAccess externalApiAccess, EmailTemplate emailTemplate) {
     Response response = new Response();
     try {
       Mail mail = new Mail();
       mail.setFrom(new Email(mailFrom));
       mail.setTemplateId(emailTemplate.templateId);
-      mail.addPersonalization(this.setDynamicEmailTemplateData(show, passwordResets, externalApiAccess, emailTemplate));
+      mail.addPersonalization(this.setDynamicEmailTemplateData(show, externalApiAccess, emailTemplate));
 
       SendGrid sg = new SendGrid(sendgridKey);
       Request request = new Request();
@@ -57,14 +56,14 @@ public class EmailUtil {
     return response;
   }
 
-  private Personalization setDynamicEmailTemplateData(Show show, PasswordReset passwordResets, ExternalApiAccess externalApiAccess, EmailTemplate emailTemplate) {
+  private Personalization setDynamicEmailTemplateData(Show show, ExternalApiAccess externalApiAccess, EmailTemplate emailTemplate) {
     Personalization personalization = new Personalization();
     personalization.addTo(new Email(show.getEmail()));
     if (emailTemplate == EmailTemplate.VERIFICATION) {
       personalization.addDynamicTemplateData("Show_Name", show.getShowName());
       personalization.addDynamicTemplateData("Verify_Link", String.format("%s/verifyEmail/%s/%s", baseAppUrl, show.getShowToken(), show.getShowSubdomain()));
     } else if (emailTemplate == EmailTemplate.FORGOT_PASSWORD) {
-      personalization.addDynamicTemplateData("Reset_Password_Link", String.format("%s/resetPassword/%s", baseAppUrl, passwordResets.getPasswordResetLink()));
+      personalization.addDynamicTemplateData("Reset_Password_Link", String.format("%s/resetPassword/%s", baseAppUrl, show.getPasswordResetLink()));
     } else if (emailTemplate == EmailTemplate.REQUEST_API_ACCESS) {
       personalization.addDynamicTemplateData("Access_Token", externalApiAccess.getAccessToken());
       personalization.addDynamicTemplateData("Secret_Key", externalApiAccess.getAccessSecret());

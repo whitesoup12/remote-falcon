@@ -250,7 +250,7 @@ public class AccountServiceLegacy {
 
   public ResponseEntity<?> resetPassword(HttpServletRequest httpServletRequest) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
     if(remote == null) {
       return ResponseEntity.status(401).build();
     }
@@ -260,7 +260,7 @@ public class AccountServiceLegacy {
       String hashedPassword = passwordEncoder.encode(updatedPassword);
       remote.setPassword(hashedPassword);
       this.remoteRepository.save(remote);
-      PasswordReset passwordReset = this.passwordResetRepository.findByRemoteToken(tokenDTO.getRemoteToken());
+      PasswordReset passwordReset = this.passwordResetRepository.findByRemoteToken(tokenDTO.getShowToken());
       if (passwordReset != null) {
         this.passwordResetRepository.delete(passwordReset);
       }

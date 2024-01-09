@@ -68,13 +68,13 @@ public class DashboardService {
     DashboardStats dashboardStats = new DashboardStats();
 
     //Gather
-    CompletableFuture<List<ViewerPageStats>> viewerPageVisitsByDate = CompletableFuture.supplyAsync(() -> viewerPageVisitsByDate(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween));
-    CompletableFuture<List<ViewerJukeStats>> jukeboxRequestsByDate = CompletableFuture.supplyAsync(() -> jukeboxRequestsByDate(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween));
-    CompletableFuture<ViewerJukeStats> jukeboxRequestsBySequence = CompletableFuture.supplyAsync(() -> jukeboxRequestsBySequence(dashboardRequest, tokenDTO.getRemoteToken()));
-    CompletableFuture<List<ViewerVoteStats>> viewerVoteStatsByDate = CompletableFuture.supplyAsync(() -> viewerVoteStatsByDate(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween));
-    CompletableFuture<ViewerVoteStats> viewerVoteStatsByPlaylist = CompletableFuture.supplyAsync(() -> viewerVoteStatsByPlaylist(dashboardRequest, tokenDTO.getRemoteToken()));
-    CompletableFuture<List<ViewerVoteWinStats>> viewerVoteWinStatsByDate = CompletableFuture.supplyAsync(() -> viewerVoteWinStatsByDate(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween));
-    CompletableFuture<ViewerVoteWinStats> viewerVoteWinStatsByPlaylist = CompletableFuture.supplyAsync(() -> viewerVoteWinStatsByPlaylist(dashboardRequest, tokenDTO.getRemoteToken()));
+    CompletableFuture<List<ViewerPageStats>> viewerPageVisitsByDate = CompletableFuture.supplyAsync(() -> viewerPageVisitsByDate(dashboardRequest, tokenDTO.getShowToken(), datesBetween));
+    CompletableFuture<List<ViewerJukeStats>> jukeboxRequestsByDate = CompletableFuture.supplyAsync(() -> jukeboxRequestsByDate(dashboardRequest, tokenDTO.getShowToken(), datesBetween));
+    CompletableFuture<ViewerJukeStats> jukeboxRequestsBySequence = CompletableFuture.supplyAsync(() -> jukeboxRequestsBySequence(dashboardRequest, tokenDTO.getShowToken()));
+    CompletableFuture<List<ViewerVoteStats>> viewerVoteStatsByDate = CompletableFuture.supplyAsync(() -> viewerVoteStatsByDate(dashboardRequest, tokenDTO.getShowToken(), datesBetween));
+    CompletableFuture<ViewerVoteStats> viewerVoteStatsByPlaylist = CompletableFuture.supplyAsync(() -> viewerVoteStatsByPlaylist(dashboardRequest, tokenDTO.getShowToken()));
+    CompletableFuture<List<ViewerVoteWinStats>> viewerVoteWinStatsByDate = CompletableFuture.supplyAsync(() -> viewerVoteWinStatsByDate(dashboardRequest, tokenDTO.getShowToken(), datesBetween));
+    CompletableFuture<ViewerVoteWinStats> viewerVoteWinStatsByPlaylist = CompletableFuture.supplyAsync(() -> viewerVoteWinStatsByPlaylist(dashboardRequest, tokenDTO.getShowToken()));
 
     //Execute
     try {
@@ -100,10 +100,10 @@ public class DashboardService {
     DashboardLiveStats liveStats = new DashboardLiveStats();
 
     //Gather
-    CompletableFuture<Integer> activeViewers = CompletableFuture.supplyAsync(() -> activeViewers(tokenDTO.getRemoteToken()));
-    CompletableFuture<Integer> totalViewers = CompletableFuture.supplyAsync(() -> totalViewers(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween));
-    CompletableFuture<Integer> currentRequests = CompletableFuture.supplyAsync(() -> currentRequests(tokenDTO.getRemoteToken()));
-    CompletableFuture<Integer> totalRequests = CompletableFuture.supplyAsync(() -> totalRequests(dashboardRequest, tokenDTO.getRemoteToken(), datesBetween));
+    CompletableFuture<Integer> activeViewers = CompletableFuture.supplyAsync(() -> activeViewers(tokenDTO.getShowToken()));
+    CompletableFuture<Integer> totalViewers = CompletableFuture.supplyAsync(() -> totalViewers(dashboardRequest, tokenDTO.getShowToken(), datesBetween));
+    CompletableFuture<Integer> currentRequests = CompletableFuture.supplyAsync(() -> currentRequests(tokenDTO.getShowToken()));
+    CompletableFuture<Integer> totalRequests = CompletableFuture.supplyAsync(() -> totalRequests(dashboardRequest, tokenDTO.getShowToken(), datesBetween));
 
     //Execute
     try {
@@ -141,7 +141,7 @@ public class DashboardService {
       List<RemoteJuke> remoteJukeList = this.remoteJukeRepository.findAllByRemoteToken(remoteToken);
       return remoteJukeList.size();
     }else {
-      List<Playlist> playlists = this.viewerPageService.playlists(ViewerTokenDTO.builder().remoteToken(remoteToken).build());
+      List<Playlist> playlists = this.viewerPageService.playlists(ViewerTokenDTO.builder().showToken(remoteToken).build());
       int currentVotes = 0;
       if(CollectionUtils.isNotEmpty(playlists)) {
         currentVotes = playlists.stream().mapToInt(Playlist::getSequenceVotes).sum();

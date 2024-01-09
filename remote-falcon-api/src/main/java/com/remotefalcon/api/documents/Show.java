@@ -57,6 +57,9 @@ public class Show {
     private Boolean managePsa;
     private Integer sequencesPlayed;
 
+    private String passwordResetLink;
+    private LocalDateTime passwordResetExpiry;
+
     @JsonIgnore
     private String serviceToken;
 }

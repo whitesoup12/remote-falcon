@@ -2,8 +2,6 @@ package com.remotefalcon.api.service;
 
 import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.dto.TokenDTO;
-import com.remotefalcon.api.entity.PasswordReset;
-import com.remotefalcon.api.entity.Remote;
 import com.remotefalcon.api.enums.EmailTemplate;
 import com.remotefalcon.api.enums.UserRole;
 import com.remotefalcon.api.enums.ViewerControlMode;
@@ -25,8 +23,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Service
@@ -69,7 +65,7 @@ public class AccountService {
 
       Show newShow = this.createDefaultShowDocument(request, email, hashedPassword, showToken, showSubdomain);
 
-      Response emailResponse = this.emailUtil.sendEmail(newShow, null, null, EmailTemplate.VERIFICATION);
+      Response emailResponse = this.emailUtil.sendEmail(newShow, null, EmailTemplate.VERIFICATION);
       if(emailResponse.getStatusCode() != 202) {
         return ResponseEntity.status(HttpStatus.valueOf(403)).build();
       }
@@ -158,16 +154,14 @@ public class AccountService {
     return ResponseEntity.status(HttpStatus.valueOf(401)).build();
   }
 
-  public ResponseEntity<?> forgotPassword(PasswordReset request) {
-    Remote remote = this.remoteRepository.findByEmail(request.getEmail());
-    if (remote != null) {
+  public ResponseEntity<?> forgotPassword(Show request) {
+    Optional<Show> show = this.showRepository.findByEmail(request.getEmail());
+    if(show.isPresent()) {
       String passwordResetLink = RandomUtil.generateToken(25);
-      request.setRemoteToken(remote.getRemoteToken());
-      request.setPasswordResetLink(passwordResetLink);
-      request.setPasswordResetExpiry(ZonedDateTime.now().plus(1, ChronoUnit.DAYS));
-      this.passwordResetRepository.deleteByEmail(request.getEmail());
-      this.passwordResetRepository.save(request);
-      Response response = this.emailUtil.sendEmail(null, request, null, EmailTemplate.FORGOT_PASSWORD);
+      show.get().setPasswordResetLink(passwordResetLink);
+      show.get().setPasswordResetExpiry(LocalDateTime.now().plusDays(1));
+      this.showRepository.save(show.get());
+      Response response = this.emailUtil.sendEmail(show.get(), null, EmailTemplate.FORGOT_PASSWORD);
       if(response.getStatusCode() != 202) {
         return ResponseEntity.status(HttpStatus.valueOf(403)).build();
       }
@@ -176,57 +170,41 @@ public class AccountService {
     return ResponseEntity.status(HttpStatus.valueOf(401)).build();
   }
 
-  public ResponseEntity<?> verifyEmail(Remote request) {
-    Remote remote = this.remoteRepository.findByRemoteToken(request.getRemoteToken());
-    if (remote != null) {
-      remote.setEmailVerified(true);
-      this.remoteRepository.save(remote);
+  public ResponseEntity<?> verifyEmail(Show request) {
+    Optional<Show> show = this.showRepository.findByShowToken(request.getShowToken());
+    if(show.isPresent()) {
+      show.get().setEmailVerified(true);
+      this.showRepository.save(show.get());
       return ResponseEntity.status(HttpStatus.valueOf(200)).build();
     }
     return ResponseEntity.status(HttpStatus.valueOf(401)).build();
   }
 
-  public ResponseEntity<String> verifyResetPasswordLink(PasswordReset request) {
-    PasswordReset passwordReset = this.passwordResetRepository.findByPasswordResetLinkAndPasswordResetExpiryGreaterThan(request.getPasswordResetLink(), ZonedDateTime.now());
-    if (passwordReset != null) {
-      Remote remote = this.remoteRepository.findByRemoteToken(passwordReset.getRemoteToken());
-      String jwt = this.authUtil.signJwt(null);
+  public ResponseEntity<String> verifyResetPasswordLink(Show request) {
+    Optional<Show> show = this.showRepository.findByPasswordResetLinkAndPasswordResetExpiryGreaterThan(request.getPasswordResetLink(), LocalDateTime.now());
+    if(show.isPresent()) {
+      String jwt = this.authUtil.signJwt(show.get());
       return ResponseEntity.status(HttpStatus.valueOf(200)).body(jwt);
     }
     return ResponseEntity.status(HttpStatus.valueOf(401)).build();
   }
 
-  public ResponseEntity<?> checkRemoteTokenExists(Remote request) {
-    Remote remote = this.remoteRepository.findByRemoteToken(request.getRemoteToken());
-    if (remote == null) {
-      return ResponseEntity.status(HttpStatus.valueOf(204)).build();
-    }
-    return ResponseEntity.status(HttpStatus.valueOf(200)).build();
-  }
-
   public ResponseEntity<?> resetPassword(HttpServletRequest httpServletRequest) {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getRemoteToken());
-    if(remote == null) {
+    Optional<Show> show = this.showRepository.findByShowToken(tokenDTO.getShowToken());
+    if(show.isEmpty()) {
       return ResponseEntity.status(401).build();
     }
     String updatedPassword = this.authUtil.getPasswordFromHeader(httpServletRequest);
     if (updatedPassword != null) {
       BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
       String hashedPassword = passwordEncoder.encode(updatedPassword);
-      remote.setPassword(hashedPassword);
-      this.remoteRepository.save(remote);
-      PasswordReset passwordReset = this.passwordResetRepository.findByRemoteToken(tokenDTO.getRemoteToken());
-      if (passwordReset != null) {
-        this.passwordResetRepository.delete(passwordReset);
-      }
+      show.get().setPassword(hashedPassword);
+      show.get().setPasswordResetLink(null);
+      show.get().setPasswordResetExpiry(null);
+      this.showRepository.save(show.get());
       return ResponseEntity.status(200).build();
     }
     return ResponseEntity.status(400).build();
-  }
-
-  public ResponseEntity<String> getIp(HttpServletRequest httpServletRequest) {
-    String ipAddress = this.clientUtil.getClientIp(httpServletRequest);
-    return ResponseEntity.status(200).body(ipAddress);
   }
 }

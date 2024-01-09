@@ -40,7 +40,7 @@ public class ApiController {
   @GetMapping(value = "/external/showDetails")
   @RequiresApiAccess
   public ResponseEntity<ExternalViewerPageDetailsResponse> showDetails() {
-    ViewerTokenDTO viewerTokenDTO = this.getViewerTokenDTO();
+    ViewerTokenDTO viewerTokenDTO = this.getviewerTokenDTO();
     if(viewerTokenDTO == null) {
       return ResponseEntity.status(401).build();
     }
@@ -50,7 +50,7 @@ public class ApiController {
   @PostMapping(value = "/external/addSequenceToQueue")
   @RequiresApiAccess
   public ResponseEntity<?> addSequenceToQueuev2(@RequestBody AddSequenceRequest request) {
-    ViewerTokenDTO viewerTokenDTO = this.getViewerTokenDTO();
+    ViewerTokenDTO viewerTokenDTO = this.getviewerTokenDTO();
     if(viewerTokenDTO == null) {
       return ResponseEntity.status(401).build();
     }
@@ -60,7 +60,7 @@ public class ApiController {
   @PostMapping(value = "/external/voteForSequence")
   @RequiresApiAccess
   public ResponseEntity<?> voteForSequencev2(@RequestBody AddSequenceRequest request, HttpServletRequest httpServletRequest) {
-    ViewerTokenDTO viewerTokenDTO = this.getViewerTokenDTO();
+    ViewerTokenDTO viewerTokenDTO = this.getviewerTokenDTO();
     if(viewerTokenDTO == null) {
       return ResponseEntity.status(401).build();
     }
@@ -123,12 +123,12 @@ public class ApiController {
     return this.apiService.voteForSequence(subdomain, request, httpServletRequest);
   }
 
-  private ViewerTokenDTO getViewerTokenDTO() {
+  private ViewerTokenDTO getviewerTokenDTO() {
     ExternalApiAccess externalApiAccess = this.authUtil.getApiAccessFromApiJwt();
     Remote remote = this.remoteRepository.findByRemoteToken(externalApiAccess.getRemoteToken());
     return ViewerTokenDTO.builder()
-            .remoteToken(remote.getRemoteToken())
-            .subdomain(remote.getRemoteSubdomain())
+            .showToken(remote.getRemoteToken())
+            .showSubdomain(remote.getRemoteSubdomain())
             .build();
 
   }
