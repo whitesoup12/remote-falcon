@@ -19,7 +19,6 @@ const ViewerGuard = ({ children }) => {
 
   useEffect(() => {
     if (isExternalViewer()) {
-      services.restore();
       navigate('/remote-falcon', { replace: true });
     }
   }, [isLoggedIn, navigate]);

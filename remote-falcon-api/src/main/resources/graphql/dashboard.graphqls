@@ -1,0 +1,28 @@
+type DashboardStats {
+    page: [Stat]
+    jukeboxByDate: [Stat]
+    jukeboxBySequence: Stat
+    votingByDate: [Stat]
+    votingBySequence: Stat
+    votingWinByDate: [Stat]
+    votingWinBySequence: Stat
+}
+
+type DashboardLiveStats {
+    activeViewers: Int
+    totalViewers: Int
+    currentRequests: Int
+    totalRequests: Int
+}
+
+type Stat {
+    date: Long
+    total: Int
+    unique: Int
+    sequences: [Sequence]
+}
+
+type Sequence {
+    name: String
+    total: Int
+}

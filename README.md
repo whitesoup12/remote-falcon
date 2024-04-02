@@ -2,13 +2,14 @@
 
 # Remote Falcon
 
-- [What Is Remote Falcon?](#what-is-remote-falcon)
-- [What is this repository for?](#what-is-this-repository-for)
-- [Cloning the respository](#cloning-the-repository)
-- [How do I run it?](#how-do-i-run-it)
-- [I Need Help!](#i-need-help)
-- [Easiest To Run, Most Difficult To Test](#easiest-to-run-most-difficult-to-test)
-- [Most Difficult to Run, Easiest to Test](#most-difficult-to-run-easiest-to-test)
+- [Remote Falcon](#remote-falcon)
+    - [What Is Remote Falcon?](#what-is-remote-falcon)
+    - [What is this repository for?](#what-is-this-repository-for)
+    - [Cloning the repository](#cloning-the-repository)
+    - [How do I run it?](#how-do-i-run-it)
+    - [I Need Help!](#i-need-help)
+    - [Easiest To Run, Most Difficult To Test](#easiest-to-run-most-difficult-to-test)
+    - [Most Difficult to Run, Easiest to Test](#most-difficult-to-run-easiest-to-test)
 
 ### What Is Remote Falcon?
 <a href="https://remotefalcon.com" target="_blank">Remote Falcon</a> is a free web application that integrates with both <a href="ttps://github.com/FalconChristmas/fppFalcon" target="_blank">Falcon Player</a> and xSchedule (from <a href="https://github.com/smeighan/xLights" target="_blank">xLights</a>) to allow viewers to interact with your light show. Via a highly customizable Viewer Page, your visitor can request or vote on songs to be played on your display.
@@ -73,7 +74,6 @@ services:
       - REACT_APP_HOST_ENV=local
       - REACT_APP_BASE_API_PATH=http://host.docker.internal:8080
       - REACT_APP_DATADOG_CLIENT_TOKEN=
-      - REACT_APP_MIXPANEL_API_KEY=
       - REACT_APP_JWT_VIEWER_SIGN_KEY=1234567890
     depends_on:
       mysql:

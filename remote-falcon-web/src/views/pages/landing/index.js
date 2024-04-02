@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 
 import { styled } from '@mui/material/styles';
-import mixpanel from 'mixpanel-browser';
 
 import AppBar from 'ui-component/extended/AppBar';
 
@@ -26,27 +25,21 @@ const SecondWrapper = styled('div')(({ theme }) => ({
   }
 }));
 
-const Landing = () => {
-  useEffect(() => {
-    mixpanel.track('Landing Page View');
-  }, []);
-
-  return (
-    <>
-      <HeaderWrapper id="home">
-        <AppBar />
-        <Header />
-      </HeaderWrapper>
-      <SecondWrapper>
-        <Feature />
-      </SecondWrapper>
-      <SecondWrapper>
-        <KeyFeature />
-      </SecondWrapper>
-      <SecondWrapper />
-      <Footer />
-    </>
-  );
-};
+const Landing = () => (
+  <>
+    <HeaderWrapper id="home">
+      <AppBar />
+      <Header />
+    </HeaderWrapper>
+    <SecondWrapper>
+      <Feature />
+    </SecondWrapper>
+    <SecondWrapper>
+      <KeyFeature />
+    </SecondWrapper>
+    <SecondWrapper />
+    <Footer />
+  </>
+);
 
 export default Landing;

@@ -13,7 +13,7 @@ import { setSequences } from 'store/slices/controlPanel';
 import MainCard from 'ui-component/cards/MainCard';
 import SequencesSkeleton from 'ui-component/cards/Skeleton/SequencesSkeleton';
 import RFLoadingButton from 'ui-component/RFLoadingButton';
-import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
+import { showAlert } from 'views/pages/globalPageHelpers';
 
 import RFSplitButton from '../../../../ui-component/RFSplitButton';
 import CreateNewSequenceGroup from './CreateNewSequenceGroup.modal';
@@ -86,7 +86,6 @@ const Sequences = () => {
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
-      mixpanelTrack('Sequences Page View', coreInfo);
       await fetchSequences();
       await fetchSequenceGroups();
       setIsLoading(false);

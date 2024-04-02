@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'store';
 import { gridSpacing } from 'store/constant';
 import MainCard from 'ui-component/cards/MainCard';
 import TrackerSkeleton from 'ui-component/cards/Skeleton/TrackerSkeleton';
-import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
+import { showAlert } from 'views/pages/globalPageHelpers';
 
 import TrackerRow from './TrackerRow';
 
@@ -37,7 +37,6 @@ const Tracker = () => {
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
-      mixpanelTrack('Tracker Page View', coreInfo);
       await fetchWorkItems();
       setIsLoading(false);
     };

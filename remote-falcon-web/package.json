@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@apollo/client": "^3.8.10",
     "@auth0/auth0-spa-js": "^1.21.1",
     "@emotion/cache": "^11.7.1",
     "@emotion/react": "^11.9.0",
@@ -38,6 +39,7 @@
     "firebase": "^9.8.1",
     "formik": "^2.2.9",
     "framer-motion": "^4.1.13",
+    "graphql": "^16.8.1",
     "history": "^5.3.0",
     "html-to-react": "^1.5.0",
     "image-to-base64": "^2.2.0",
@@ -48,7 +50,6 @@
     "lodash": "^4.17.21",
     "material-ui-popup-state": "^2.0.0",
     "md5": "^2.3.0",
-    "mixpanel-browser": "^2.45.0",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.43",
     "prop-types": "^15.8.1",

@@ -6,7 +6,6 @@ import { TextField } from '@mui/material';
 import htmlToReact from 'html-to-react';
 import sign from 'jwt-encode';
 import _ from 'lodash';
-import mixpanel from 'mixpanel-browser';
 import Loading from 'react-fullscreen-loading';
 import { Helmet } from 'react-helmet';
 
@@ -92,13 +91,13 @@ const ExternalViewerPage = () => {
   }, []);
 
   const getExternalViewerPageDetails = useCallback(async () => {
-    let remoteName = '';
+    let showName = '';
     try {
       const externalViewerPageDetailsResponse = await getExternalViewerPageDetailsService();
       setExternalViewerPageDetails({
         ...externalViewerPageDetailsResponse.data
       });
-      remoteName = externalViewerPageDetailsResponse.data?.remotePreferences?.remoteName;
+      showName = externalViewerPageDetailsResponse.data?.remotePreferences?.showName;
       if (externalViewerPageDetails?.remotePreferences?.enableGeolocation) {
         setViewerLocation();
       }
@@ -115,7 +114,7 @@ const ExternalViewerPage = () => {
         })
       );
     }
-    return remoteName;
+    return showName;
   }, [dispatch, externalViewerPageDetails?.remotePreferences?.enableGeolocation, setViewerLocation]);
 
   const showViewerMessage = useCallback(
@@ -145,11 +144,7 @@ const ExternalViewerPage = () => {
   );
 
   const insertViewerPageStats = useCallback(async () => {
-    const remoteName = await getExternalViewerPageDetails();
-    const inserViewerPageStatsResponse = await insertViewerPageStatsService();
-    if (inserViewerPageStatsResponse?.status === 200) {
-      mixpanel.track('External Viewer Page View', { 'Show Name': remoteName });
-    }
+    await insertViewerPageStatsService();
   }, []);
 
   const addSequenceToQueue = useCallback(

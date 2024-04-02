@@ -11,14 +11,10 @@ const account = createSlice({
   name: 'account',
   initialState,
   reducers: {
-    startRegisterAction(state, action) {
-      state.coreInfo = action?.payload?.coreInfo;
-    },
     startLoginAction(state, action) {
       state.isLoggedIn = true;
       state.isInitialized = true;
-      state.isDemo = action?.payload?.isDemo;
-      state.coreInfo = action?.payload?.coreInfo;
+      state.coreInfo = action?.payload;
     },
     startLogoutAction(state) {
       state.isLoggedIn = false;
@@ -36,4 +32,4 @@ const account = createSlice({
 
 export default account.reducer;
 
-export const { startRegisterAction, startLoginAction, startLogoutAction, startFetchCoreInfoAction, setCoreInfo } = account.actions;
+export const { startLoginAction, startLogoutAction, startFetchCoreInfoAction, setCoreInfo } = account.actions;

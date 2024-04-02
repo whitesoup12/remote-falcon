@@ -12,4 +12,5 @@ public interface ViewerPageStatsRepository extends JpaRepository<ViewerPageStats
   void deleteAllByRemoteToken(String remoteToken);
   List<ViewerPageStats> findAllByRemoteTokenAndPageVisitDateTimeBetween(String remoteToken, ZonedDateTime startDate, ZonedDateTime endDate);
   List<ViewerPageStats> findAllByPageVisitDateTimeBefore(ZonedDateTime pageVisitDateTime);
+  List<ViewerPageStats> findAllByRemoteToken(String remoteToken);
 }

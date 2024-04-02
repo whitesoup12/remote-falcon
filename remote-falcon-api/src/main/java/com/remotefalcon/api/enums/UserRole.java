@@ -1,12 +1,11 @@
 package com.remotefalcon.api.enums;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public enum UserRole {
     USER("user"),
     ADMIN("admin");
 
-    public final String userRole;
-
-    private UserRole(String userRole) {
-        this.userRole = userRole;
-    }
+    private final String userRole;
 }

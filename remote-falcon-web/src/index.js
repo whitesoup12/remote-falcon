@@ -1,9 +1,9 @@
-import mixpanel from 'mixpanel-browser';
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 import DataDog from 'react-datadog';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-
 import '_mockApis';
 
 import App from 'App';
@@ -14,6 +14,50 @@ import * as serviceWorker from 'serviceWorker';
 import { store } from 'store';
 
 import 'assets/scss/style.scss';
+
+const graphQLURI = `${process?.env?.REACT_APP_BASE_API_PATH}/remotefalcon/api/graphql`;
+const httpLink = createHttpLink({
+  uri: graphQLURI
+});
+
+const defaultOptions = {
+  watchQuery: {
+    fetchPolicy: 'network-only'
+  },
+  query: {
+    fetchPolicy: 'network-only'
+  },
+  mutate: {
+    fetchPolicy: 'network-only'
+  }
+};
+
+const client = new ApolloClient({
+  cache: new InMemoryCache({
+    dataIdFromObject: () => null
+  }),
+  defaultOptions,
+  link: httpLink,
+  connectToDevTools: process?.env?.REACT_APP_HOST_ENV === 'local'
+});
+
+// eslint-disable-next-line import/prefer-default-export
+export function setGraphqlHeaders(serviceToken) {
+  let authLink = setContext((_, { headers }) => ({
+    headers: {
+      ...headers
+    }
+  }));
+  if (serviceToken && serviceToken !== '') {
+    authLink = setContext((_, { headers }) => ({
+      headers: {
+        ...headers,
+        authorization: `Bearer ${serviceToken}`
+      }
+    }));
+  }
+  client.setLink(authLink.concat(httpLink));
+}
 
 ReactDOM.render(
   <DataDog
@@ -28,21 +72,15 @@ ReactDOM.render(
     <Provider store={store}>
       <ConfigProvider>
         <BrowserRouter basename={BASE_PATH}>
-          <App />
+          <ApolloProvider client={client}>
+            <App />
+          </ApolloProvider>
         </BrowserRouter>
       </ConfigProvider>
     </Provider>
   </DataDog>,
   document.getElementById('root')
 );
-
-if (process?.env?.REACT_APP_MIXPANEL_API_KEY) {
-  mixpanel.init(process?.env?.REACT_APP_MIXPANEL_API_KEY);
-  mixpanel.register({ Environment: process?.env?.REACT_APP_HOST_ENV });
-} else {
-  mixpanel.init('*');
-  mixpanel.disable();
-}
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

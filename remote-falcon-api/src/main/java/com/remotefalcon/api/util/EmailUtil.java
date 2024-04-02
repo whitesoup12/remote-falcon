@@ -1,7 +1,6 @@
 package com.remotefalcon.api.util;
 
 import com.remotefalcon.api.documents.Show;
-import com.remotefalcon.api.entity.ExternalApiAccess;
 import com.remotefalcon.api.enums.EmailTemplate;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -29,13 +28,36 @@ public class EmailUtil {
   @Value("${BASE_APP_URL}")
   String baseAppUrl;
 
-  public Response sendEmail(Show show, ExternalApiAccess externalApiAccess, EmailTemplate emailTemplate) {
+  public Response sendSignUpEmail(Show show) {
+    Personalization personalization = new Personalization();
+    personalization.addTo(new Email(show.getEmail()));
+    personalization.addDynamicTemplateData("Show_Name", show.getShowName());
+    personalization.addDynamicTemplateData("Verify_Link", String.format("%s/verifyEmail/%s/%s", baseAppUrl, show.getShowToken(), show.getShowSubdomain()));
+    return sendEmail(EmailTemplate.SIGN_UP, personalization);
+  }
+
+  public Response sendForgotPasswordEmail(Show show, String passwordResetLink) {
+    Personalization personalization = new Personalization();
+    personalization.addTo(new Email(show.getEmail()));
+    personalization.addDynamicTemplateData("Reset_Password_Link", String.format("%s/resetPassword/%s", baseAppUrl, passwordResetLink));
+    return sendEmail(EmailTemplate.FORGOT_PASSWORD, personalization);
+  }
+
+  public Response sendRequestApiAccessEmail(Show show, String apiAccessToken, String apiAccessSecret) {
+    Personalization personalization = new Personalization();
+    personalization.addTo(new Email(show.getEmail()));
+    personalization.addDynamicTemplateData("Access_Token", apiAccessToken);
+    personalization.addDynamicTemplateData("Secret_Key", apiAccessSecret);
+    return sendEmail(EmailTemplate.REQUEST_API_ACCESS, personalization);
+  }
+
+  private Response sendEmail(EmailTemplate emailTemplate, Personalization personalization) {
     Response response = new Response();
     try {
       Mail mail = new Mail();
       mail.setFrom(new Email(mailFrom));
       mail.setTemplateId(emailTemplate.templateId);
-      mail.addPersonalization(this.setDynamicEmailTemplateData(show, externalApiAccess, emailTemplate));
+      mail.addPersonalization(personalization);
 
       SendGrid sg = new SendGrid(sendgridKey);
       Request request = new Request();
@@ -54,20 +76,5 @@ public class EmailUtil {
       response.setStatusCode(500);
     }
     return response;
-  }
-
-  private Personalization setDynamicEmailTemplateData(Show show, ExternalApiAccess externalApiAccess, EmailTemplate emailTemplate) {
-    Personalization personalization = new Personalization();
-    personalization.addTo(new Email(show.getEmail()));
-    if (emailTemplate == EmailTemplate.VERIFICATION) {
-      personalization.addDynamicTemplateData("Show_Name", show.getShowName());
-      personalization.addDynamicTemplateData("Verify_Link", String.format("%s/verifyEmail/%s/%s", baseAppUrl, show.getShowToken(), show.getShowSubdomain()));
-    } else if (emailTemplate == EmailTemplate.FORGOT_PASSWORD) {
-      personalization.addDynamicTemplateData("Reset_Password_Link", String.format("%s/resetPassword/%s", baseAppUrl, show.getPasswordResetLink()));
-    } else if (emailTemplate == EmailTemplate.REQUEST_API_ACCESS) {
-      personalization.addDynamicTemplateData("Access_Token", externalApiAccess.getAccessToken());
-      personalization.addDynamicTemplateData("Secret_Key", externalApiAccess.getAccessSecret());
-    }
-    return personalization;
   }
 }

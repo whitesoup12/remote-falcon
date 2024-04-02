@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 
+import { useLazyQuery } from '@apollo/client';
 import { Grid, TextField, Stack, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -7,7 +8,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import PropTypes from 'prop-types';
 
-import { dashboardStatsService } from 'services/controlPanel/dashboard.service';
+import reportWebVitals from 'reportWebVitals';
 import { useDispatch } from 'store';
 import { unexpectedErrorMessage } from 'store/constant';
 import { openSnackbar } from 'store/slices/snackbar';
@@ -16,6 +17,8 @@ import DashboardChartsSkeleton from 'ui-component/cards/Skeleton/DashboardCharts
 import SubCard from 'ui-component/cards/SubCard';
 import RFLoadingButton from 'ui-component/RFLoadingButton';
 
+import { ViewerControlMode } from '../../../../utils/enum';
+import { dashboardStatsQql } from '../../../../utils/graphql/dashboard/queries';
 import ApexBarChart from './ApexBarChart';
 import ApexLineChart from './ApexLineChart';
 import {
@@ -38,6 +41,8 @@ const DashboardCharts = ({ ...otherProps }) => {
   const dateMinus7 = new Date();
   dateMinus7.setDate(dateMinus7.getDate() - 7);
 
+  const [dashboardStatsQuery] = useLazyQuery(dashboardStatsQql);
+
   const [dateFilterStart, setDateFilterStart] = useState(dateMinus7.setHours(0, 0, 0));
   const [dateFilterEnd, setDateFilterEnd] = useState(new Date().setHours(23, 59, 59));
   const [dashboardStats, setDashboardStats] = useState();
@@ -45,23 +50,29 @@ const DashboardCharts = ({ ...otherProps }) => {
   const [isDownloadingStats, setIsDownloadingStats] = useState(false);
 
   const fetchDashboardStats = useCallback(async () => {
-    try {
-      const dashboardStatsResponse = await dashboardStatsService(otherProps.timezone, dateFilterStart, dateFilterEnd);
-      const dashboardStats = dashboardStatsResponse.data;
-      setDashboardStats(dashboardStats);
-    } catch (err) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: unexpectedErrorMessage,
-          variant: 'alert',
-          alert: {
-            color: 'error'
-          },
-          close: true
-        })
-      );
-    }
+    await dashboardStatsQuery({
+      variables: {
+        startDate: dateFilterStart,
+        endDate: dateFilterEnd,
+        timezone: otherProps.timezone
+      }
+    })
+      .then((response) => {
+        setDashboardStats(response?.data?.dashboardStats);
+      })
+      .catch(() => {
+        dispatch(
+          openSnackbar({
+            open: true,
+            message: unexpectedErrorMessage,
+            variant: 'alert',
+            alert: {
+              color: 'error'
+            },
+            close: true
+          })
+        );
+      });
   }, [dispatch, dateFilterStart, dateFilterEnd, otherProps.timezone]);
 
   useEffect(() => {
@@ -107,16 +118,7 @@ const DashboardCharts = ({ ...otherProps }) => {
           <Stack direction="row" spacing={2} justifyContent="right" pt={2}>
             <RFLoadingButton
               loading={isDownloadingStats}
-              onClick={() =>
-                downloadStatsToExcel(
-                  dispatch,
-                  otherProps.timezone,
-                  dateFilterStart,
-                  dateFilterEnd,
-                  setIsDownloadingStats,
-                  otherProps.coreInfo
-                )
-              }
+              onClick={() => downloadStatsToExcel(dispatch, otherProps.timezone, setIsDownloadingStats)}
               color="primary"
             >
               Download Stats
@@ -145,7 +147,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       {isLoading || otherProps.isLoading ? (
         <DashboardChartsSkeleton />
       ) : (
-        otherProps.viewerControlMode === 'jukebox' && (
+        otherProps.viewerControlMode === ViewerControlMode.JUKEBOX && (
           <Grid item xs={12} md={6} lg={6}>
             <MainCard title="Sequence Requests by Date" sx={{ overflow: 'visible' }}>
               <ApexLineChart chartData={sequenceRequestsByDate(dashboardStats)} />
@@ -156,7 +158,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       {isLoading || otherProps.isLoading ? (
         <DashboardChartsSkeleton />
       ) : (
-        otherProps.viewerControlMode === 'jukebox' && (
+        otherProps.viewerControlMode === ViewerControlMode.JUKEBOX && (
           <Grid item xs={12} md={6} lg={6}>
             <MainCard title="Sequence Requests" sx={{ overflow: 'visible' }}>
               <ApexBarChart chartData={sequenceRequests(dashboardStats)} />
@@ -167,7 +169,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       {isLoading || otherProps.isLoading ? (
         <DashboardChartsSkeleton />
       ) : (
-        otherProps.viewerControlMode === 'voting' && (
+        otherProps.viewerControlMode === ViewerControlMode.VOTING && (
           <Grid item xs={12} md={6} lg={6}>
             <MainCard title="Sequence Votes by Date" sx={{ overflow: 'visible' }}>
               <ApexLineChart chartData={sequenceVotesByDate(dashboardStats)} />
@@ -178,7 +180,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       {isLoading || otherProps.isLoading ? (
         <DashboardChartsSkeleton />
       ) : (
-        otherProps.viewerControlMode === 'voting' && (
+        otherProps.viewerControlMode === ViewerControlMode.VOTING && (
           <Grid item xs={12} md={6} lg={6}>
             <MainCard title="Sequence Votes" sx={{ overflow: 'visible' }}>
               <ApexBarChart chartData={sequenceVotes(dashboardStats)} />
@@ -189,7 +191,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       {isLoading || otherProps.isLoading ? (
         <DashboardChartsSkeleton />
       ) : (
-        otherProps.viewerControlMode === 'voting' && (
+        otherProps.viewerControlMode === ViewerControlMode.VOTING && (
           <Grid item xs={12} md={6} lg={6}>
             <MainCard title="Total Wins by Date" sx={{ overflow: 'visible' }}>
               <ApexLineChart chartData={sequenceVoteWinsByDate(dashboardStats)} />
@@ -200,7 +202,7 @@ const DashboardCharts = ({ ...otherProps }) => {
       {isLoading || otherProps.isLoading ? (
         <DashboardChartsSkeleton />
       ) : (
-        otherProps.viewerControlMode === 'voting' && (
+        otherProps.viewerControlMode === ViewerControlMode.VOTING && (
           <Grid item xs={12} md={6} lg={6}>
             <MainCard title="Sequence Wins" sx={{ overflow: 'visible' }}>
               <ApexBarChart chartData={sequenceVoteWins(dashboardStats)} />

@@ -20,9 +20,9 @@ const HeaderWrapper = styled('div')(({ theme }) => ({
 
 const basicData = [
   {
-    title: 'Where do I find my Remote Token?',
+    title: 'Where do I find my Show Token?',
     defaultExpand: false,
-    content: 'Your Remote Token can be found under Account Settings -> Account.'
+    content: 'Your Show Token can be found under Account Settings -> Account.'
   },
   {
     title: 'Does Remote Falcon have a Facebook group?',

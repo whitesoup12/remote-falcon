@@ -9,6 +9,7 @@ import Customization from 'layout/Customization';
 import { useDispatch, useSelector } from 'store';
 import { openDrawer } from 'store/slices/menu';
 
+import { ViewerControlMode } from '../../../utils/enum';
 import LogoSection from '../LogoSection';
 import { getAllJukeboxRequests, purgeQueue, resetVotes, deleteJukeboxRequest } from './helpers';
 import LocalizationSection from './LocalizationSection';
@@ -88,12 +89,12 @@ const Header = () => {
           size={matchMobile ? 'small' : 'large'}
           sx={{ ml: 1, background: theme.palette.error.main, '&:hover': { background: theme.palette.error.dark } }}
           onClick={
-            coreInfo?.viewerControlMode === 'jukebox'
+            coreInfo?.preference?.viewerControlMode === ViewerControlMode.JUKEBOX
               ? () => getAllJukeboxRequests(dispatch, setIsFetching, setAllJukeboxRequests, openViewJukeboxRequests, coreInfo)
               : () => resetVotes(dispatch, setIsFetching, coreInfo)
           }
         >
-          {coreInfo?.viewerControlMode === 'jukebox' ? <>View Queue</> : <>Reset Votes</>}
+          {coreInfo?.preference?.viewerControlMode === ViewerControlMode.JUKEBOX ? <>View Queue</> : <>Reset Votes</>}
         </LoadingButton>
       </Box>
 

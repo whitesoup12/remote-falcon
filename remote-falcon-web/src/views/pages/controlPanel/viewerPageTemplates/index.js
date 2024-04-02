@@ -12,7 +12,6 @@ import { openSnackbar } from 'store/slices/snackbar';
 import MainCard from 'ui-component/cards/MainCard';
 import ViewerPageTemplatesSkeleton from 'ui-component/cards/Skeleton/ViewerPageTemplatesSkeleton';
 import { RFTabPanel, RFTab } from 'ui-component/RFTabPanel';
-import { mixpanelTrack } from 'views/pages/globalPageHelpers';
 
 import FreeTemplates from './FreeTemplates';
 import { tabOptions, handleTemplateChange } from './helpers';
@@ -64,7 +63,6 @@ const ViewerPageTemplates = () => {
 
   useEffect(() => {
     const init = async () => {
-      mixpanelTrack('Viewer Page Templates Page View', coreInfo);
       await fetchRemoteViewerPageTemplates();
     };
 

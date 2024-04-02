@@ -19,10 +19,10 @@ const Account = ({
   isDemo,
   requestApiAccess,
   isRequestingApi,
-  remoteToken,
-  showRemoteToken,
-  handleClickShowRemoteToken,
-  copyRemoteToken
+  showToken,
+  showShowToken,
+  handleClickShowShowToken,
+  copyShowToken
 }) => (
   <Grid item xs={12}>
     <MainCard content={false}>
@@ -31,31 +31,25 @@ const Account = ({
         <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
           <Grid item xs={12} md={6} lg={4}>
             <Typography variant="h4" sx={{ m: 0 }}>
-              Remote Token
+              Show Token
             </Typography>
             <Typography component="div" variant="caption">
-              This is your Remote Token that will be used in the FPP or xSchedule plugins.
+              This is your Show Token that will be used in the FPP or xSchedule plugins.
               <br />
               Treat this token like a password, as it allows FPP and xSchedule to communicate with your show page!
             </Typography>
           </Grid>
           <Grid item xs={12} md={6} lg={4}>
-            {showRemoteToken ? (
-              <span style={{ fontSize: '1.2em' }}>{remoteToken}</span>
+            {showShowToken ? (
+              <span style={{ fontSize: '1.2em' }}>{showToken}</span>
             ) : (
               <span style={{ fontSize: '1.2em' }}>&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
             )}
-            <IconButton
-              aria-label="toggle password visibility"
-              onClick={handleClickShowRemoteToken}
-              edge="end"
-              size="small"
-              sx={{ ml: 0.5 }}
-            >
-              {showRemoteToken ? <Visibility /> : <VisibilityOff />}
+            <IconButton aria-label="toggle password visibility" onClick={handleClickShowShowToken} edge="end" size="small" sx={{ ml: 0.5 }}>
+              {showShowToken ? <Visibility /> : <VisibilityOff />}
             </IconButton>
-            <Tooltip placement="top" title="Copy Remote Token">
-              <IconButton aria-label="copy remote token" onClick={copyRemoteToken} edge="end" size="small" sx={{ ml: 0.5 }}>
+            <Tooltip placement="top" title="Copy Show Token">
+              <IconButton aria-label="copy show token" onClick={copyShowToken} edge="end" size="small" sx={{ ml: 0.5 }}>
                 <ContentCopyTwoToneIcon />
               </IconButton>
             </Tooltip>
@@ -116,10 +110,10 @@ Account.propTypes = {
   isDemo: PropTypes.bool,
   requestApiAccess: PropTypes.func,
   isRequestingApi: PropTypes.bool,
-  remoteToken: PropTypes.string,
-  showRemoteToken: PropTypes.bool,
-  handleClickShowRemoteToken: PropTypes.func,
-  copyRemoteToken: PropTypes.func
+  showToken: PropTypes.string,
+  showShowToken: PropTypes.bool,
+  handleClickShowShowToken: PropTypes.func,
+  copyShowToken: PropTypes.func
 };
 
 export default Account;

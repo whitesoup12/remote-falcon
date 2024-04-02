@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -19,21 +19,14 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Formik } from 'formik';
-import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 
 import useAuth from 'hooks/useAuth';
-import useScriptRef from 'hooks/useScriptRef';
-import { useDispatch } from 'store';
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import { strengthColor, strengthIndicatorNumFunc } from 'utils/password-strength';
-import { showAlert } from 'views/pages/globalPageHelpers';
 
-const JWTRegister = ({ ...others }) => {
+const AuthRegister = () => {
   const theme = useTheme();
-  const navigate = useNavigate();
-  const scriptedRef = useScriptRef();
-  const dispatch = useDispatch();
 
   const matchDownSM = useMediaQuery(theme.breakpoints.down('md'));
   const [showPassword, setShowPassword] = React.useState(false);
@@ -56,10 +49,6 @@ const JWTRegister = ({ ...others }) => {
     setLevel(strengthColor(temp));
   };
 
-  useEffect(() => {
-    // changePassword('123456');
-  }, []);
-
   return (
     <>
       <Formik
@@ -79,34 +68,12 @@ const JWTRegister = ({ ...others }) => {
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
           password: Yup.string().max(255).required('Password is required')
         })}
-        onSubmit={async (values, { setSubmitting }) => {
-          try {
-            const response = await register(values.showName, values.email, values.password, values.firstName, values.lastName);
-
-            if (scriptedRef.current) {
-              setSubmitting(false);
-            }
-
-            if (response?.status === 200) {
-              showAlert({ dispatch, message: `A verification email has been sent to ${values.email}` });
-              navigate('/signin', { replace: true });
-            }
-          } catch (err) {
-            if (scriptedRef.current) {
-              setSubmitting(false);
-            }
-            if (err?.response?.status === 401) {
-              showAlert({ dispatch, message: 'That email or show name already exists', alert: 'error' });
-            } else if (err?.response?.status === 403) {
-              showAlert({ dispatch, message: 'Unable to send verification email', alert: 'error' });
-            } else {
-              showAlert({ dispatch, alert: 'error' });
-            }
-          }
+        onSubmit={async (values) => {
+          await register(values.showName, values.email, values.password, values.firstName, values.lastName);
         }}
       >
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
-          <form noValidate onSubmit={handleSubmit} {...others}>
+          <form noValidate onSubmit={handleSubmit}>
             <Grid container spacing={matchDownSM ? 0 : 2}>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -252,4 +219,4 @@ const JWTRegister = ({ ...others }) => {
   );
 };
 
-export default JWTRegister;
+export default AuthRegister;

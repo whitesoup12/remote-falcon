@@ -20,7 +20,6 @@ const GuestGuard = ({ children }) => {
 
   useEffect(() => {
     if (isExternalViewer() && !isLoggedIn) {
-      services.restore();
       navigate('/remote-falcon', { replace: true });
     }
     if (isLoggedIn) {

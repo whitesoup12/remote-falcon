@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.remotefalcon.api.documents.Show;
@@ -11,13 +12,14 @@ import com.remotefalcon.api.dto.TokenDTO;
 import com.remotefalcon.api.dto.ViewerTokenDTO;
 import com.remotefalcon.api.entity.ExternalApiAccess;
 import com.remotefalcon.api.entity.Remote;
+import com.remotefalcon.api.enums.StatusResponse;
 import com.remotefalcon.api.repository.ExternalApiAccessRepository;
 import com.remotefalcon.api.repository.RemoteRepository;
-import com.remotefalcon.api.repository.ShowRepository;
+import com.remotefalcon.api.repository.mongo.ShowRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -29,6 +31,7 @@ import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AuthUtil {
   private final RemoteRepository remoteRepository;
   private final ExternalApiAccessRepository externalApiAccessRepository;
@@ -39,14 +42,6 @@ public class AuthUtil {
 
   @Value("${JWT_VIEWER_SIGN_KEY}")
   String jwtViewerSignKey;
-
-  @Autowired
-  public AuthUtil(RemoteRepository remoteRepository, ExternalApiAccessRepository externalApiAccessRepository,
-                  ShowRepository showRepository) {
-    this.remoteRepository = remoteRepository;
-    this.externalApiAccessRepository = externalApiAccessRepository;
-    this.showRepository = showRepository;
-  }
 
   public String signJwt(Show show) {
     Map<String, Object> jwtPayload = new HashMap<String, Object>();
@@ -68,13 +63,17 @@ public class AuthUtil {
   public TokenDTO getJwtPayload() {
     HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
     String token = this.getTokenFromRequest(request);
-    DecodedJWT decodedJWT = JWT.decode(token);
-    Map<String, Object> userDataMap = decodedJWT.getClaim("user-data").asMap();
-    return TokenDTO.builder()
-            .showToken((String) userDataMap.get("showToken"))
-            .email((String) userDataMap.get("email"))
-            .showSubdomain((String) userDataMap.get("showSubdomain"))
-            .build();
+    try {
+      DecodedJWT decodedJWT = JWT.decode(token);
+      Map<String, Object> userDataMap = decodedJWT.getClaim("user-data").asMap();
+      return TokenDTO.builder()
+              .showToken((String) userDataMap.get("showToken"))
+              .email((String) userDataMap.get("email"))
+              .showSubdomain((String) userDataMap.get("showSubdomain"))
+              .build();
+    }catch (JWTDecodeException jde) {
+      throw new RuntimeException(StatusResponse.INVALID_JWT.name());
+    }
   }
 
   public ViewerTokenDTO getViewerJwtPayload() {
@@ -105,14 +104,14 @@ public class AuthUtil {
     try {
       String token = this.getTokenFromRequest(httpServletRequest);
       if (StringUtils.isEmpty(token)) {
-        return false;
+        throw new RuntimeException(StatusResponse.INVALID_JWT.name());
       }
       Algorithm algorithm = Algorithm.HMAC256(jwtSignKey);
       JWTVerifier verifier = JWT.require(algorithm).withIssuer("remotefalcon").build();
       verifier.verify(token);
       return true;
     } catch (JWTVerificationException e) {
-      return false;
+      throw new RuntimeException(StatusResponse.INVALID_JWT.name());
     }
   }
 
@@ -167,6 +166,7 @@ public class AuthUtil {
         token = authorization.split(" ")[1];
       }catch (Exception e) {
         log.error("Error getting token from request");
+        throw new RuntimeException(StatusResponse.INVALID_JWT.name());
       }
     }
     return token;

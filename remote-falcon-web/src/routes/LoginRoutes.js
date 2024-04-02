@@ -35,7 +35,7 @@ const LoginRoutes = {
       element: <AuthRegister />
     },
     {
-      path: '/verifyEmail/:remoteToken/:remoteSubdomain',
+      path: '/verifyEmail/:showToken/:showSubdomain',
       element: <VerifyEmail />
     },
     {

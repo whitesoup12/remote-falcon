@@ -25,7 +25,6 @@ import useConfig from 'hooks/useConfig';
 import { useSelector } from 'store';
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
-import { mixpanelTrack } from 'views/pages/globalPageHelpers';
 
 const ProfileSection = () => {
   const theme = useTheme();
@@ -42,7 +41,6 @@ const ProfileSection = () => {
   const anchorRef = useRef(null);
   const handleLogout = async () => {
     try {
-      mixpanelTrack('Logout', coreInfo);
       await logout();
     } catch (err) {
       console.error(err);
@@ -69,11 +67,11 @@ const ProfileSection = () => {
 
   const prevOpen = useRef(open);
   useEffect(() => {
-    let showUrl = `https://${coreInfo?.remoteSubdomain}.remotefalcon.com`;
+    let showUrl = `https://${coreInfo?.showSubdomain}.remotefalcon.com`;
     if (process?.env?.REACT_APP_HOST_ENV === 'local') {
-      showUrl = `http://${coreInfo?.remoteSubdomain}.localhost:3000`;
+      showUrl = `http://${coreInfo?.showSubdomain}.localhost:3000`;
     } else if (process?.env?.REACT_APP_HOST_ENV === 'development') {
-      showUrl = `https://${coreInfo?.remoteSubdomain}.remotefalcon.dev`;
+      showUrl = `https://${coreInfo?.showSubdomain}.remotefalcon.dev`;
     }
     setShowNameUrl(showUrl);
 
@@ -171,7 +169,7 @@ const ProfileSection = () => {
                             sx={{ fontWeight: 400, cursor: 'pointer', justifyContent: 'center' }}
                             onClick={() => handleShowNameClick()}
                           >
-                            {coreInfo?.remoteName}
+                            {coreInfo?.showName}
                           </Typography>
                         </Stack>
                         <Stack direction="row" spacing={0.5} alignItems="center" sx={{ pt: 1 }}>

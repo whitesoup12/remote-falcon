@@ -22,20 +22,12 @@ import { Link } from 'react-router-dom';
 import * as Yup from 'yup';
 
 import useAuth from 'hooks/useAuth';
-import useScriptRef from 'hooks/useScriptRef';
-import { useDispatch } from 'store';
-import { unexpectedErrorMessage } from 'store/constant';
-import { openSnackbar } from 'store/slices/snackbar';
 import AnimateButton from 'ui-component/extended/AnimateButton';
 
 const JWTLogin = ({ ...others }) => {
   const theme = useTheme();
 
-  const dispatch = useDispatch();
-
   const { login } = useAuth();
-
-  const scriptedRef = useScriptRef();
 
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => {
@@ -57,57 +49,8 @@ const JWTLogin = ({ ...others }) => {
         email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
         password: Yup.string().max(255).required('Password is required')
       })}
-      onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
-        try {
-          await login(values.email, values.password);
-          if (scriptedRef.current) {
-            setStatus({ success: true });
-            setSubmitting(false);
-          }
-        } catch (err) {
-          if (scriptedRef.current) {
-            setSubmitting(false);
-            setStatus({ success: false });
-            setErrors({ submit: err });
-          }
-          if (err.response?.status === 401) {
-            dispatch(
-              openSnackbar({
-                open: true,
-                message: 'Invalid Credentials',
-                variant: 'alert',
-                alert: {
-                  color: 'error'
-                },
-                close: true
-              })
-            );
-          } else if (err.response?.status === 403) {
-            dispatch(
-              openSnackbar({
-                open: true,
-                message: 'This email has not been verified',
-                variant: 'alert',
-                alert: {
-                  color: 'warning'
-                },
-                close: true
-              })
-            );
-          } else {
-            dispatch(
-              openSnackbar({
-                open: true,
-                message: unexpectedErrorMessage,
-                variant: 'alert',
-                alert: {
-                  color: 'error'
-                },
-                close: true
-              })
-            );
-          }
-        }
+      onSubmit={async (values) => {
+        await login(values.email, values.password);
       }}
     >
       {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (

@@ -48,9 +48,9 @@ services.onPost('/remotefalcon/api/account/signIn').reply(async (request) => {
 
     const userData = {
       'user-data': {
-        remoteToken: coreInfo.remoteToken,
+        showToken: coreInfo.showToken,
         email: coreInfo.email,
-        remoteSubdomain: coreInfo.remoteSubdomain
+        showSubdomain: coreInfo.showSubdomain
       }
     };
 

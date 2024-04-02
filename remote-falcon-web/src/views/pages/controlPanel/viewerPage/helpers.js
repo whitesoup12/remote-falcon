@@ -14,7 +14,7 @@ import {
   validateHtmlService
 } from 'services/controlPanel/viewerPage.service';
 import HtmlValidationSkeleton from 'ui-component/cards/Skeleton/HtmlValidationSkeleton';
-import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
+import { showAlert } from 'views/pages/globalPageHelpers';
 
 export const handleStartingTemplateChange = (event, value, setSelectedStartingTemplate) => {
   setSelectedStartingTemplate(value);
@@ -148,7 +148,6 @@ export const createNewViewerPage = async (
     const response = await addRemoteViewerPageService(createViewerPageData);
     if (response?.status === 200) {
       showAlert({ dispatch, message: 'Viewer Page Created' });
-      mixpanelTrack('Viewer Page Created', coreInfo);
       closeCreateViewerPage(setNewViewerPageName, setNewViewerPageError, setCreateViewerPageOpen);
       fetchRemoteViewerPages();
     } else if (response?.status === 204) {
@@ -175,7 +174,6 @@ const saveViewerPage = async (dispatch, remoteViewerPages, activeViewerPageHtml,
   const response = await saveRemoteViewerPageService(modifiedRemoteViewerPage);
   if (response?.status === 200) {
     showAlert({ dispatch, message: 'Viewer Page Saved' });
-    mixpanelTrack('Viewer Page Saved', coreInfo);
   } else {
     showAlert({ dispatch, alert: 'error' });
   }
@@ -194,7 +192,6 @@ export const deleteViewerPage = async (
   const response = await deleteRemoteViewerPageService(remoteViewerPageKey);
   if (response?.status === 200) {
     showAlert({ dispatch, message: 'Viewer Page Deleted' });
-    mixpanelTrack('Viewer Page Deleted', coreInfo);
     setIsLoading(false);
     await fetchRemoteViewerPages();
   } else {
@@ -215,7 +212,6 @@ const copyHtmlToClipboard = async (dispatch, activeViewerPageHtml, coreInfo) => 
     document.execCommand('copy', true, activeViewerPageHtml);
   }
   showAlert({ dispatch, message: 'HTML Copied' });
-  mixpanelTrack('Viewer Page HTML Copied', coreInfo);
 };
 
 export const openCloseActionsSpeedial = (setOpenSpeedial, openSpeedial) => {

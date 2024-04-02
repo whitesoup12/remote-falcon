@@ -12,7 +12,7 @@ import {
   deleteAllSequencesService
 } from 'services/controlPanel/sequences.services';
 import { setSequences } from 'store/slices/controlPanel';
-import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
+import { showAlert } from 'views/pages/globalPageHelpers';
 
 export const openCreateNewSequenceGroup = (setCreateNewSequenceGroupOpen, setNewSequenceGroupName, setNewSequenceGroupNameError) => {
   setCreateNewSequenceGroupOpen(true);
@@ -58,7 +58,6 @@ export const playSequence = async (dispatch, sequenceKey, sequenceName, setShowL
   const response = await playSequenceService(sequenceKey);
   if (response?.status === 200) {
     showAlert({ dispatch, message: `${sequenceName} Queued Next` });
-    mixpanelTrack('Sequence Played', coreInfo);
   } else if (response?.status === 204) {
     showAlert({ dispatch, message: 'You have already requested a sequence', alert: 'warning' });
   } else {
@@ -83,7 +82,6 @@ export const toggleSequenceVisibility = async (dispatch, sequenceKey, sequenceNa
       })
     );
     showAlert({ dispatch, message: `${sequenceName} Visibility Saved` });
-    mixpanelTrack('Sequence Visibility Toggled', coreInfo);
   } else {
     showAlert({ dispatch, alert: 'error' });
   }
@@ -95,7 +93,6 @@ export const deleteSequence = async ({ dispatch, sequenceKey, sequenceName, setS
   const response = await deleteSequenceService(sequenceKey);
   if (response?.status === 200) {
     showAlert({ dispatch, message: `${sequenceName} Deleted` });
-    mixpanelTrack('Sequence Deleted', coreInfo);
     await fetchSequences();
   } else {
     showAlert({ dispatch, alert: 'error' });
@@ -122,7 +119,6 @@ export const saveSequenceGroup = async (
     const saveSequenceGroupResponse = await saveSequenceGroupService(newSequenceGroupName);
     if (saveSequenceGroupResponse?.status === 200) {
       showAlert({ dispatch, message: `${newSequenceGroupName} Saved` });
-      mixpanelTrack('Sequence Group Created', coreInfo);
       await fetchSequenceGroups();
     } else {
       showAlert({ dispatch, alert: 'error' });
@@ -147,7 +143,6 @@ export const deleteSequenceGroup = async (
     const deleteSequenceGroupResponse = await deleteSequenceGroupService(sequenceGroupKey);
     if (deleteSequenceGroupResponse?.status === 200) {
       showAlert({ dispatch, message: `${sequenceGroupName} Deleted` });
-      mixpanelTrack('Sequence Group Deleted', coreInfo);
       await fetchSequenceGroups();
     } else {
       showAlert({ dispatch, alert: 'error' });
@@ -215,7 +210,6 @@ export const sortSequencesAlphabetically = async (sequences, setShowLinearProgre
   const response = await updateSequenceOrderService(sequencesArray);
   if (response?.status === 200) {
     showAlert({ dispatch, message: 'Sequences Sorted Alphabetically' });
-    mixpanelTrack('Sequences Sorted Alphabetically', coreInfo);
   } else {
     showAlert({ dispatch, alert: 'error' });
   }
@@ -238,7 +232,6 @@ export const reorderSequences = async (result, sequences, setShowLinearProgress,
   const response = await updateSequenceOrderService(sequencesArray);
   if (response?.status === 200) {
     showAlert({ dispatch, message: 'Sequence Order Updated' });
-    mixpanelTrack('Sequences Sorted Alphabetically', coreInfo);
   } else {
     showAlert({ dispatch, alert: 'error' });
   }
@@ -252,7 +245,6 @@ export const deleteSequences = async (options, selectedIndex, setShowLinearProgr
     const response = await deleteInactiveSequencesService();
     if (response?.status === 200) {
       showAlert({ dispatch, message: 'All Inactive Sequences Deleted' });
-      mixpanelTrack('Inactive Sequences Deleted', coreInfo);
       await fetchSequences();
     } else {
       showAlert({ dispatch, alert: 'error' });
@@ -263,7 +255,6 @@ export const deleteSequences = async (options, selectedIndex, setShowLinearProgr
     const response = await deleteAllSequencesService();
     if (response?.status === 200) {
       showAlert({ dispatch, message: 'All Sequences Deleted' });
-      mixpanelTrack('All Sequences Deleted', coreInfo);
       await fetchSequences();
     } else {
       showAlert({ dispatch, alert: 'error' });

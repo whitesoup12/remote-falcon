@@ -2,38 +2,29 @@ package com.remotefalcon.api.controller;
 
 import com.remotefalcon.api.aop.RequiresAccess;
 import com.remotefalcon.api.aop.RequiresAdminAccess;
+import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.entity.*;
 import com.remotefalcon.api.request.*;
 import com.remotefalcon.api.response.GitHubIssueResponse;
 import com.remotefalcon.api.response.PublicViewerPagesResponse;
-import com.remotefalcon.api.response.RemoteResponse;
 import com.remotefalcon.api.service.ControlPanelService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 public class ControlPanelController {
   private final ControlPanelService controlPanelService;
 
-  @Autowired
-  public ControlPanelController(ControlPanelService controlPanelService) {
-    this.controlPanelService = controlPanelService;
-  }
-
-  @GetMapping(value = "/controlPanel/isJwtValid")
+  @QueryMapping
   @RequiresAccess()
-  public ResponseEntity<?> isJwtValid() {
-    return ResponseEntity.status(200).build();
-  }
-
-  @GetMapping(value = "/controlPanel/coreInfo")
-  @RequiresAccess()
-  public ResponseEntity<RemoteResponse> coreInfo() {
-    return this.controlPanelService.coreInfo();
+  public Show coreInfo() {
+    return controlPanelService.coreInfo();
   }
 
   @DeleteMapping(value = "/controlPanel/deleteViewerStats")

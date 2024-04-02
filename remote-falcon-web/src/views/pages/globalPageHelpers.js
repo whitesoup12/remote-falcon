@@ -1,8 +1,7 @@
-import mixpanel from 'mixpanel-browser';
-
 import { unexpectedErrorMessage } from 'store/constant';
 import { openSnackbar } from 'store/slices/snackbar';
 
+// eslint-disable-next-line import/prefer-default-export
 export const showAlert = ({ dispatch, message, alert }) => {
   dispatch(
     openSnackbar({
@@ -13,8 +12,4 @@ export const showAlert = ({ dispatch, message, alert }) => {
       }
     })
   );
-};
-
-export const mixpanelTrack = (event, coreInfo) => {
-  mixpanel.track(event, { 'Show Name': coreInfo?.remoteName });
 };

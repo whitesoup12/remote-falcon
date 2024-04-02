@@ -46,13 +46,11 @@ export const totalRequestsService = async (timezone, startDateMillis, endDateMil
   return response;
 };
 
-export const downloadStatsToExcelService = async (timezone, startDateMillis, endDateMillis) => {
+export const downloadStatsToExcelService = async (timezone) => {
   const response = await axios.post(
     '/remotefalcon/api/controlPanel/downloadStatsToExcel',
     {
-      timezone,
-      startDateMillis,
-      endDateMillis
+      timezone
     },
     { responseType: 'blob' }
   );

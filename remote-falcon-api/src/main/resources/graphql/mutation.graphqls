@@ -1,0 +1,7 @@
+type Mutation {
+    #Account
+    forgotPassword(email: String!): Boolean
+    signUp(firstName: String!, lastName: String!, showName: String!): Show
+    verifyEmail(showToken: String!): Boolean
+    resetPassword: Boolean
+}

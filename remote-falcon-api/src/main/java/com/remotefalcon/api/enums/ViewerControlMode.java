@@ -1,12 +1,11 @@
 package com.remotefalcon.api.enums;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public enum ViewerControlMode {
   JUKEBOX("jukebox"),
   VOTING("voting");
 
-  public final String viewerControlMode;
-
-  private ViewerControlMode(String viewerControlMode) {
-    this.viewerControlMode = viewerControlMode;
-  }
+  private final String viewerControlMode;
 }

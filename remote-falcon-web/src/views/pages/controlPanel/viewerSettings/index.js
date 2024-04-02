@@ -12,7 +12,7 @@ import { setRemotePrefs, setExternalViewerPageMeta } from 'store/slices/controlP
 import MainCard from 'ui-component/cards/MainCard';
 import ViewerSettingsSkeleton from 'ui-component/cards/Skeleton/ViewerSettingsSkeleton';
 import { RFTabPanel, RFTab } from 'ui-component/RFTabPanel';
-import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
+import { showAlert } from 'views/pages/globalPageHelpers';
 
 import ExternalViewerPageSettings from './ExternalViewerPageSettings';
 import {
@@ -100,7 +100,6 @@ const ViewerSettings = () => {
   useEffect(() => {
     const init = async () => {
       setShowSkeletonLoader(true);
-      mixpanelTrack('Remote Falcon Settings Page View', coreInfo);
       await fetchSequences();
       await fetchRemotePrefs();
       await fetchExternalViewerPageMeta();

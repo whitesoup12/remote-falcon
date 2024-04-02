@@ -11,7 +11,7 @@ import {
   updatePasswordService,
   importantAnalyticsService
 } from 'services/controlPanel/accountSettings.service';
-import { showAlert, mixpanelTrack } from 'views/pages/globalPageHelpers';
+import { showAlert } from 'views/pages/globalPageHelpers';
 
 export const handleInputChange = (event, value, setUserProfile, userProfile) => {
   setUserProfile({
@@ -44,8 +44,8 @@ export const handleImportantAnalyticsClose = (setImportantAnalyticsOpen) => {
   setImportantAnalyticsOpen(false);
 };
 
-export const handleClickShowRemoteToken = (setShowRemoteToken, showRemoteToken) => {
-  setShowRemoteToken(!showRemoteToken);
+export const handleClickShowShowToken = (setShowShowToken, showShowToken) => {
+  setShowShowToken(!showShowToken);
 };
 
 export const tabOptions = [
@@ -57,7 +57,7 @@ export const tabOptions = [
   {
     label: 'Account',
     icon: <DescriptionTwoToneIcon />,
-    caption: 'Remote Token and other account settings'
+    caption: 'Show Token and other account settings'
   },
   {
     label: 'Change Password',
@@ -108,7 +108,6 @@ export const requestApiAccess = async (dispatch, setIsRequestingApi) => {
 export const deleteAccount = async (dispatch, coreInfo, setIsDeleting, logout) => {
   setIsDeleting(true);
   const response = await deleteAccountService();
-  mixpanelTrack('Delete Account', coreInfo);
   if (response?.status === 200) {
     logout();
   } else {
@@ -120,7 +119,6 @@ export const deleteAccount = async (dispatch, coreInfo, setIsDeleting, logout) =
 export const updateEmail = async (dispatch, coreInfo, setIsUpdatingEmail, logout, userProfile, setUpdateEmailOpen, setUserProfile) => {
   setIsUpdatingEmail(true);
   const response = await updateEmailService(userProfile?.email);
-  mixpanelTrack('Update Email', coreInfo);
   if (response?.status === 200) {
     showAlert({ dispatch, message: 'Email updated and verification email sent', alert: 'success' });
     setTimeout(() => {
@@ -154,12 +152,11 @@ export const importantAnalytics = async () => {
   importantAnalyticsService();
 };
 
-export const copyRemoteToken = async (dispatch, coreInfo) => {
+export const copyShowToken = async (dispatch, coreInfo) => {
   if ('clipboard' in navigator) {
-    await navigator.clipboard.writeText(coreInfo?.remoteToken);
+    await navigator.clipboard.writeText(coreInfo?.showToken);
   } else {
-    document.execCommand('copy', true, coreInfo?.remoteToken);
+    document.execCommand('copy', true, coreInfo?.showToken);
   }
-  showAlert({ dispatch, message: 'Remote Token Copied' });
-  mixpanelTrack('Viewer Page HTML Copied', coreInfo);
+  showAlert({ dispatch, message: 'Show Token Copied' });
 };

@@ -1,39 +1,37 @@
 package com.remotefalcon.api.service;
 
+import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.dto.TokenDTO;
 import com.remotefalcon.api.entity.*;
-import com.remotefalcon.api.enums.EmailTemplate;
 import com.remotefalcon.api.repository.*;
+import com.remotefalcon.api.repository.mongo.ShowRepository;
 import com.remotefalcon.api.request.*;
 import com.remotefalcon.api.response.GitHubIssueResponse;
 import com.remotefalcon.api.response.PublicViewerPagesResponse;
-import com.remotefalcon.api.response.RemoteResponse;
 import com.remotefalcon.api.util.AuthUtil;
 import com.remotefalcon.api.util.EmailUtil;
 import com.remotefalcon.api.util.RandomUtil;
-import com.sendgrid.Response;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.dozer.DozerBeanMapper;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class ControlPanelService {
-  private final String VISIBLE_IN_RF_QUERY_ID = "f38a779c-5096-4c7c-b5d7-5efb84cfc7ff";
-
   private final RemoteRepository remoteRepository;
   private final RemotePreferenceRepository remotePreferenceRepository;
   private final ViewerPageStatsRepository viewerPageStatsRepository;
@@ -52,68 +50,39 @@ public class ControlPanelService {
   private final DefaultViewerPageRepository defaultViewerPageRepository;
   private final CurrentPlaylistRepository currentPlaylistRepository;
   private final FppScheduleRepository fppScheduleRepository;
-  private final PasswordResetRepository passwordResetRepository;
+  private final PasswordResetMySQLRepository passwordResetMySQLRepository;
   private final RemoteViewerPagesRepository remoteViewerPagesRepository;
   private final RemoteViewerPageTemplatesRepository remoteViewerPageTemplatesRepository;
-  private final PluginService pluginService;
   private final AuthUtil authUtil;
-  private final DozerBeanMapper mapper;
   private final EmailUtil emailUtil;
   private final EasterEggRepository easterEggRepository;
   private final NotificationsRepository notificationsRepository;
   private final WebClient gitHubWebClient;
 
-  public ControlPanelService(RemoteRepository remoteRepository, RemotePreferenceRepository remotePreferenceRepository,
-                             ViewerPageStatsRepository viewerPageStatsRepository, ViewerJukeStatsRepository viewerJukeStatsRepository, ViewerVoteStatsRepository viewerVoteStatsRepository,
-                             ViewerVoteWinStatsRepository viewerVoteWinStatsRepository, ActiveViewerRepository activeViewerRepository,
-                             ExternalApiAccessRepository externalApiAccessRepository, PlaylistRepository playlistRepository, RemoteJukeRepository remoteJukeRepository,
-                             RemoteViewerVoteRepository remoteViewerVoteRepository, ViewerPageMetaRepository viewerPageMetaRepository, DefaultViewerPageRepository defaultViewerPageRepository,
-                             CurrentPlaylistRepository currentPlaylistRepository, FppScheduleRepository fppScheduleRepository, PasswordResetRepository passwordResetRepository,
-                             PluginService pluginService, PageGalleryHeartsRepository pageGalleryHeartsRepository, AuthUtil authUtil, DozerBeanMapper mapper,
-                             EmailUtil emailUtil, PlaylistGroupRepository playlistGroupRepository, PsaSequenceRepository psaSequenceRepository, RemoteViewerPagesRepository remoteViewerPagesRepository,
-                             RemoteViewerPageTemplatesRepository remoteViewerPageTemplatesRepository, EasterEggRepository easterEggRepository, NotificationsRepository notificationsRepository,
-                             WebClient gitHubWebClient) {
-    this.remoteRepository = remoteRepository;
-    this.remotePreferenceRepository = remotePreferenceRepository;
-    this.viewerPageStatsRepository = viewerPageStatsRepository;
-    this.viewerJukeStatsRepository = viewerJukeStatsRepository;
-    this.viewerVoteStatsRepository = viewerVoteStatsRepository;
-    this.viewerVoteWinStatsRepository = viewerVoteWinStatsRepository;
-    this.activeViewerRepository = activeViewerRepository;
-    this.externalApiAccessRepository = externalApiAccessRepository;
-    this.playlistRepository = playlistRepository;
-    this.remoteJukeRepository = remoteJukeRepository;
-    this.remoteViewerVoteRepository = remoteViewerVoteRepository;
-    this.viewerPageMetaRepository = viewerPageMetaRepository;
-    this.pageGalleryHeartsRepository = pageGalleryHeartsRepository;
-    this.defaultViewerPageRepository = defaultViewerPageRepository;
-    this.currentPlaylistRepository = currentPlaylistRepository;
-    this.fppScheduleRepository = fppScheduleRepository;
-    this.passwordResetRepository = passwordResetRepository;
-    this.pluginService = pluginService;
-    this.authUtil = authUtil;
-    this.mapper = mapper;
-    this.emailUtil = emailUtil;
-    this.playlistGroupRepository = playlistGroupRepository;
-    this.psaSequenceRepository = psaSequenceRepository;
-    this.remoteViewerPagesRepository = remoteViewerPagesRepository;
-    this.remoteViewerPageTemplatesRepository = remoteViewerPageTemplatesRepository;
-    this.easterEggRepository = easterEggRepository;
-    this.notificationsRepository = notificationsRepository;
-    this.gitHubWebClient = gitHubWebClient;
-  }
+  private final ShowRepository showRepository;
 
-  public ResponseEntity<RemoteResponse> coreInfo() {
+//  public ResponseEntity<RemoteResponse> coreInfo() {
+//    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
+//    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
+//    RemoteResponse remoteResponse = this.mapper.map(remote, RemoteResponse.class);
+//    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
+//    if(remotePreference != null) {
+//      remoteResponse.setViewerControlMode(remotePreference.getViewerControlMode());
+//    }
+//    remote.setLastLoginDate(ZonedDateTime.now());
+//    this.remoteRepository.save(remote);
+//    return ResponseEntity.status(200).body(remoteResponse);
+//  }
+
+  public Show coreInfo() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
-    RemoteResponse remoteResponse = this.mapper.map(remote, RemoteResponse.class);
-    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
-    if(remotePreference != null) {
-      remoteResponse.setViewerControlMode(remotePreference.getViewerControlMode());
+    Optional<Show> show = this.showRepository.findByShowToken(tokenDTO.getShowToken());
+    if(show.isPresent()) {
+      show.get().setLastLoginDate(LocalDateTime.now());
+      this.showRepository.save(show.get());
+      return show.get();
     }
-    remote.setLastLoginDate(ZonedDateTime.now());
-    this.remoteRepository.save(remote);
-    return ResponseEntity.status(200).body(remoteResponse);
+    return null;
   }
 
   public ResponseEntity<?> deleteViewerStats() {
@@ -203,11 +172,11 @@ public class ControlPanelService {
             .createdDate(ZonedDateTime.now())
             .build();
     this.externalApiAccessRepository.save(externalApiAccess);
-    Response response = this.emailUtil.sendEmail(null, externalApiAccess, EmailTemplate.REQUEST_API_ACCESS);
-    if(response.getStatusCode() != 202) {
-      this.externalApiAccessRepository.delete(externalApiAccess);
-      return ResponseEntity.status(HttpStatus.valueOf(403)).build();
-    }
+//    Response response = this.emailUtil.sendEmail(null, null,externalApiAccess, EmailTemplate.REQUEST_API_ACCESS);
+//    if(response.getStatusCode() != 202) {
+//      this.externalApiAccessRepository.delete(externalApiAccess);
+//      return ResponseEntity.status(HttpStatus.valueOf(403)).build();
+//    }
     return ResponseEntity.status(200).build();
   }
 
@@ -219,7 +188,7 @@ public class ControlPanelService {
     this.externalApiAccessRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
     this.fppScheduleRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
     this.pageGalleryHeartsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.passwordResetRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
+    this.passwordResetMySQLRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
     this.playlistRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
     this.remoteJukeRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
     this.remotePreferenceRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
@@ -765,7 +734,7 @@ public class ControlPanelService {
       remote.setEmail(updatedEmail);
       remote.setEmailVerified(false);
       this.remoteRepository.save(remote);
-      this.emailUtil.sendEmail(null, null, EmailTemplate.VERIFICATION);
+      //this.emailUtil.sendEmail(null, null,null, EmailTemplate.VERIFICATION);
       return ResponseEntity.status(200).build();
     }
     return ResponseEntity.status(400).build();

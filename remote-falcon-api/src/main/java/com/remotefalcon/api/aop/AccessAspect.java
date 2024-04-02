@@ -1,5 +1,6 @@
 package com.remotefalcon.api.aop;
 
+import com.remotefalcon.api.enums.StatusResponse;
 import com.remotefalcon.api.util.AuthUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -25,7 +26,7 @@ public class AccessAspect {
     if(this.authUtil.isJwtValid(request)) {
       return proceedingJoinPoint.proceed();
     }
-    return ResponseEntity.status(401).build();
+    throw new RuntimeException(StatusResponse.INVALID_JWT.name());
   }
 
   @Around("@annotation(RequiresViewerAccess)")

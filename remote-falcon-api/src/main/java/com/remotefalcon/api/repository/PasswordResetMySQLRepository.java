@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional;
 import java.time.ZonedDateTime;
 
 @Repository
-public interface PasswordResetRepository extends JpaRepository<PasswordReset, Integer> {
+public interface PasswordResetMySQLRepository extends JpaRepository<PasswordReset, Integer> {
   @Transactional
   void deleteAllByRemoteToken(String remoteToken);
   @Transactional

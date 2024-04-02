@@ -1,9 +1,6 @@
 package com.remotefalcon.api.util;
 
-import com.remotefalcon.api.model.ViewerJukeStatsSequenceRequests;
-import com.remotefalcon.api.model.ViewerVoteStatsSequenceVotes;
-import com.remotefalcon.api.model.ViewerVoteWinStatsSequenceWins;
-import com.remotefalcon.api.response.DashboardStats;
+import com.remotefalcon.api.response.dashboard.DashboardStatsResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.poi.ss.usermodel.*;
@@ -26,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class ExcelUtil {
 
-  public ResponseEntity<ByteArrayResource> generateDashboardExcel(DashboardStats dashboardStats, String timezone) {
+  public ResponseEntity<ByteArrayResource> generateDashboardExcel(DashboardStatsResponse dashboardStats, String timezone) {
     ResponseEntity<ByteArrayResource> response =  ResponseEntity.status(204).build();
     Workbook workbook = new XSSFWorkbook();
 
@@ -55,7 +52,7 @@ public class ExcelUtil {
     return response;
   }
 
-  private void uniquePageVisitsByDate(Workbook workbook, DashboardStats dashboardStats, String timezone) {
+  private void uniquePageVisitsByDate(Workbook workbook, DashboardStatsResponse dashboardStats, String timezone) {
     Sheet sheet = workbook.createSheet("Unique Page Visits by Date");
     sheet.setColumnWidth(0, 6000);
     sheet.setColumnWidth(1, 4000);
@@ -71,20 +68,20 @@ public class ExcelUtil {
     headerCell.setCellStyle(getHeaderStyle(workbook));
 
     AtomicInteger rowIndex = new AtomicInteger(1);
-    dashboardStats.getViewerPageVisitsByDate().forEach(visit -> {
+    dashboardStats.getPage().forEach(visit -> {
       Row row = sheet.createRow(rowIndex.get());
 
       Cell cell = row.createCell(0);
-      cell.setCellValue(formatDateColumn(visit.getPageVisitDate(), timezone));
+      cell.setCellValue(formatDateColumn(visit.getDate(), timezone));
 
       cell = row.createCell(1);
-      cell.setCellValue(visit.getUniqueVisits());
+      cell.setCellValue(visit.getUnique());
 
       rowIndex.getAndIncrement();
     });
   }
 
-  private void totalPageVisitsByDate(Workbook workbook, DashboardStats dashboardStats, String timezone) {
+  private void totalPageVisitsByDate(Workbook workbook, DashboardStatsResponse dashboardStats, String timezone) {
     Sheet sheet = workbook.createSheet("Total Page Visits by Date");
     sheet.setColumnWidth(0, 6000);
     sheet.setColumnWidth(1, 4000);
@@ -100,20 +97,20 @@ public class ExcelUtil {
     headerCell.setCellStyle(getHeaderStyle(workbook));
 
     AtomicInteger rowIndex = new AtomicInteger(1);
-    dashboardStats.getViewerPageVisitsByDate().forEach(visit -> {
+    dashboardStats.getPage().forEach(visit -> {
       Row row = sheet.createRow(rowIndex.get());
 
       Cell cell = row.createCell(0);
-      cell.setCellValue(formatDateColumn(visit.getPageVisitDate(), timezone));
+      cell.setCellValue(formatDateColumn(visit.getDate(), timezone));
 
       cell = row.createCell(1);
-      cell.setCellValue(visit.getTotalVisits());
+      cell.setCellValue(visit.getTotal());
 
       rowIndex.getAndIncrement();
     });
   }
 
-  private void sequenceRequestsByDate(Workbook workbook, DashboardStats dashboardStats, String timezone) {
+  private void sequenceRequestsByDate(Workbook workbook, DashboardStatsResponse dashboardStats, String timezone) {
     Sheet sheet = workbook.createSheet("Sequence Requests by Date");
     sheet.setColumnWidth(0, 6000);
     sheet.setColumnWidth(1, 12000);
@@ -134,18 +131,18 @@ public class ExcelUtil {
     headerCell.setCellStyle(getHeaderStyle(workbook));
 
     AtomicInteger rowIndex = new AtomicInteger(1);
-    dashboardStats.getJukeboxRequestsByDate().forEach(request -> {
+    dashboardStats.getJukeboxByDate().forEach(request -> {
       Row row = sheet.createRow(rowIndex.get());
 
       Cell cell = row.createCell(0);
-      cell.setCellValue(formatDateColumn(request.getRequestDate(), timezone));
+      cell.setCellValue(formatDateColumn(request.getDate(), timezone));
 
       cell = row.createCell(1);
       StringBuilder sequenceRequests = new StringBuilder();
       int sequenceRequestIndex = 1;
-      for(ViewerJukeStatsSequenceRequests sequenceRequest : request.getSequenceRequests()) {
-        sequenceRequests.append(String.format("%s: %s", sequenceRequest.getSequenceName(), sequenceRequest.getSequenceRequests()));
-        if(request.getSequenceRequests().size() > sequenceRequestIndex) {
+      for(DashboardStatsResponse.Sequence sequenceRequest : request.getSequences()) {
+        sequenceRequests.append(String.format("%s: %s", sequenceRequest.getName(), sequenceRequest.getTotal()));
+        if(request.getSequences().size() > sequenceRequestIndex) {
           sequenceRequests.append("\r\n");
         }
         sequenceRequestIndex++;
@@ -154,13 +151,13 @@ public class ExcelUtil {
       cell.setCellStyle(getCellWrapStyle(workbook));
 
       cell = row.createCell(2);
-      cell.setCellValue(request.getTotalRequests());
+      cell.setCellValue(request.getTotal());
 
       rowIndex.getAndIncrement();
     });
   }
 
-  private void sequenceRequestsBySequence(Workbook workbook, DashboardStats dashboardStats) {
+  private void sequenceRequestsBySequence(Workbook workbook, DashboardStatsResponse dashboardStats) {
     Sheet sheet = workbook.createSheet("Sequence Requests by Sequence");
     sheet.setColumnWidth(0, 6000);
     sheet.setColumnWidth(1, 4000);
@@ -176,20 +173,20 @@ public class ExcelUtil {
     headerCell.setCellStyle(getHeaderStyle(workbook));
 
     AtomicInteger rowIndex = new AtomicInteger(1);
-    dashboardStats.getJukeboxRequestsBySequence().getSequenceRequests().forEach(sequence -> {
+    dashboardStats.getJukeboxBySequence().getSequences().forEach(sequence -> {
       Row row = sheet.createRow(rowIndex.get());
 
       Cell cell = row.createCell(0);
-      cell.setCellValue(sequence.getSequenceName());
+      cell.setCellValue(sequence.getName());
 
       cell = row.createCell(1);
-      cell.setCellValue(sequence.getSequenceRequests());
+      cell.setCellValue(sequence.getTotal());
 
       rowIndex.getAndIncrement();
     });
   }
 
-  private void sequenceVotesByDate(Workbook workbook, DashboardStats dashboardStats, String timezone) {
+  private void sequenceVotesByDate(Workbook workbook, DashboardStatsResponse dashboardStats, String timezone) {
     Sheet sheet = workbook.createSheet("Sequence Votes by Date");
     sheet.setColumnWidth(0, 6000);
     sheet.setColumnWidth(1, 12000);
@@ -210,18 +207,18 @@ public class ExcelUtil {
     headerCell.setCellStyle(getHeaderStyle(workbook));
 
     AtomicInteger rowIndex = new AtomicInteger(1);
-    dashboardStats.getViewerVoteStatsByDate().forEach(vote -> {
+    dashboardStats.getVotingByDate().forEach(vote -> {
       Row row = sheet.createRow(rowIndex.get());
 
       Cell cell = row.createCell(0);
-      cell.setCellValue(formatDateColumn(vote.getVoteDate(), timezone));
+      cell.setCellValue(formatDateColumn(vote.getDate(), timezone));
 
       cell = row.createCell(1);
       StringBuilder sequenceRequests = new StringBuilder();
       int sequenceVoteIndex = 1;
-      for(ViewerVoteStatsSequenceVotes sequenceVote : vote.getSequenceVotes()) {
-        sequenceRequests.append(String.format("%s: %s", sequenceVote.getSequenceName(), sequenceVote.getSequenceVotes()));
-        if(vote.getSequenceVotes().size() > sequenceVoteIndex) {
+      for(DashboardStatsResponse.Sequence sequenceVote : vote.getSequences()) {
+        sequenceRequests.append(String.format("%s: %s", sequenceVote.getName(), sequenceVote.getTotal()));
+        if(vote.getSequences().size() > sequenceVoteIndex) {
           sequenceRequests.append("\r\n");
         }
         sequenceVoteIndex++;
@@ -230,13 +227,13 @@ public class ExcelUtil {
       cell.setCellStyle(getCellWrapStyle(workbook));
 
       cell = row.createCell(2);
-      cell.setCellValue(vote.getTotalVotes());
+      cell.setCellValue(vote.getTotal());
 
       rowIndex.getAndIncrement();
     });
   }
 
-  private void sequenceVotesBySequence(Workbook workbook, DashboardStats dashboardStats) {
+  private void sequenceVotesBySequence(Workbook workbook, DashboardStatsResponse dashboardStats) {
     Sheet sheet = workbook.createSheet("Sequence Votes by Sequence");
     sheet.setColumnWidth(0, 6000);
     sheet.setColumnWidth(1, 4000);
@@ -252,20 +249,20 @@ public class ExcelUtil {
     headerCell.setCellStyle(getHeaderStyle(workbook));
 
     AtomicInteger rowIndex = new AtomicInteger(1);
-    dashboardStats.getViewerVoteStatsBySequence().getSequenceVotes().forEach(sequence -> {
+    dashboardStats.getVotingBySequence().getSequences().forEach(sequence -> {
       Row row = sheet.createRow(rowIndex.get());
 
       Cell cell = row.createCell(0);
-      cell.setCellValue(sequence.getSequenceName());
+      cell.setCellValue(sequence.getName());
 
       cell = row.createCell(1);
-      cell.setCellValue(sequence.getSequenceVotes());
+      cell.setCellValue(sequence.getTotal());
 
       rowIndex.getAndIncrement();
     });
   }
 
-  private void sequenceWinsByDate(Workbook workbook, DashboardStats dashboardStats, String timezone) {
+  private void sequenceWinsByDate(Workbook workbook, DashboardStatsResponse dashboardStats, String timezone) {
     Sheet sheet = workbook.createSheet("Sequence Wins by Date");
     sheet.setColumnWidth(0, 6000);
     sheet.setColumnWidth(1, 12000);
@@ -286,18 +283,18 @@ public class ExcelUtil {
     headerCell.setCellStyle(getHeaderStyle(workbook));
 
     AtomicInteger rowIndex = new AtomicInteger(1);
-    dashboardStats.getViewerVoteWinStatsByDate().forEach(win -> {
+    dashboardStats.getVotingWinByDate().forEach(win -> {
       Row row = sheet.createRow(rowIndex.get());
 
       Cell cell = row.createCell(0);
-      cell.setCellValue(formatDateColumn(win.getVoteDate(), timezone));
+      cell.setCellValue(formatDateColumn(win.getDate(), timezone));
 
       cell = row.createCell(1);
       StringBuilder sequenceRequests = new StringBuilder();
       int sequenceVoteIndex = 1;
-      for(ViewerVoteWinStatsSequenceWins sequenceWin : win.getSequenceWins()) {
-        sequenceRequests.append(String.format("%s: %s", sequenceWin.getSequenceName(), sequenceWin.getSequenceWins()));
-        if(win.getSequenceWins().size() > sequenceVoteIndex) {
+      for(DashboardStatsResponse.Sequence sequenceWin : win.getSequences()) {
+        sequenceRequests.append(String.format("%s: %s", sequenceWin.getName(), sequenceWin.getTotal()));
+        if(win.getSequences().size() > sequenceVoteIndex) {
           sequenceRequests.append("\r\n");
         }
         sequenceVoteIndex++;
@@ -306,13 +303,13 @@ public class ExcelUtil {
       cell.setCellStyle(getCellWrapStyle(workbook));
 
       cell = row.createCell(2);
-      cell.setCellValue(win.getTotalVotes());
+      cell.setCellValue(win.getTotal());
 
       rowIndex.getAndIncrement();
     });
   }
 
-  private void sequenceWinsBySequence(Workbook workbook, DashboardStats dashboardStats) {
+  private void sequenceWinsBySequence(Workbook workbook, DashboardStatsResponse dashboardStats) {
     Sheet sheet = workbook.createSheet("Sequence Wins by Sequence");
     sheet.setColumnWidth(0, 6000);
     sheet.setColumnWidth(1, 4000);
@@ -328,14 +325,14 @@ public class ExcelUtil {
     headerCell.setCellStyle(getHeaderStyle(workbook));
 
     AtomicInteger rowIndex = new AtomicInteger(1);
-    dashboardStats.getViewerVoteWinStatsBySequence().getSequenceWins().forEach(sequence -> {
+    dashboardStats.getVotingWinBySequence().getSequences().forEach(sequence -> {
       Row row = sheet.createRow(rowIndex.get());
 
       Cell cell = row.createCell(0);
-      cell.setCellValue(sequence.getSequenceName());
+      cell.setCellValue(sequence.getName());
 
       cell = row.createCell(1);
-      cell.setCellValue(sequence.getSequenceWins());
+      cell.setCellValue(sequence.getTotal());
 
       rowIndex.getAndIncrement();
     });

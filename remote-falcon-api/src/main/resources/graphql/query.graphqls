@@ -1,0 +1,12 @@
+type Query {
+    #Account
+    signIn: Show
+    verifyPasswordResetLink(passwordResetLink: String!): Show
+
+    #Control Panel
+    coreInfo: Show
+
+    #Dashboard
+    dashboardLiveStats(startDate: Long!, endDate: Long!, timezone: String = "America/Chicago"): DashboardLiveStats
+    dashboardStats(startDate: Long!, endDate: Long!, timezone: String = "America/Chicago"): DashboardStats
+}

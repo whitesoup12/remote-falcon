@@ -12,7 +12,6 @@ import { setRemoteViewerPages, setRemoteViewerPageTemplates } from 'store/slices
 import { openSnackbar } from 'store/slices/snackbar';
 import MainCard from 'ui-component/cards/MainCard';
 import ViewerPageEditorSkeleton from 'ui-component/cards/Skeleton/ViewerPageEditorSkeleton';
-import { mixpanelTrack } from 'views/pages/globalPageHelpers';
 
 import CreateViewerPageModal from './CreateViewerPage.modal';
 import {
@@ -132,7 +131,6 @@ const ViewerPage = () => {
 
   useEffect(() => {
     const init = async () => {
-      mixpanelTrack('Viewer Page Page View', coreInfo);
       await fetchRemoteViewerPages();
       await fetchRemoteViewerPageTemplates();
     };

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
+import { useLazyQuery, useMutation } from '@apollo/client';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import {
@@ -23,15 +24,15 @@ import * as Yup from 'yup';
 import useAuth from 'hooks/useAuth';
 import useScriptRef from 'hooks/useScriptRef';
 import { useDispatch } from 'store';
-import { unexpectedErrorMessage } from 'store/constant';
-import { openSnackbar } from 'store/slices/snackbar';
 import AnimateButton from 'ui-component/extended/AnimateButton';
+import { StatusResponse } from 'utils/enum';
+import { verifyPasswordResetLinkQql } from 'utils/graphql/account/queries';
 import { strengthColor, strengthIndicatorNumFunc } from 'utils/password-strength';
+import { showAlert } from 'views/pages/globalPageHelpers';
 
 const AuthResetPassword = ({ ...others }) => {
   const theme = useTheme();
-  const scriptedRef = useScriptRef();
-  const { validatePasswordResetLink, resetPassword } = useAuth();
+  const { resetPassword } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [strength, setStrength] = useState(0);
   const [level, setLevel] = useState();
@@ -43,6 +44,8 @@ const AuthResetPassword = ({ ...others }) => {
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
+
+  const [verifyPasswordResetLinkQuery] = useLazyQuery(verifyPasswordResetLinkQql);
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -58,45 +61,39 @@ const AuthResetPassword = ({ ...others }) => {
     setLevel(strengthColor(temp));
   };
 
-  useEffect(() => {
-    const validateLink = async () => {
-      try {
-        const response = await validatePasswordResetLink(passwordResetLink);
-        if (response?.status === 200) {
-          setLinkValid(true);
-          setServiceToken(response.data);
-        }
-      } catch (err) {
-        if (err?.response?.status === 401) {
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: 'Invalid Password Reset Link',
-              variant: 'alert',
-              alert: {
-                color: 'error'
-              },
-              close: true
-            })
-          );
+  const validateLink = useCallback(async () => {
+    await verifyPasswordResetLinkQuery({
+      variables: {
+        passwordResetLink
+      },
+      onCompleted: (data) => {
+        setLinkValid(true);
+        console.log(data);
+        setServiceToken(data?.verifyPasswordResetLink?.serviceToken);
+      },
+      onError: (error) => {
+        if (error?.message === StatusResponse.UNAUTHORIZED) {
+          showAlert({
+            dispatch,
+            message: 'Invalid Password Reset Link',
+            alert: 'error'
+          });
         } else {
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: unexpectedErrorMessage,
-              variant: 'alert',
-              alert: {
-                color: 'error'
-              },
-              close: true
-            })
-          );
+          showAlert({ dispatch, alert: 'error' });
         }
-        navigate('/signin', { replace: true });
+        setTimeout(() => {
+          navigate('/signin', { replace: true });
+        }, 3000);
       }
+    });
+  }, [dispatch, navigate, passwordResetLink, verifyPasswordResetLinkQuery]);
+
+  useEffect(() => {
+    const init = async () => {
+      await validateLink();
     };
-    validateLink();
-  });
+    init();
+  }, [validateLink]);
 
   return (
     <Formik
@@ -112,43 +109,9 @@ const AuthResetPassword = ({ ...others }) => {
           then: Yup.string().oneOf([Yup.ref('password')], 'Passwords do not match')
         })
       })}
-      onSubmit={async (values, { setSubmitting }) => {
-        try {
-          const passwordBase64 = Buffer.from(values.password, 'binary').toString('base64');
-          const response = await resetPassword(serviceToken, passwordBase64);
-          if (scriptedRef.current) {
-            setSubmitting(false);
-          }
-          if (response?.status === 200) {
-            dispatch(
-              openSnackbar({
-                open: true,
-                message: 'Password Reset',
-                variant: 'alert',
-                alert: {
-                  color: 'success'
-                },
-                close: true
-              })
-            );
-            navigate('/signin', { replace: true });
-          }
-        } catch (err) {
-          if (scriptedRef.current) {
-            setSubmitting(false);
-          }
-          dispatch(
-            openSnackbar({
-              open: true,
-              message: unexpectedErrorMessage,
-              variant: 'alert',
-              alert: {
-                color: 'error'
-              },
-              close: true
-            })
-          );
-        }
+      onSubmit={async (values) => {
+        const passwordBase64 = Buffer.from(values.password, 'binary').toString('base64');
+        await resetPassword(serviceToken, passwordBase64);
       }}
     >
       {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (

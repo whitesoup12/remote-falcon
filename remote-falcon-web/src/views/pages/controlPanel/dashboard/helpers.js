@@ -3,12 +3,15 @@ import _ from 'lodash';
 import moment from 'moment/moment';
 
 import { downloadStatsToExcelService } from 'services/controlPanel/dashboard.service';
-import { mixpanelTrack, showAlert } from 'views/pages/globalPageHelpers';
+import { showAlert } from 'views/pages/globalPageHelpers';
+
+import { unexpectedErrorMessage } from '../../../../store/constant';
+import { openSnackbar } from '../../../../store/slices/snackbar';
 
 export const uniqueViewersByDate = (dashboardStats) => {
   const data = [];
-  _.map(dashboardStats?.viewerPageVisitsByDate, (viewerPageVisit) => {
-    data.push([viewerPageVisit.pageVisitDate, viewerPageVisit.uniqueVisits]);
+  _.map(dashboardStats?.page, (viewerPageVisit) => {
+    data.push([viewerPageVisit.date, viewerPageVisit.unique]);
   });
   return {
     yValue: 'Unique Viewers: ',
@@ -18,8 +21,8 @@ export const uniqueViewersByDate = (dashboardStats) => {
 
 export const totalViewersByDate = (dashboardStats) => {
   const data = [];
-  _.map(dashboardStats?.viewerPageVisitsByDate, (viewerPageVisit) => {
-    data.push([viewerPageVisit.pageVisitDate, viewerPageVisit.totalVisits]);
+  _.map(dashboardStats?.page, (viewerPageVisit) => {
+    data.push([viewerPageVisit.date, viewerPageVisit.total]);
   });
   return {
     yValue: 'Total Viewers: ',
@@ -31,12 +34,12 @@ export const sequenceRequestsByDate = (dashboardStats) => {
   const seriesLabels = [];
   const data = [];
   let labels = [];
-  _.map(dashboardStats?.jukeboxRequestsByDate, (request) => {
-    data.push([request.requestDate, request.totalRequests]);
-    _.forEach(request.sequenceRequests, (sequence) => {
+  _.map(dashboardStats?.jukeboxByDate, (request) => {
+    data.push([request.date, request.total]);
+    _.forEach(request.sequences, (sequence) => {
       labels.push({
-        label: `${sequence.sequenceName}: `,
-        value: `<strong>${sequence.sequenceRequests}</strong><br />`
+        label: `${sequence.name}: `,
+        value: `<strong>${sequence.total}</strong><br />`
       });
     });
     seriesLabels.push(labels);
@@ -51,10 +54,8 @@ export const sequenceRequestsByDate = (dashboardStats) => {
 
 export const sequenceRequests = (dashboardStats) => {
   const data = [];
-  _.map(dashboardStats?.jukeboxRequestsBySequence, (sequenceRequest) => {
-    _.forEach(sequenceRequest, (request) => {
-      data.push({ x: request.sequenceName, y: request.sequenceRequests });
-    });
+  _.forEach(dashboardStats?.jukeboxBySequence?.sequences, (sequence) => {
+    data.push({ x: sequence.name, y: sequence.total });
   });
   return {
     yValue: 'Total Requests: ',
@@ -66,12 +67,12 @@ export const sequenceVotesByDate = (dashboardStats) => {
   const seriesLabels = [];
   const data = [];
   let labels = [];
-  _.map(dashboardStats?.viewerVoteStatsByDate, (vote) => {
-    data.push([vote.voteDate, vote.totalVotes]);
-    _.forEach(vote.sequenceVotes, (sequence) => {
+  _.map(dashboardStats?.votingByDate, (vote) => {
+    data.push([vote.date, vote.total]);
+    _.forEach(vote.sequences, (sequence) => {
       labels.push({
-        label: `${sequence.sequenceName}: `,
-        value: `<strong>${sequence.sequenceVotes}</strong><br />`
+        label: `${sequence.name}: `,
+        value: `<strong>${sequence.total}</strong><br />`
       });
     });
     seriesLabels.push(labels);
@@ -86,10 +87,8 @@ export const sequenceVotesByDate = (dashboardStats) => {
 
 export const sequenceVotes = (dashboardStats) => {
   const data = [];
-  _.map(dashboardStats?.viewerVoteStatsBySequence, (sequenceVote) => {
-    _.forEach(sequenceVote, (vote) => {
-      data.push({ x: vote.sequenceName, y: vote.sequenceVotes });
-    });
+  _.forEach(dashboardStats?.votingBySequence?.sequences, (vote) => {
+    data.push({ x: vote.name, y: vote.total });
   });
   return {
     yValue: 'Total Votes: ',
@@ -101,12 +100,12 @@ export const sequenceVoteWinsByDate = (dashboardStats) => {
   const seriesLabels = [];
   const data = [];
   let labels = [];
-  _.map(dashboardStats?.viewerVoteWinStatsByDate, (vote) => {
-    data.push([vote.voteDate, vote.totalVotes]);
-    _.forEach(vote.sequenceWins, (sequence) => {
+  _.map(dashboardStats?.votingWinByDate, (vote) => {
+    data.push([vote.date, vote.total]);
+    _.forEach(vote.sequences, (sequence) => {
       labels.push({
-        label: `${sequence.sequenceName}: `,
-        value: `<strong>${sequence.sequenceWins}</strong><br />`
+        label: `${sequence.name}: `,
+        value: `<strong>${sequence.total}</strong><br />`
       });
     });
     seriesLabels.push(labels);
@@ -121,10 +120,8 @@ export const sequenceVoteWinsByDate = (dashboardStats) => {
 
 export const sequenceVoteWins = (dashboardStats) => {
   const data = [];
-  _.map(dashboardStats?.viewerVoteWinStatsBySequence, (sequenceVoteWins) => {
-    _.forEach(sequenceVoteWins, (voteWin) => {
-      data.push({ x: voteWin.sequenceName, y: voteWin.sequenceWins });
-    });
+  _.forEach(dashboardStats?.votingWinBySequence?.sequences, (voteWin) => {
+    data.push({ x: voteWin.name, y: voteWin.total });
   });
   return {
     yValue: 'Total Wins: ',
@@ -132,10 +129,9 @@ export const sequenceVoteWins = (dashboardStats) => {
   };
 };
 
-export const downloadStatsToExcel = async (dispatch, timezone, dateFilterStart, dateFilterEnd, setIsDownloadingStats, coreInfo) => {
+export const downloadStatsToExcel = async (dispatch, timezone, setIsDownloadingStats) => {
   setIsDownloadingStats(true);
-  mixpanelTrack('Dashboard Stats Download', coreInfo);
-  const response = await downloadStatsToExcelService(timezone, dateFilterStart, dateFilterEnd);
+  const response = await downloadStatsToExcelService(timezone);
   if (response?.status === 200) {
     fileDownload(response.data, 'Remote Falcon Stats.xlsx');
     showAlert({ dispatch, message: 'Dashboard Stats Downloaded' });

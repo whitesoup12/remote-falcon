@@ -31,7 +31,6 @@ import {
 import { useSelector } from 'store';
 import MainCard from 'ui-component/cards/MainCard';
 import Transitions from 'ui-component/extended/Transitions';
-import { mixpanelTrack } from 'views/pages/globalPageHelpers';
 
 import NotificationModal from './Notification.modal';
 import NotificationList from './NotificationList';
@@ -84,7 +83,6 @@ const NotificationSection = () => {
   };
 
   const openNotificationModal = async (notification) => {
-    mixpanelTrack('Read Notification', coreInfo);
     setSelectedNotification(notification);
     setNotificationModalOpen(true);
     if (!notification.notificationRead) {
@@ -94,7 +92,6 @@ const NotificationSection = () => {
   };
 
   const markAllNotificationsAsRead = async () => {
-    mixpanelTrack('Mark All Notifications Read', coreInfo);
     await markAllNotificationsAsReadService();
     setOpen(false);
     fetchNotifications();
@@ -104,11 +101,6 @@ const NotificationSection = () => {
     event.preventDefault();
     event.stopPropagation();
     setIsDeleting(true);
-    if (!notification.notificationRead) {
-      mixpanelTrack('Delete Unread Notification', coreInfo);
-    } else {
-      mixpanelTrack('Delete Read Notification', coreInfo);
-    }
     await deleteNotificationService(notification.notificationKey);
     await fetchNotifications();
     setIsDeleting(false);

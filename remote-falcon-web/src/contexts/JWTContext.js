@@ -1,24 +1,20 @@
 import { createContext, useEffect } from 'react';
 
+import { useLazyQuery, useMutation, useApolloClient } from '@apollo/client';
 import jwtDecode from 'jwt-decode';
 import PropTypes from 'prop-types';
+import { useDatadogRum } from 'react-datadog';
 import { useNavigate } from 'react-router-dom';
 
-import {
-  signInService,
-  signUpService,
-  verifyEmailService,
-  resetPasswordService,
-  forgotPasswordService,
-  verifyPasswordResetLinkService
-} from 'services/authentication/authentication.service';
-import { coreInfoService } from 'services/controlPanel/accountSettings.service';
 import { useDispatch, useSelector } from 'store';
-import { startRegisterAction, startLoginAction, startLogoutAction } from 'store/slices/account';
+import { startLoginAction, startLogoutAction } from 'store/slices/account';
 import Loader from 'ui-component/Loader';
 import axios from 'utils/axios';
-import { services, mockServices } from 'utils/mockAdapter';
-import { mixpanelTrack } from 'views/pages/globalPageHelpers';
+import { showAlert } from 'views/pages/globalPageHelpers';
+
+import { setGraphqlHeaders } from '../index';
+import { StatusResponse } from '../utils/enum';
+import { signUpQql, verifyEmailQql, signInQql, coreInfoQql, forgotPasswordGql, resetPasswordGql } from '../utils/graphql/account/queries';
 
 const verifyToken = (serviceToken) => {
   if (!serviceToken) {
@@ -31,9 +27,11 @@ const verifyToken = (serviceToken) => {
 const setSession = (serviceToken) => {
   if (serviceToken) {
     localStorage.setItem('serviceToken', serviceToken);
+    setGraphqlHeaders(serviceToken);
     axios.defaults.headers.common.Authorization = `Bearer ${serviceToken}`;
   } else {
     localStorage.removeItem('serviceToken');
+    setGraphqlHeaders(null);
     delete axios.defaults.headers.common.Authorization;
   }
 };
@@ -46,34 +44,47 @@ export const JWTProvider = ({ children }) => {
 
   const navigate = useNavigate();
 
+  const client = useApolloClient();
+
+  const [signUpMutation] = useMutation(signUpQql);
+  const [verifyEmailMutation] = useMutation(verifyEmailQql);
+  const [forgotPasswordMutation] = useMutation(forgotPasswordGql);
+  const [resetPasswordMutation] = useMutation(resetPasswordGql);
+
+  const [signInQuery] = useLazyQuery(signInQql);
+  const [coreInfoQuery] = useLazyQuery(coreInfoQql);
+
+  const datadogRum = useDatadogRum();
+
   useEffect(() => {
     const init = async () => {
       try {
         const serviceToken = window.localStorage.getItem('serviceToken');
         if (serviceToken && verifyToken(serviceToken)) {
-          const decoded = jwtDecode(serviceToken);
-          let isDemo = false;
-          if (decoded['user-data'].email === 'demo@remotefalcon.com') {
-            isDemo = true;
-            axios.defaults.adapter = mockServices;
-          } else {
-            services.restore();
-          }
           setSession(serviceToken);
-          const coreInfoResponse = await coreInfoService();
-          const coreInfo = coreInfoResponse.data;
-          coreInfo.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          dispatch(
-            startLoginAction({
-              isDemo,
-              coreInfo
-            })
-          );
+          await coreInfoQuery({
+            onCompleted: (data) => {
+              const coreInfoData = { ...data?.coreInfo };
+              coreInfoData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+              datadogRum.setUser({
+                id: coreInfoData?.showName,
+                name: `${coreInfoData?.firstName} ${coreInfoData?.lastName}`,
+                email: coreInfoData?.email
+              });
+              dispatch(
+                startLoginAction({
+                  ...coreInfoData
+                })
+              );
+            },
+            onError: () => {
+              dispatch(startLogoutAction());
+            }
+          });
         } else {
           dispatch(startLogoutAction());
         }
       } catch (err) {
-        console.error(err);
         dispatch(startLogoutAction());
       }
     };
@@ -82,67 +93,131 @@ export const JWTProvider = ({ children }) => {
   }, [dispatch]);
 
   const login = async (email, password) => {
-    if (email === 'demo@remotefalcon.com') {
-      axios.defaults.adapter = mockServices;
-    } else {
-      services.restore();
-    }
-    const signInResponse = await signInService(email, password);
-    const { serviceToken, isDemo } = signInResponse.data;
-    const coreInfo = signInResponse.data;
-    if (!isDemo) {
-      mixpanelTrack('Sign In', coreInfo);
-    }
-    coreInfo.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    setSession(serviceToken);
-    dispatch(
-      startLoginAction({
-        isDemo,
-        coreInfo
-      })
-    );
+    await signInQuery({
+      context: {
+        headers: {
+          authorization: `Basic ${Buffer.from(`${email}:${password}`).toString('base64')}`
+        }
+      },
+      onCompleted: async (data) => {
+        setSession(data?.signIn?.serviceToken);
+        await coreInfoQuery().then((response) => {
+          const coreInfoData = { ...response?.data?.coreInfo };
+          coreInfoData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          dispatch(
+            startLoginAction({
+              ...coreInfoData
+            })
+          );
+        });
+        navigate('/control-panel', { replace: true });
+      },
+      onError: (error) => {
+        if (error?.message === StatusResponse.UNAUTHORIZED) {
+          showAlert({ dispatch, message: 'Invalid Credentials', alert: 'warning' });
+        } else if (error?.message === StatusResponse.SHOW_NOT_FOUND) {
+          showAlert({ dispatch, message: 'Show could not be found!', alert: 'error' });
+        } else if (error?.message === StatusResponse.EMAIL_NOT_VERIFIED) {
+          showAlert({ dispatch, message: 'Email has not been verified', alert: 'warning' });
+        } else {
+          showAlert({ dispatch, alert: 'error' });
+        }
+      }
+    });
   };
 
   const register = async (showName, email, password, firstName, lastName) => {
-    services.restore();
-    const registerResponse = await signUpService(showName, email, password, firstName, lastName);
-    const coreInfo = registerResponse.data;
-    mixpanelTrack('Sign Up', coreInfo);
-    coreInfo.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    dispatch(
-      startRegisterAction({
-        coreInfo
-      })
-    );
-    return registerResponse;
+    await signUpMutation({
+      variables: {
+        showName,
+        firstName,
+        lastName
+      },
+      context: {
+        headers: {
+          authorization: `Basic ${Buffer.from(`${email}:${password}`).toString('base64')}`
+        }
+      },
+      onCompleted: () => {
+        showAlert({ dispatch, message: `A verification email has been sent to ${email}` });
+        setTimeout(() => {
+          navigate('/signin', { replace: true });
+        }, 3000);
+      },
+      onError: (error) => {
+        if (error?.message === StatusResponse.SHOW_EXISTS) {
+          showAlert({ dispatch, message: 'That email or show name already exists', alert: 'error' });
+        } else if (error?.message === StatusResponse.EMAIL_CANNOT_BE_SENT) {
+          showAlert({ dispatch, message: 'Unable to send verification email', alert: 'error' });
+        } else {
+          showAlert({ dispatch, alert: 'error' });
+        }
+      }
+    });
   };
 
-  const verifyEmail = async (remoteToken) => {
-    services.restore();
-    const response = await verifyEmailService(remoteToken);
-    return response;
+  const verifyEmail = async (showToken) => {
+    await verifyEmailMutation({
+      variables: {
+        showToken
+      },
+      onCompleted: () => {
+        showAlert({ dispatch, message: 'Email successfully verified' });
+        setTimeout(() => {
+          navigate('/signin', { replace: true });
+        }, 3000);
+      },
+      onError: () => {
+        showAlert({ dispatch, alert: 'error' });
+      }
+    });
   };
 
   const sendResetPassword = async (email) => {
-    services.restore();
-    const response = await forgotPasswordService(email);
-    return response;
-  };
-
-  const validatePasswordResetLink = async (passwordResetLink) => {
-    services.restore();
-    const response = await verifyPasswordResetLinkService(passwordResetLink);
-    return response;
+    await forgotPasswordMutation({
+      variables: {
+        email
+      },
+      onCompleted: () => {
+        showAlert({ dispatch, message: `Forgot password email sent to ${email}` });
+        setTimeout(() => {
+          navigate('/signin', { replace: true });
+        }, 3000);
+      },
+      onError: (error) => {
+        if (error?.message === StatusResponse.UNAUTHORIZED) {
+          showAlert({ dispatch, alert: 'error' });
+        } else if (error?.message === StatusResponse.EMAIL_CANNOT_BE_SENT) {
+          showAlert({ dispatch, message: 'Unable to send password reset email', alert: 'error' });
+        } else {
+          showAlert({ dispatch, alert: 'error' });
+        }
+      }
+    });
   };
 
   const resetPassword = async (serviceToken, password) => {
-    services.restore();
-    const response = await resetPasswordService(serviceToken, password);
-    return response;
+    await resetPasswordMutation({
+      context: {
+        headers: {
+          authorization: `Bearer ${serviceToken}`,
+          Password: password
+        }
+      },
+      onCompleted: () => {
+        showAlert({ dispatch, message: 'Password Reset' });
+        setTimeout(() => {
+          navigate('/signin', { replace: true });
+        }, 3000);
+      },
+      onError: () => {
+        showAlert({ dispatch, alert: 'error' });
+      }
+    });
   };
 
-  const logout = async () => {
-    services.restore();
+  const logout = () => {
+    client.clearStore();
     setSession(null);
     dispatch(startLogoutAction());
     navigate('/', { replace: true });
@@ -161,7 +236,6 @@ export const JWTProvider = ({ children }) => {
         verifyEmail,
         register,
         sendResetPassword,
-        validatePasswordResetLink,
         resetPassword
       }}
     >

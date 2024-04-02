@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 
+import { useLazyQuery } from '@apollo/client';
 import PeopleTwoTone from '@mui/icons-material/PeopleTwoTone';
 import ThumbUpTwoTone from '@mui/icons-material/ThumbUpTwoTone';
 import { Grid } from '@mui/material';
@@ -7,15 +8,11 @@ import { useTheme } from '@mui/styles';
 import PropTypes from 'prop-types';
 
 import useInterval from 'hooks/useInterval';
-import {
-  activeViewersService,
-  totalViewersService,
-  currentRequestsService,
-  totalRequestsService,
-  dashboardLiveStatsService
-} from 'services/controlPanel/dashboard.service';
 import RevenueCard from 'ui-component/cards/RevenueCard';
 import DashboardStatsSkeleton from 'ui-component/cards/Skeleton/DashboardStatsSkeleton';
+
+import { ViewerControlMode } from '../../../../utils/enum';
+import { dashboardLiveStatsQql } from '../../../../utils/graphql/dashboard/queries';
 
 const DashboardHeader = ({ ...otherProps }) => {
   const theme = useTheme();
@@ -26,22 +23,23 @@ const DashboardHeader = ({ ...otherProps }) => {
   const [totalRequests, setTotalRequests] = useState('0');
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchDashboardLiveStats = useCallback(async () => {
-    const dashboardLiveStatsResponse = await dashboardLiveStatsService(
-      otherProps.timezone,
-      new Date().setHours(0, 0, 0),
-      new Date().setHours(23, 59, 59)
-    );
-    const dashboardLiveStats = dashboardLiveStatsResponse.data;
-    const activeViewers = dashboardLiveStats?.activeViewers;
-    const totalViewers = dashboardLiveStats?.totalViewers;
-    const currentRequests = dashboardLiveStats?.currentRequests;
-    const totalRequests = dashboardLiveStats?.totalRequests;
+  const [dashboardLiveStatsQuery] = useLazyQuery(dashboardLiveStatsQql);
 
-    setActiveViewers(activeViewers.toString());
-    setTotalViewers(`${totalViewers} Today`);
-    setCurrentRequests(currentRequests.toString());
-    setTotalRequests(`${totalRequests} Today`);
+  const fetchDashboardLiveStats = useCallback(async () => {
+    await dashboardLiveStatsQuery({
+      variables: {
+        startDate: new Date().setHours(0, 0, 0),
+        endDate: new Date().setHours(23, 59, 59),
+        timezone: otherProps.timezone
+      }
+    }).then((response) => {
+      const dashboardLiveStats = response?.data?.dashboardLiveStats;
+
+      setActiveViewers(dashboardLiveStats?.activeViewers?.toString());
+      setTotalViewers(`${dashboardLiveStats?.totalViewers} Today`);
+      setCurrentRequests(dashboardLiveStats?.currentRequests?.toString());
+      setTotalRequests(`${dashboardLiveStats?.totalRequests} Today`);
+    });
   }, [otherProps.timezone]);
 
   useEffect(() => {
@@ -77,7 +75,7 @@ const DashboardHeader = ({ ...otherProps }) => {
       ) : (
         <Grid item xs={12} md={6} lg={6}>
           <RevenueCard
-            primary={otherProps.viewerControlMode === 'jukebox' ? 'Active Requests' : 'Active Votes'}
+            primary={otherProps.viewerControlMode === ViewerControlMode.JUKEBOX ? 'Active Requests' : 'Active Votes'}
             secondary={currentRequests}
             content={totalRequests}
             iconPrimary={ThumbUpTwoTone}

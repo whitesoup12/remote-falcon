@@ -1,0 +1,23 @@
+type Preference {
+    viewerControlEnabled: Boolean
+    viewerControlMode: String
+    resetVotes: Boolean
+    jukeboxDepth: Int
+    locationCheckMethod: String
+    remoteLatitude: Float
+    remoteLongitude: Float
+    allowedRadius: Float
+    checkIfVoted: Boolean
+    psaEnabled: Boolean
+    psaSequence: String
+    psaFrequency: Int
+    jukeboxRequestLimit: Int
+    jukeboxHistoryLimit: Int
+    locationCode: String
+    hideSequenceCount: Int
+    makeItSnow: Boolean
+    managePsa: Boolean
+    sequencesPlayed: Int
+    pageTitle: String
+    pageIconUrl: String
+}

@@ -12,7 +12,6 @@ import { startFetchCoreInfoAction } from 'store/slices/account';
 import MainCard from 'ui-component/cards/MainCard';
 import UserProfileSkeleton from 'ui-component/cards/Skeleton/UserProfileSkeleton';
 import { RFTabPanel, RFTab } from 'ui-component/RFTabPanel';
-import { mixpanelTrack } from 'views/pages/globalPageHelpers';
 
 import Account from './Account';
 import ChangePassword from './ChangePassword';
@@ -23,7 +22,7 @@ import {
   handleUpdateEmailOpen,
   handleUpdateEmailClose,
   updateEmail,
-  handleClickShowRemoteToken,
+  handleClickShowShowToken,
   tabOptions,
   saveProfile,
   requestApiAccess,
@@ -31,7 +30,7 @@ import {
   updatePassword,
   handleImportantAnalyticsClose,
   importantAnalytics,
-  copyRemoteToken
+  copyShowToken
 } from './helpers';
 import ImportantAnalytics from './ImportantAnalytics.modal';
 import UserProfile from './UserProfile';
@@ -52,12 +51,12 @@ const AccountSettings = () => {
   const [isRequestingApi, setIsRequestingApi] = useState(false);
   const [changePasswordEnabled, setChangePasswordEnabled] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [showRemoteToken, setShowRemoteToken] = useState(false);
+  const [showShowToken, setShowShowToken] = useState(false);
   const [gravatar, setGravatar] = useState();
   const [userProfile, setUserProfile] = useState({
     firstName: coreInfo?.firstName,
     lastName: coreInfo?.lastName,
-    showName: coreInfo?.remoteName,
+    showName: coreInfo?.showName,
     email: coreInfo?.email,
     facebookUrl: coreInfo?.facebookUrl,
     youtubeUrl: coreInfo?.youtubeUrl,
@@ -73,7 +72,6 @@ const AccountSettings = () => {
   useEffect(() => {
     const init = async () => {
       setIsLoading(true);
-      mixpanelTrack('Account Settings Page View', coreInfo);
       const hashedEmail = coreInfo?.email ? md5(coreInfo?.email, { encoding: 'binary' }) : '';
       const gravatar = `//www.gravatar.com/avatar/${hashedEmail}?r=pg&d=identicon`;
       setGravatar(gravatar);
@@ -138,10 +136,10 @@ const AccountSettings = () => {
                       isDemo={isDemo}
                       requestApiAccess={() => requestApiAccess(dispatch, setIsRequestingApi)}
                       isRequestingApi={isRequestingApi}
-                      remoteToken={coreInfo?.remoteToken}
-                      showRemoteToken={showRemoteToken}
-                      handleClickShowRemoteToken={() => handleClickShowRemoteToken(setShowRemoteToken, showRemoteToken)}
-                      copyRemoteToken={() => copyRemoteToken(dispatch, coreInfo)}
+                      showToken={coreInfo?.showToken}
+                      showShowToken={showShowToken}
+                      handleClickShowShowToken={() => handleClickShowShowToken(setShowShowToken, showShowToken)}
+                      copyShowToken={() => copyShowToken(dispatch, coreInfo)}
                     />
                   </RFTab>
                   <RFTab index={2}>

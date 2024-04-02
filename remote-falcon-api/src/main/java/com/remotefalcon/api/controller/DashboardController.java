@@ -1,41 +1,39 @@
 package com.remotefalcon.api.controller;
 
 import com.remotefalcon.api.aop.RequiresAccess;
-import com.remotefalcon.api.request.DashboardRequest;
-import com.remotefalcon.api.response.DashboardLiveStats;
-import com.remotefalcon.api.response.DashboardStats;
+import com.remotefalcon.api.request.dashboard.DownloadStatsToExcelRequest;
+import com.remotefalcon.api.response.dashboard.DashboardLiveStatsResponse;
+import com.remotefalcon.api.response.dashboard.DashboardStatsResponse;
 import com.remotefalcon.api.service.DashboardService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 public class DashboardController {
   private final DashboardService dashboardService;
 
-  @Autowired
-  public DashboardController(DashboardService dashboardService) {
-    this.dashboardService = dashboardService;
+  @QueryMapping
+  @RequiresAccess()
+  public DashboardStatsResponse dashboardStats(@Argument Long startDate, @Argument Long endDate, @Argument String timezone) {
+    return dashboardService.dashboardStats(startDate, endDate, timezone, true);
   }
 
-  @PostMapping(value = "/controlPanel/dashboardStats")
+  @QueryMapping
   @RequiresAccess()
-  public ResponseEntity<DashboardStats> dashboardStats(@RequestBody DashboardRequest dashboardRequest) {
-    return this.dashboardService.dashboardStats(dashboardRequest);
-  }
-
-  @PostMapping(value = "/controlPanel/dashboardLiveStats")
-  @RequiresAccess()
-  public ResponseEntity<DashboardLiveStats> dashboardLiveStats(@RequestBody DashboardRequest dashboardRequest) {
-    return this.dashboardService.dashboardLiveStats(dashboardRequest);
+  public DashboardLiveStatsResponse dashboardLiveStats(@Argument Long startDate, @Argument Long endDate, @Argument String timezone) {
+    return dashboardService.dashboardLiveStats(startDate, endDate, timezone);
   }
 
   @PostMapping(value = "/controlPanel/downloadStatsToExcel")
   @RequiresAccess
-  public ResponseEntity<ByteArrayResource> downloadStatsToExcel(@RequestBody DashboardRequest dashboardRequest) {
-    return this.dashboardService.downloadStatsToExcel(dashboardRequest);
+  public ResponseEntity<ByteArrayResource> downloadStatsToExcel(@RequestBody DownloadStatsToExcelRequest downloadStatsToExcelRequest) {
+    return this.dashboardService.downloadStatsToExcel(downloadStatsToExcelRequest.getTimezone());
   }
 }

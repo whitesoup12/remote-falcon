@@ -35,7 +35,6 @@ Now that you have the code, it's time to get Remote Falcon Web up and running. H
 REACT_APP_HOST_ENV=local
 REACT_APP_BASE_API_PATH=http://localhost:8080
 #REACT_APP_DATADOG_CLIENT_TOKEN=
-#REACT_APP_MIXPANEL_API_KEY=
 REACT_APP_JWT_VIEWER_SIGN_KEY=1234567890
 ```
 
@@ -43,14 +42,12 @@ Here is what each variable is for:
 - `REACT_APP_HOST_ENV`: You're running this locally, so the environment is local.
 - `REACT_APP_BASE_API_PATH`: This is going to be the base URL for the API. If using a port other than the default port (8080), then you'll need to update this URL.
 - `REACT_APP_DATADOG_CLIENT_TOKEN`: Used for monitoring. More on that in the [Third Party Integrations](#third-party-integrations) section.
-- `REACT_APP_MIXPANEL_API_KEY`: Used for analytics. More on that in the [Third Party Integrations](#third-party-integrations) section.
 - `REACT_APP_JWT_VIEWER_SIGN_KEY`: This can be anything, but needs to be same value used in the API environment variables.
 
-Notice the `REACT_APP_DATADOG_CLIENT_TOKEN` and `REACT_APP_MIXPANEL_API_KEY` is commented out. If you actually want to test metrics (Datadog) or analytics (Mixpanel), then you will need to create an account with those services and get an API key. Setup for these services will not be included in this README.
+Notice the `REACT_APP_DATADOG_CLIENT_TOKEN` is commented out. If you actually want to test metrics in Datadog then you will need to create an account with those services and get an API key. Setup for these services will not be included in this README.
 5. **Start Remote Falcon Web** - The final step is to start Remote Falcon Web. To do this, run `npm run start`. Once the application is ready, it should automatically open the app in your default browser. If your browser and app doesn't automatically open, you can manually navigate to `localhost:3000`.
 
 ### Third Party Integrations
 These are the third party apps used in Remote Falcon Web and how they are used. All of these have free tiers, so you're welcome to use them if needed during development/testing, but it shouldn't be required.
 
 - Datadog: <a href="https://www.datadoghq.com/" target="_blank">Datadog</a> is used to monitor everything in Remote Falcon, including Kubernetes resources. For the Web portion specifically, it's used to monitor and report on Web application performance and user session experiences.
-- Mixpanel: <a href="https://mixpanel.com/" target="_blank">Mixpanel</a> is used for analytics and event tracking. So when a user visits a page or performs an action, it gets sent to Mixpanel.
