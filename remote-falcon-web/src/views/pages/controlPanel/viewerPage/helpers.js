@@ -14,7 +14,7 @@ import {
   validateHtmlService
 } from 'services/controlPanel/viewerPage.service';
 import HtmlValidationSkeleton from 'ui-component/cards/Skeleton/HtmlValidationSkeleton';
-import { showAlert } from 'views/pages/globalPageHelpers';
+import { showAlertOld } from 'views/pages/globalPageHelpers';
 
 export const handleStartingTemplateChange = (event, value, setSelectedStartingTemplate) => {
   setSelectedStartingTemplate(value);
@@ -28,7 +28,7 @@ export const validateHtml = async (dispatch, viewerPageHtml, setHtmlValidation, 
     const sortedMessages = _.orderBy(messages, ['lastLine'], ['asc']);
     setHtmlValidation(sortedMessages);
   } catch (err) {
-    showAlert({ dispatch, message: 'Unable to validate HTML', alert: 'warning' });
+    showAlertOld({ dispatch, message: 'Unable to validate HTML', alert: 'warning' });
   }
   setIsValidating(false);
 };
@@ -128,7 +128,7 @@ export const createNewViewerPage = async (
   fetchRemoteViewerPages,
   setNewViewerPageName,
   setCreateViewerPageOpen,
-  coreInfo
+  show
 ) => {
   setNewViewerPageError(false);
   setIsSavingNewPage(true);
@@ -147,21 +147,21 @@ export const createNewViewerPage = async (
     };
     const response = await addRemoteViewerPageService(createViewerPageData);
     if (response?.status === 200) {
-      showAlert({ dispatch, message: 'Viewer Page Created' });
+      showAlertOld({ dispatch, message: 'Viewer Page Created' });
       closeCreateViewerPage(setNewViewerPageName, setNewViewerPageError, setCreateViewerPageOpen);
       fetchRemoteViewerPages();
     } else if (response?.status === 204) {
-      showAlert({ dispatch, message: `${newViewerPageName} Already Exists`, alert: 'warning' });
+      showAlertOld({ dispatch, message: `${newViewerPageName} Already Exists`, alert: 'warning' });
       closeCreateViewerPage(setNewViewerPageName, setNewViewerPageError, setCreateViewerPageOpen);
     } else {
       closeCreateViewerPage(setNewViewerPageName, setNewViewerPageError, setCreateViewerPageOpen);
-      showAlert({ dispatch, alert: 'error' });
+      showAlertOld({ dispatch, alert: 'error' });
     }
   }
   setIsSavingNewPage(false);
 };
 
-const saveViewerPage = async (dispatch, remoteViewerPages, activeViewerPageHtml, activeViewerPageName, coreInfo) => {
+const saveViewerPage = async (dispatch, remoteViewerPages, activeViewerPageHtml, activeViewerPageName, show) => {
   let modifiedRemoteViewerPage = {};
   _.map(remoteViewerPages, (viewerPage) => {
     if (viewerPage.viewerPageName === activeViewerPageName) {
@@ -173,9 +173,9 @@ const saveViewerPage = async (dispatch, remoteViewerPages, activeViewerPageHtml,
   });
   const response = await saveRemoteViewerPageService(modifiedRemoteViewerPage);
   if (response?.status === 200) {
-    showAlert({ dispatch, message: 'Viewer Page Saved' });
+    showAlertOld({ dispatch, message: 'Viewer Page Saved' });
   } else {
-    showAlert({ dispatch, alert: 'error' });
+    showAlertOld({ dispatch, alert: 'error' });
   }
 };
 
@@ -185,18 +185,18 @@ export const deleteViewerPage = async (
   setIsLoading,
   setManageViewerPagesOpen,
   fetchRemoteViewerPages,
-  coreInfo
+  show
 ) => {
   setManageViewerPagesOpen(false);
   setIsLoading(true);
   const response = await deleteRemoteViewerPageService(remoteViewerPageKey);
   if (response?.status === 200) {
-    showAlert({ dispatch, message: 'Viewer Page Deleted' });
+    showAlertOld({ dispatch, message: 'Viewer Page Deleted' });
     setIsLoading(false);
     await fetchRemoteViewerPages();
   } else {
     await fetchRemoteViewerPages();
-    showAlert({ dispatch, alert: 'error' });
+    showAlertOld({ dispatch, alert: 'error' });
   }
   setIsLoading(false);
 };
@@ -205,13 +205,13 @@ const toggleSidePreview = (setOpenSidePreview, openSidePreview) => {
   setOpenSidePreview(!openSidePreview);
 };
 
-const copyHtmlToClipboard = async (dispatch, activeViewerPageHtml, coreInfo) => {
+const copyHtmlToClipboard = async (dispatch, activeViewerPageHtml, show) => {
   if ('clipboard' in navigator) {
     await navigator.clipboard.writeText(activeViewerPageHtml);
   } else {
     document.execCommand('copy', true, activeViewerPageHtml);
   }
-  showAlert({ dispatch, message: 'HTML Copied' });
+  showAlertOld({ dispatch, message: 'HTML Copied' });
 };
 
 export const openCloseActionsSpeedial = (setOpenSpeedial, openSpeedial) => {
@@ -234,7 +234,7 @@ export const speedialActions = (
   setOpenSidePreview,
   openSidePreview,
   setOpenPreview,
-  coreInfo
+  show
 ) => [
   {
     icon: <AddTwoToneIcon sx={{ color: theme.palette.grey[700] }} fontSize="medium" />,
@@ -246,13 +246,13 @@ export const speedialActions = (
     icon: <SaveTwoToneIcon sx={{ color: theme.palette.grey[700] }} fontSize="medium" />,
     name: 'Save Viewer Page',
     action: () =>
-      saveViewerPage(dispatch, remoteViewerPages, activeViewerPageHtml, activeViewerPageName, setOpenSpeedial, setIsLoading, coreInfo),
+      saveViewerPage(dispatch, remoteViewerPages, activeViewerPageHtml, activeViewerPageName, setOpenSpeedial, setIsLoading, show),
     enabled: true
   },
   {
     icon: <ContentCopyTwoToneIcon sx={{ color: theme.palette.grey[700] }} fontSize="medium" />,
     name: 'Copy HTML',
-    action: () => copyHtmlToClipboard(dispatch, activeViewerPageHtml, coreInfo),
+    action: () => copyHtmlToClipboard(dispatch, activeViewerPageHtml, show),
     enabled: true
   },
   {

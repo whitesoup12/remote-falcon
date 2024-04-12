@@ -38,7 +38,7 @@ import NotificationList from './NotificationList';
 const NotificationSection = () => {
   const theme = useTheme();
   const matchesXs = useMediaQuery(theme.breakpoints.down('md'));
-  const { coreInfo } = useSelector((state) => state.account);
+  const { show } = useSelector((state) => state.show);
 
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);

@@ -116,7 +116,7 @@ public class RemotePreference {
   private Integer sequencesPlayed;
 
   @Transient
-  List<PsaSequence> psaSequenceList;
+  List<PsaSequenceOld> psaSequenceOldList;
 
   @Transient
   List<String> remoteViewerPages;

@@ -43,6 +43,8 @@ public class AuthUtil {
   @Value("${JWT_VIEWER_SIGN_KEY}")
   String jwtViewerSignKey;
 
+  public TokenDTO tokenDTO;
+
   public String signJwt(Show show) {
     Map<String, Object> jwtPayload = new HashMap<String, Object>();
     jwtPayload.put("showToken", show.getShowToken());
@@ -109,6 +111,7 @@ public class AuthUtil {
       Algorithm algorithm = Algorithm.HMAC256(jwtSignKey);
       JWTVerifier verifier = JWT.require(algorithm).withIssuer("remotefalcon").build();
       verifier.verify(token);
+      this.tokenDTO = getJwtPayload();
       return true;
     } catch (JWTVerificationException e) {
       throw new RuntimeException(StatusResponse.INVALID_JWT.name());

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class PSASequence {
+public class PsaSequence {
     private String name;
     private Integer order;
     private LocalDateTime lastPlayed;

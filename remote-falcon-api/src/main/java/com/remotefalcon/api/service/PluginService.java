@@ -167,16 +167,16 @@ public class PluginService {
     this.playlistRepository.saveAll(playlistsToSync.stream().toList());
 
     //Check PSA Sequences and Delete if not in sync list
-    List<PsaSequence> psaSequenceList = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
-    if(CollectionUtils.isNotEmpty(psaSequenceList)) {
-      psaSequenceList.forEach(psa -> {
+    List<PsaSequenceOld> psaSequenceOldList = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
+    if(CollectionUtils.isNotEmpty(psaSequenceOldList)) {
+      psaSequenceOldList.forEach(psa -> {
         if(!playlistNamesInRequest.contains(psa.getPsaSequenceName())) {
           this.psaSequenceRepository.delete(psa);
         }
       });
       //If there are none left, turn off PSA
-      psaSequenceList = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
-      if(CollectionUtils.isEmpty(psaSequenceList)) {
+      psaSequenceOldList = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
+      if(CollectionUtils.isEmpty(psaSequenceOldList)) {
         RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
         remotePreference.setPsaEnabled(false);
         this.remotePreferenceRepository.save(remotePreference);
@@ -214,7 +214,7 @@ public class PluginService {
       //If sequences played is not 0 and is a dividend of the PSA frequency
       if(sequencesPlayed != 0 && sequencesPlayed % remotePreference.getPsaFrequency() == 0) {
         //Get PSAs ordered by which one needs to be played next
-        Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
+        Optional<PsaSequenceOld> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
         if(psaSequence.isPresent()) {
           //Let's take care of jukebox first
           if(StringUtils.equalsIgnoreCase("JUKEBOX", remotePreference.getViewerControlMode())) {
@@ -241,9 +241,9 @@ public class PluginService {
 
     //Now decide if we should update the sequences played
     //Get all PSAs
-    List<PsaSequence> allPsaSequences = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
+    List<PsaSequenceOld> allPsaSequenceOlds = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
     //Determine if any PSAs are same as Now Playing
-    boolean psaIsNowPlaying = allPsaSequences.stream().anyMatch(psaSequence -> StringUtils.equalsIgnoreCase(request.getPlaylist(), psaSequence.getPsaSequenceName()));
+    boolean psaIsNowPlaying = allPsaSequenceOlds.stream().anyMatch(psaSequence -> StringUtils.equalsIgnoreCase(request.getPlaylist(), psaSequence.getPsaSequenceName()));
     //If not, update the sequences played count
     if(!psaIsNowPlaying) {
       remotePreference.setSequencesPlayed(sequencesPlayed);
@@ -314,10 +314,10 @@ public class PluginService {
               .build();
 
       boolean isWinningSequencePsa = false;
-      List<PsaSequence> psaSequenceList = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
-      if(CollectionUtils.isNotEmpty(psaSequenceList)) {
-        for(PsaSequence psaSequence : psaSequenceList) {
-          if(StringUtils.equalsIgnoreCase(psaSequence.getPsaSequenceName(), highestVotedPlaylist.get().getSequenceName())) {
+      List<PsaSequenceOld> psaSequenceOldList = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
+      if(CollectionUtils.isNotEmpty(psaSequenceOldList)) {
+        for(PsaSequenceOld psaSequenceOld : psaSequenceOldList) {
+          if(StringUtils.equalsIgnoreCase(psaSequenceOld.getPsaSequenceName(), highestVotedPlaylist.get().getSequenceName())) {
             isWinningSequencePsa = true;
           }
         }
@@ -341,7 +341,7 @@ public class PluginService {
         List<Playlist> nonGroupedPlaylists = playlists.stream()
                 .filter(playlist -> StringUtils.isEmpty(playlist.getSequenceGroup())).toList();
         if(remotePreference.getPsaEnabled()) {
-          List<String> psaSequenceNames = psaSequenceList.stream().map(PsaSequence::getPsaSequenceName).toList();
+          List<String> psaSequenceNames = psaSequenceOldList.stream().map(PsaSequenceOld::getPsaSequenceName).toList();
           nonGroupedPlaylists = nonGroupedPlaylists.stream()
                   .filter(playlist -> !psaSequenceNames.contains(playlist.getSequenceName()))
                   .collect(Collectors.toList());
@@ -385,7 +385,7 @@ public class PluginService {
         ZonedDateTime todayOhHundred = ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0);
         int voteWinCounts = this.viewerVoteWinStatsRepository.countAllByRemoteTokenAndVoteWinDateTimeAfter(remoteToken, todayOhHundred);
         if(voteWinCounts != 0 && voteWinCounts % remotePreference.getPsaFrequency() == 0) {
-          Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
+          Optional<PsaSequenceOld> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
           if(psaSequence.isPresent()) {
             Optional<Playlist> psaPlaylist = playlists.stream().filter(playlist -> StringUtils.equalsIgnoreCase(psaSequence.get().getPsaSequenceName(), playlist.getSequenceName())).findFirst();
             if(psaPlaylist.isPresent()) {

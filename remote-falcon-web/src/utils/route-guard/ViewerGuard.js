@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 
 import useAuth from 'hooks/useAuth';
-import { services } from 'utils/mockAdapter';
 
 import { isExternalViewer } from './helpers/helpers';
 

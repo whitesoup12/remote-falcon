@@ -1,16 +1,16 @@
 package com.remotefalcon.api.service;
 
-import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.dto.TokenDTO;
 import com.remotefalcon.api.entity.*;
 import com.remotefalcon.api.repository.*;
 import com.remotefalcon.api.repository.mongo.ShowRepository;
-import com.remotefalcon.api.request.*;
+import com.remotefalcon.api.request.CustomLocationRequest;
+import com.remotefalcon.api.request.SequenceKeyRequest;
+import com.remotefalcon.api.request.ViewerPagePublicRequest;
 import com.remotefalcon.api.response.GitHubIssueResponse;
 import com.remotefalcon.api.response.PublicViewerPagesResponse;
 import com.remotefalcon.api.util.AuthUtil;
 import com.remotefalcon.api.util.EmailUtil;
-import com.remotefalcon.api.util.RandomUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +18,10 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,12 +32,6 @@ import java.util.stream.Collectors;
 public class ControlPanelService {
   private final RemoteRepository remoteRepository;
   private final RemotePreferenceRepository remotePreferenceRepository;
-  private final ViewerPageStatsRepository viewerPageStatsRepository;
-  private final ViewerJukeStatsRepository viewerJukeStatsRepository;
-  private final ViewerVoteStatsRepository viewerVoteStatsRepository;
-  private final ViewerVoteWinStatsRepository viewerVoteWinStatsRepository;
-  private final ActiveViewerRepository activeViewerRepository;
-  private final ExternalApiAccessRepository externalApiAccessRepository;
   private final PlaylistRepository playlistRepository;
   private final RemoteJukeRepository remoteJukeRepository;
   private final RemoteViewerVoteRepository remoteViewerVoteRepository;
@@ -48,9 +40,6 @@ public class ControlPanelService {
   private final PlaylistGroupRepository playlistGroupRepository;
   private final PsaSequenceRepository psaSequenceRepository;
   private final DefaultViewerPageRepository defaultViewerPageRepository;
-  private final CurrentPlaylistRepository currentPlaylistRepository;
-  private final FppScheduleRepository fppScheduleRepository;
-  private final PasswordResetMySQLRepository passwordResetMySQLRepository;
   private final RemoteViewerPagesRepository remoteViewerPagesRepository;
   private final RemoteViewerPageTemplatesRepository remoteViewerPageTemplatesRepository;
   private final AuthUtil authUtil;
@@ -60,156 +49,16 @@ public class ControlPanelService {
   private final WebClient gitHubWebClient;
 
   private final ShowRepository showRepository;
+  private final HttpServletRequest httpServletRequest;
 
-//  public ResponseEntity<RemoteResponse> coreInfo() {
-//    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-//    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
-//    RemoteResponse remoteResponse = this.mapper.map(remote, RemoteResponse.class);
-//    RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
-//    if(remotePreference != null) {
-//      remoteResponse.setViewerControlMode(remotePreference.getViewerControlMode());
-//    }
-//    remote.setLastLoginDate(ZonedDateTime.now());
-//    this.remoteRepository.save(remote);
-//    return ResponseEntity.status(200).body(remoteResponse);
-//  }
-
-  public Show coreInfo() {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Optional<Show> show = this.showRepository.findByShowToken(tokenDTO.getShowToken());
-    if(show.isPresent()) {
-      show.get().setLastLoginDate(LocalDateTime.now());
-      this.showRepository.save(show.get());
-      return show.get();
-    }
-    return null;
-  }
-
-  public ResponseEntity<?> deleteViewerStats() {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    this.viewerPageStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.viewerJukeStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.viewerVoteStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.viewerVoteWinStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    return ResponseEntity.status(200).build();
-  }
-
-  public ResponseEntity<?> updateActiveTheme(ActiveThemeRequest request) {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
-    remote.setActiveTheme(request.getActiveTheme());
-    this.remoteRepository.save(remote);
-    return ResponseEntity.status(200).build();
-  }
-
-  public ResponseEntity<?> updatePassword(HttpServletRequest httpServletRequest) {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
-    String password = this.authUtil.getPasswordFromHeader(httpServletRequest);
-    String updatedPassword = this.authUtil.getUpdatedPasswordFromHeader(httpServletRequest);
-    if (updatedPassword != null) {
-      BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-      boolean passwordsMatch = passwordEncoder.matches(password, remote.getPassword());
-      if(passwordsMatch) {
-        String hashedPassword = passwordEncoder.encode(updatedPassword);
-        remote.setPassword(hashedPassword);
-        this.remoteRepository.save(remote);
-        return ResponseEntity.status(200).build();
-      }else {
-        return ResponseEntity.status(401).build();
-      }
-    }
-    return ResponseEntity.status(400).build();
-  }
-
-  public ResponseEntity<?> updateShowName(UpdateShowName request) {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
-    if(remote != null) {
-      remote.setRemoteName(request.getRemoteName());
-      remote.setRemoteSubdomain(request.getRemoteSubdomain());
-      this.remoteRepository.save(remote);
-      return ResponseEntity.status(200).build();
-    }
-    return ResponseEntity.status(400).build();
-  }
-
-  public ResponseEntity<UserProfile> userProfile(UserProfile request) {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    String remoteSubdomain = request.getRemoteName().replaceAll("\\s", "").toLowerCase();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
-    Remote existingRemote = this.remoteRepository.findByEmailOrRemoteSubdomain(null, remoteSubdomain);
-    if(remote != null) {
-      if(existingRemote != null && !StringUtils.equalsIgnoreCase(remote.getRemoteSubdomain(), existingRemote.getRemoteSubdomain())) {
-        return ResponseEntity.status(401).build();
-      }
-      remote.setFirstName(request.getFirstName());
-      remote.setLastName(request.getLastName());
-      remote.setFacebookUrl(request.getFacebookUrl());
-      remote.setYoutubeUrl(request.getYoutubeUrl());
-      remote.setRemoteName(request.getRemoteName());
-      remote.setRemoteSubdomain(remoteSubdomain);
-      this.remoteRepository.save(remote);
-      return ResponseEntity.status(200).build();
-    }
-    return ResponseEntity.status(400).build();
-  }
-
-  public ResponseEntity<?> requestApiAccess() {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-    Remote remote = this.remoteRepository.findByRemoteToken(tokenDTO.getShowToken());
-    ExternalApiAccess externalApiAccess = this.externalApiAccessRepository.findByRemoteToken(tokenDTO.getShowToken());
-    if(externalApiAccess != null) {
-      return ResponseEntity.status(204).build();
-    }
-    String accessToken = RandomUtil.generateToken(20);
-    String secretKey = RandomUtil.generateToken(20);
-    externalApiAccess = ExternalApiAccess.builder()
-            .accessToken(accessToken)
-            .accessSecret(secretKey)
-            .remoteToken(tokenDTO.getShowToken())
-            .isActive(true)
-            .createdDate(ZonedDateTime.now())
-            .build();
-    this.externalApiAccessRepository.save(externalApiAccess);
-//    Response response = this.emailUtil.sendEmail(null, null,externalApiAccess, EmailTemplate.REQUEST_API_ACCESS);
-//    if(response.getStatusCode() != 202) {
-//      this.externalApiAccessRepository.delete(externalApiAccess);
-//      return ResponseEntity.status(HttpStatus.valueOf(403)).build();
-//    }
-    return ResponseEntity.status(200).build();
-  }
-
-  public ResponseEntity<?> deleteAccount() {
-    TokenDTO tokenDTO = this.authUtil.getJwtPayload();
-
-    this.activeViewerRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.currentPlaylistRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.externalApiAccessRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.fppScheduleRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.pageGalleryHeartsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.passwordResetMySQLRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.playlistRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.remoteJukeRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.remotePreferenceRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.remoteRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.remoteViewerVoteRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.viewerJukeStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.viewerPageMetaRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.viewerPageStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.viewerVoteStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-    this.viewerVoteWinStatsRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
-
-    return ResponseEntity.status(200).build();
-  }
 
   public ResponseEntity<RemotePreference> remotePrefs() {
     TokenDTO tokenDTO = this.authUtil.getJwtPayload();
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(tokenDTO.getShowToken());
-    List<PsaSequence> psaSequenceList = this.psaSequenceRepository.findAllByRemoteToken(tokenDTO.getShowToken());
+    List<PsaSequenceOld> psaSequenceOldList = this.psaSequenceRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getShowToken());
     if(remotePreference != null) {
-      remotePreference.setPsaSequenceList(psaSequenceList);
+      remotePreference.setPsaSequenceOldList(psaSequenceOldList);
       List<String> viewerPages = remoteViewerPages.stream().map(RemoteViewerPages::getViewerPageName).toList();
       Optional<RemoteViewerPages> activeViewerPage = remoteViewerPages.stream().filter(RemoteViewerPages::getViewerPageActive).findFirst();
       remotePreference.setRemoteViewerPages(viewerPages);
@@ -265,11 +114,11 @@ public class ControlPanelService {
 
       this.psaSequenceRepository.deleteAllByRemoteToken(tokenDTO.getShowToken());
 
-      for(PsaSequence psaSequence : request.getPsaSequenceList()) {
-        psaSequence.setRemoteToken(tokenDTO.getShowToken());
-        psaSequence.setPsaSequenceLastPlayed(ZonedDateTime.now());
+      for(PsaSequenceOld psaSequenceOld : request.getPsaSequenceOldList()) {
+        psaSequenceOld.setRemoteToken(tokenDTO.getShowToken());
+        psaSequenceOld.setPsaSequenceLastPlayed(ZonedDateTime.now());
       }
-      this.psaSequenceRepository.saveAll(request.getPsaSequenceList());
+      this.psaSequenceRepository.saveAll(request.getPsaSequenceOldList());
 
       List<RemoteViewerPages> remoteViewerPages = this.remoteViewerPagesRepository.findAllByRemoteToken(tokenDTO.getShowToken());
       remoteViewerPages.forEach(viewerPage -> {

@@ -2,7 +2,7 @@ package com.remotefalcon.api.documents;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.remotefalcon.api.documents.models.*;
-import com.remotefalcon.api.enums.UserRole;
+import com.remotefalcon.api.enums.ShowRole;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -22,8 +22,6 @@ public class Show {
     private String password;
     private String showName;
     private String showSubdomain;
-    private String firstName;
-    private String lastName;
     private Boolean emailVerified;
     private LocalDateTime createdDate;
     private LocalDateTime lastLoginDate;
@@ -31,21 +29,18 @@ public class Show {
     private String pluginVersion;
     private String fppVersion;
     private String lastLoginIp;
-    private String facebookUrl;
-    private String youtubeUrl;
-    private UserRole userRole;
-    private String apiAccessToken;
-    private String apiAccessSecret;
-    private Boolean apiAccessActive;
+    private ShowRole showRole;
     private String passwordResetLink;
     private LocalDateTime passwordResetExpiry;
 
-    private Preference preference;
+    private ApiAccess apiAccess;
+    private UserProfile userProfile;
+    private Preference preferences;
     private List<Sequence> sequences;
     private List<SequenceGroup> sequenceGroups;
-    private List<PSASequence> psaSequences;
+    private List<PsaSequence> psaSequences;
     private List<Page> pages;
-    private Stat stat;
+    private Stat stats;
 
     @JsonIgnore
     private String serviceToken;

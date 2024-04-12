@@ -13,7 +13,7 @@ import { setSequences } from 'store/slices/controlPanel';
 import MainCard from 'ui-component/cards/MainCard';
 import SequencesSkeleton from 'ui-component/cards/Skeleton/SequencesSkeleton';
 import RFLoadingButton from 'ui-component/RFLoadingButton';
-import { showAlert } from 'views/pages/globalPageHelpers';
+import { showAlertOld } from 'views/pages/globalPageHelpers';
 
 import RFSplitButton from '../../../../ui-component/RFSplitButton';
 import CreateNewSequenceGroup from './CreateNewSequenceGroup.modal';
@@ -42,7 +42,7 @@ const Sequences = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const { sequences } = useSelector((state) => state.controlPanel);
-  const { coreInfo } = useSelector((state) => state.account);
+  const { show } = useSelector((state) => state.show);
 
   const [isLoading, setIsLoading] = useState(0);
   const [showLinearProgress, setShowLinearProgress] = useState(false);
@@ -64,7 +64,7 @@ const Sequences = () => {
         })
       );
     } catch (err) {
-      showAlert({ dispatch, alert: 'error' });
+      showAlertOld({ dispatch, alert: 'error' });
     }
   }, [dispatch]);
 
@@ -79,7 +79,7 @@ const Sequences = () => {
       setSequenceGroups(sequenceGroups);
       setSequenceGroupOptions(sequenceGroupOptions);
     } catch (err) {
-      showAlert({ dispatch, alert: 'error' });
+      showAlertOld({ dispatch, alert: 'error' });
     }
   }, [dispatch]);
 
@@ -92,7 +92,7 @@ const Sequences = () => {
     };
 
     init();
-  }, [dispatch, fetchSequences, fetchSequenceGroups, coreInfo]);
+  }, [dispatch, fetchSequences, fetchSequenceGroups, show]);
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -109,9 +109,7 @@ const Sequences = () => {
                 <Stack direction="row" spacing={2} justifyContent="right" pt={2} pb={2} pr={2}>
                   <RFLoadingButton
                     loading={showLinearProgress}
-                    onClick={() =>
-                      sortSequencesAlphabetically(sequences, setShowLinearProgress, coreInfo, dispatch, () => fetchSequences())
-                    }
+                    onClick={() => sortSequencesAlphabetically(sequences, setShowLinearProgress, show, dispatch, () => fetchSequences())}
                     color="primary"
                   >
                     Sort Alphabetically
@@ -119,7 +117,7 @@ const Sequences = () => {
                   <RFSplitButton
                     color="error"
                     onClick={(options, selectedIndex) =>
-                      deleteSequences(options, selectedIndex, setShowLinearProgress, dispatch, coreInfo, () => fetchSequences())
+                      deleteSequences(options, selectedIndex, setShowLinearProgress, dispatch, show, () => fetchSequences())
                     }
                   />
                 </Stack>
@@ -142,7 +140,7 @@ const Sequences = () => {
                   </TableHead>
                   <DragDropContext
                     onDragEnd={(result) =>
-                      reorderSequences(result, sequences, setShowLinearProgress, coreInfo, dispatch, () => fetchSequences())
+                      reorderSequences(result, sequences, setShowLinearProgress, show, dispatch, () => fetchSequences())
                     }
                   >
                     <Droppable droppableId="sequences">
@@ -170,17 +168,10 @@ const Sequences = () => {
                                       )
                                     }
                                     playSequence={(sequenceKey, sequenceName) =>
-                                      playSequence(dispatch, sequenceKey, sequenceName, setShowLinearProgress, coreInfo)
+                                      playSequence(dispatch, sequenceKey, sequenceName, setShowLinearProgress, show)
                                     }
                                     toggleSequenceVisibility={(sequenceKey, sequenceName) =>
-                                      toggleSequenceVisibility(
-                                        dispatch,
-                                        sequenceKey,
-                                        sequenceName,
-                                        sequences,
-                                        setShowLinearProgress,
-                                        coreInfo
-                                      )
+                                      toggleSequenceVisibility(dispatch, sequenceKey, sequenceName, sequences, setShowLinearProgress, show)
                                     }
                                     deleteSequence={(sequenceKey, sequenceName) =>
                                       deleteSequence({
@@ -189,7 +180,7 @@ const Sequences = () => {
                                         sequenceName,
                                         setShowLinearProgress,
                                         fetchSequences,
-                                        coreInfo
+                                        show
                                       })
                                     }
                                     handleInputChange={(event, sequenceKey) => handleInputChange(event, sequenceKey, dispatch, sequences)}
@@ -245,7 +236,7 @@ const Sequences = () => {
               setCreateNewSequenceGroupOpen,
               setNewSequenceGroupName,
               setNewSequenceGroupNameError,
-              coreInfo
+              show
             )
           }
           isSavingNewSequenceGroup={isSavingNewSequenceGroup}
@@ -262,7 +253,7 @@ const Sequences = () => {
           handleClose={() => closeManageSequenceGroups(setManageSequenceGroupsOpen)}
           sequenceGroups={sequenceGroups}
           deleteSequenceGroup={(sequenceGroupKey, sequenceGroupName) =>
-            deleteSequenceGroup(dispatch, sequenceGroupKey, sequenceGroupName, setShowLinearProgress, fetchSequenceGroups, coreInfo)
+            deleteSequenceGroup(dispatch, sequenceGroupKey, sequenceGroupName, setShowLinearProgress, fetchSequenceGroups, show)
           }
         />
       </Modal>

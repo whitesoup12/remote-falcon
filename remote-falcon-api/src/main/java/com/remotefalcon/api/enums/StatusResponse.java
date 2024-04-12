@@ -7,5 +7,6 @@ public enum StatusResponse {
   SHOW_NOT_FOUND,
   UNAUTHORIZED,
   INVALID_JWT,
+  API_ACCESS_REQUESTED,
   UNEXPECTED_ERROR;
 }

@@ -12,7 +12,7 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "PSA_SEQUENCES")
-public class PsaSequence {
+public class PsaSequenceOld {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "psaSequenceKey")

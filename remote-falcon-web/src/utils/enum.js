@@ -3,6 +3,12 @@ export const ViewerControlMode = {
   VOTING: 'VOTING'
 };
 
+export const LocationCheckMethod = {
+  GEO: 'GEO',
+  CODE: 'CODE',
+  NONE: 'NONE'
+};
+
 export const StatusResponse = {
   SHOW_EXISTS: 'SHOW_EXISTS',
   EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
@@ -10,5 +16,6 @@ export const StatusResponse = {
   SHOW_NOT_FOUND: 'SHOW_NOT_FOUND',
   UNAUTHORIZED: 'UNAUTHORIZED',
   INVALID_JWT: 'INVALID_JWT',
+  API_ACCESS_REQUESTED: 'API_ACCESS_REQUESTED',
   UNEXPECTED_ERROR: 'UNEXPECTED_ERROR'
 };

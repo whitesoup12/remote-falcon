@@ -12,7 +12,7 @@ import {
   deleteAllSequencesService
 } from 'services/controlPanel/sequences.services';
 import { setSequences } from 'store/slices/controlPanel';
-import { showAlert } from 'views/pages/globalPageHelpers';
+import { showAlertOld } from 'views/pages/globalPageHelpers';
 
 export const openCreateNewSequenceGroup = (setCreateNewSequenceGroupOpen, setNewSequenceGroupName, setNewSequenceGroupNameError) => {
   setCreateNewSequenceGroupOpen(true);
@@ -45,28 +45,28 @@ export const saveSequenceChanges = async (dispatch, sequences, setShowLinearProg
   });
   const response = await updateSequenceDetailsService(sequencesArray);
   if (response?.status === 200) {
-    showAlert({ dispatch, message: 'Sequence Details Updated' });
+    showAlertOld({ dispatch, message: 'Sequence Details Updated' });
     callback();
   } else {
-    showAlert({ dispatch, alert: 'error' });
+    showAlertOld({ dispatch, alert: 'error' });
   }
   setShowLinearProgress(false);
 };
 
-export const playSequence = async (dispatch, sequenceKey, sequenceName, setShowLinearProgress, coreInfo) => {
+export const playSequence = async (dispatch, sequenceKey, sequenceName, setShowLinearProgress, show) => {
   setShowLinearProgress(true);
   const response = await playSequenceService(sequenceKey);
   if (response?.status === 200) {
-    showAlert({ dispatch, message: `${sequenceName} Queued Next` });
+    showAlertOld({ dispatch, message: `${sequenceName} Queued Next` });
   } else if (response?.status === 204) {
-    showAlert({ dispatch, message: 'You have already requested a sequence', alert: 'warning' });
+    showAlertOld({ dispatch, message: 'You have already requested a sequence', alert: 'warning' });
   } else {
-    showAlert({ dispatch, alert: 'error' });
+    showAlertOld({ dispatch, alert: 'error' });
   }
   setShowLinearProgress(false);
 };
 
-export const toggleSequenceVisibility = async (dispatch, sequenceKey, sequenceName, sequences, setShowLinearProgress, coreInfo) => {
+export const toggleSequenceVisibility = async (dispatch, sequenceKey, sequenceName, sequences, setShowLinearProgress, show) => {
   setShowLinearProgress(true);
   const response = await toggleSequenceVisibilityService(sequenceKey);
   if (response?.status === 200) {
@@ -81,21 +81,21 @@ export const toggleSequenceVisibility = async (dispatch, sequenceKey, sequenceNa
         ...updatedSequences
       })
     );
-    showAlert({ dispatch, message: `${sequenceName} Visibility Saved` });
+    showAlertOld({ dispatch, message: `${sequenceName} Visibility Saved` });
   } else {
-    showAlert({ dispatch, alert: 'error' });
+    showAlertOld({ dispatch, alert: 'error' });
   }
   setShowLinearProgress(false);
 };
 
-export const deleteSequence = async ({ dispatch, sequenceKey, sequenceName, setShowLinearProgress, fetchSequences, coreInfo }) => {
+export const deleteSequence = async ({ dispatch, sequenceKey, sequenceName, setShowLinearProgress, fetchSequences, show }) => {
   setShowLinearProgress(true);
   const response = await deleteSequenceService(sequenceKey);
   if (response?.status === 200) {
-    showAlert({ dispatch, message: `${sequenceName} Deleted` });
+    showAlertOld({ dispatch, message: `${sequenceName} Deleted` });
     await fetchSequences();
   } else {
-    showAlert({ dispatch, alert: 'error' });
+    showAlertOld({ dispatch, alert: 'error' });
   }
   setShowLinearProgress(false);
 };
@@ -108,7 +108,7 @@ export const saveSequenceGroup = async (
   setCreateNewSequenceGroupOpen,
   setNewSequenceGroupName,
   setNewSequenceGroupNameError,
-  coreInfo
+  show
 ) => {
   if (newSequenceGroupName == null || newSequenceGroupName === '') {
     setNewSequenceGroupNameError(true);
@@ -118,13 +118,13 @@ export const saveSequenceGroup = async (
   try {
     const saveSequenceGroupResponse = await saveSequenceGroupService(newSequenceGroupName);
     if (saveSequenceGroupResponse?.status === 200) {
-      showAlert({ dispatch, message: `${newSequenceGroupName} Saved` });
+      showAlertOld({ dispatch, message: `${newSequenceGroupName} Saved` });
       await fetchSequenceGroups();
     } else {
-      showAlert({ dispatch, alert: 'error' });
+      showAlertOld({ dispatch, alert: 'error' });
     }
   } catch (err) {
-    showAlert({ dispatch, alert: 'error' });
+    showAlertOld({ dispatch, alert: 'error' });
   }
   closeCreateNewSequenceGroup(setCreateNewSequenceGroupOpen, setNewSequenceGroupName, setNewSequenceGroupNameError);
   setIsSavingNewSequenceGroup(false);
@@ -136,19 +136,19 @@ export const deleteSequenceGroup = async (
   sequenceGroupName,
   setShowLinearProgress,
   fetchSequenceGroups,
-  coreInfo
+  show
 ) => {
   setShowLinearProgress(true);
   try {
     const deleteSequenceGroupResponse = await deleteSequenceGroupService(sequenceGroupKey);
     if (deleteSequenceGroupResponse?.status === 200) {
-      showAlert({ dispatch, message: `${sequenceGroupName} Deleted` });
+      showAlertOld({ dispatch, message: `${sequenceGroupName} Deleted` });
       await fetchSequenceGroups();
     } else {
-      showAlert({ dispatch, alert: 'error' });
+      showAlertOld({ dispatch, alert: 'error' });
     }
   } catch (err) {
-    showAlert({ dispatch, alert: 'error' });
+    showAlertOld({ dispatch, alert: 'error' });
   }
   setShowLinearProgress(false);
 };
@@ -198,7 +198,7 @@ export const handleSequenceGroupChange = (
   });
 };
 
-export const sortSequencesAlphabetically = async (sequences, setShowLinearProgress, coreInfo, dispatch, fetchSequences) => {
+export const sortSequencesAlphabetically = async (sequences, setShowLinearProgress, show, dispatch, fetchSequences) => {
   setShowLinearProgress(true);
   let updatedSequences = _.cloneDeep(sequences);
   updatedSequences = _.sortBy(updatedSequences, ['sequenceDisplayName']);
@@ -209,15 +209,15 @@ export const sortSequencesAlphabetically = async (sequences, setShowLinearProgre
   });
   const response = await updateSequenceOrderService(sequencesArray);
   if (response?.status === 200) {
-    showAlert({ dispatch, message: 'Sequences Sorted Alphabetically' });
+    showAlertOld({ dispatch, message: 'Sequences Sorted Alphabetically' });
   } else {
-    showAlert({ dispatch, alert: 'error' });
+    showAlertOld({ dispatch, alert: 'error' });
   }
   fetchSequences();
   setShowLinearProgress(false);
 };
 
-export const reorderSequences = async (result, sequences, setShowLinearProgress, coreInfo, dispatch, fetchSequences) => {
+export const reorderSequences = async (result, sequences, setShowLinearProgress, show, dispatch, fetchSequences) => {
   if (!result.destination) return;
   const updatedSequences = _.cloneDeep(_.values(sequences));
   const [reorderedItem] = updatedSequences.splice(result.source.index, 1);
@@ -231,33 +231,33 @@ export const reorderSequences = async (result, sequences, setShowLinearProgress,
 
   const response = await updateSequenceOrderService(sequencesArray);
   if (response?.status === 200) {
-    showAlert({ dispatch, message: 'Sequence Order Updated' });
+    showAlertOld({ dispatch, message: 'Sequence Order Updated' });
   } else {
-    showAlert({ dispatch, alert: 'error' });
+    showAlertOld({ dispatch, alert: 'error' });
   }
   fetchSequences();
   setShowLinearProgress(false);
 };
 
-export const deleteSequences = async (options, selectedIndex, setShowLinearProgress, dispatch, coreInfo, fetchSequences) => {
+export const deleteSequences = async (options, selectedIndex, setShowLinearProgress, dispatch, show, fetchSequences) => {
   if (selectedIndex === 0) {
     setShowLinearProgress(true);
     const response = await deleteInactiveSequencesService();
     if (response?.status === 200) {
-      showAlert({ dispatch, message: 'All Inactive Sequences Deleted' });
+      showAlertOld({ dispatch, message: 'All Inactive Sequences Deleted' });
       await fetchSequences();
     } else {
-      showAlert({ dispatch, alert: 'error' });
+      showAlertOld({ dispatch, alert: 'error' });
     }
     setShowLinearProgress(false);
   } else if (selectedIndex === 1) {
     setShowLinearProgress(true);
     const response = await deleteAllSequencesService();
     if (response?.status === 200) {
-      showAlert({ dispatch, message: 'All Sequences Deleted' });
+      showAlertOld({ dispatch, message: 'All Sequences Deleted' });
       await fetchSequences();
     } else {
-      showAlert({ dispatch, alert: 'error' });
+      showAlertOld({ dispatch, alert: 'error' });
     }
     setShowLinearProgress(false);
   }

@@ -4,8 +4,9 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum LocationCheckMethod {
-    GEO("geo"),
-    CODE("code");
+    GEO("GEO"),
+    CODE("CODE"),
+    NONE("NONE");
 
     private final String locationCheckMethod;
 }

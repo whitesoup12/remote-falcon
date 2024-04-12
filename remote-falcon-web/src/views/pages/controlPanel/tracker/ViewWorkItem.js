@@ -7,8 +7,8 @@ import { ReactMarkdown } from 'react-markdown/lib/react-markdown';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import remarkBreaks from 'remark-breaks';
 
-const ViewWorkItem = ({ workItem, coreInfo, open, handleDrawerOpen }) => {
-  const createdDateParse = moment(workItem?.created_at, 'YYYY-MM-DDTHH:mm:ss.SSZ').tz(coreInfo?.timezone);
+const ViewWorkItem = ({ workItem, show, open, handleDrawerOpen }) => {
+  const createdDateParse = moment(workItem?.created_at, 'YYYY-MM-DDTHH:mm:ss.SSZ').tz(show?.timezone);
   const commentDateFormatted = `${createdDateParse.format('YYYY-MM-DD HH:mm:ss')}`;
 
   return (
@@ -101,7 +101,7 @@ const ViewWorkItem = ({ workItem, coreInfo, open, handleDrawerOpen }) => {
 
 ViewWorkItem.propTypes = {
   open: PropTypes.bool,
-  coreInfo: PropTypes.object,
+  show: PropTypes.object,
   handleDrawerOpen: PropTypes.func,
   workItem: PropTypes.object
 };

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 import MainCard from 'ui-component/cards/MainCard';
 
-const UpdateEmailModal = ({ theme, handleClose, updateEmail, isUpdatingEmail, updatedEmail }) => (
+const UpdateEmailModal = ({ theme, handleClose, updateShowName, isUpdatingShowName, updatedShowName }) => (
   <MainCard
     sx={{
       position: 'absolute',
@@ -14,7 +14,7 @@ const UpdateEmailModal = ({ theme, handleClose, updateEmail, isUpdatingEmail, up
       left: '50%',
       transform: 'translate(-50%, -50%)'
     }}
-    title="Update Email"
+    title="Update Show Name"
     content={false}
     secondary={
       <IconButton onClick={handleClose} size="large">
@@ -24,13 +24,16 @@ const UpdateEmailModal = ({ theme, handleClose, updateEmail, isUpdatingEmail, up
   >
     <CardContent>
       <Typography variant="body2" sx={{ mt: 2 }}>
-        Are you sure you want to update your email to:
+        Are you sure you want to update your show name to:
       </Typography>
-      <Typography variant="body2" sx={{ mt: 1 }}>
-        {updatedEmail}
+      <Typography variant="body2" sx={{ mt: 1, mb: 2 }}>
+        {updatedShowName}
+      </Typography>
+      <Typography component="body2" sx={{ m: 0, color: 'red' }}>
+        Warning! Changing your show name will also update your Viewer Page URL!
       </Typography>
       <Typography variant="subtitle2" sx={{ mt: 2 }}>
-        (You will be signed out after updating and verification email will be sent to the updated email address)
+        (You will be signed out after updating)
       </Typography>
     </CardContent>
     <Divider />
@@ -38,7 +41,7 @@ const UpdateEmailModal = ({ theme, handleClose, updateEmail, isUpdatingEmail, up
       <Grid container alignItems="center" justifyContent="space-between" spacing={2}>
         <Grid item>
           <LoadingButton
-            loading={isUpdatingEmail}
+            loading={isUpdatingShowName}
             loadingIndicator={<CircularProgress color="primary" size={30} />}
             variant="contained"
             size="large"
@@ -52,14 +55,14 @@ const UpdateEmailModal = ({ theme, handleClose, updateEmail, isUpdatingEmail, up
           <Grid container alignItems="center" justifyContent="flex-end" spacing={2}>
             <Grid item>
               <LoadingButton
-                loading={isUpdatingEmail}
+                loading={isUpdatingShowName}
                 loadingIndicator={<CircularProgress color="error" size={30} />}
                 variant="contained"
                 size="large"
                 sx={{ background: theme.palette.error.main, '&:hover': { background: theme.palette.error.dark } }}
-                onClick={updateEmail}
+                onClick={updateShowName}
               >
-                Update Email
+                Update Show Name
               </LoadingButton>
             </Grid>
           </Grid>
@@ -72,9 +75,9 @@ const UpdateEmailModal = ({ theme, handleClose, updateEmail, isUpdatingEmail, up
 UpdateEmailModal.propTypes = {
   theme: PropTypes.object,
   handleClose: PropTypes.func,
-  updateEmail: PropTypes.func,
-  isUpdatingEmail: PropTypes.bool,
-  updatedEmail: PropTypes.string
+  updateShowName: PropTypes.func,
+  isUpdatingShowName: PropTypes.bool,
+  updatedShowName: PropTypes.string
 };
 
 export default UpdateEmailModal;

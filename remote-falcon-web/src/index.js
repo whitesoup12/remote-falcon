@@ -34,7 +34,8 @@ const defaultOptions = {
 
 const client = new ApolloClient({
   cache: new InMemoryCache({
-    dataIdFromObject: () => null
+    dataIdFromObject: () => null,
+    addTypename: false
   }),
   defaultOptions,
   link: httpLink,

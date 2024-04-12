@@ -97,8 +97,7 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "start": "npm run lint && react-scripts start",
-    "start-no-lint": "react-scripts start",
+    "start": "react-scripts start",
     "build": "npm run lint && GENERATE_SOURCEMAP=false react-scripts build",
     "lint": "eslint --fix --ext .js,.jsx ./src",
     "test": "npm run lint && react-scripts test",

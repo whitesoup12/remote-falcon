@@ -1,85 +1,55 @@
 import { useState, useEffect } from 'react';
 
-import { Box, CardContent, Divider, Grid, LinearProgress, Modal } from '@mui/material';
+import DescriptionTwoToneIcon from '@mui/icons-material/DescriptionTwoTone';
+import PersonOutlineTwoToneIcon from '@mui/icons-material/PersonOutlineTwoTone';
+import VpnKeyTwoToneIcon from '@mui/icons-material/VpnKeyTwoTone';
+import { Box, CardContent, Divider, Grid, LinearProgress } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import md5 from 'md5';
-import { useKeys } from 'rooks';
 
-import useAuth from 'hooks/useAuth';
-import { useDispatch, useSelector } from 'store';
+import { useSelector } from 'store';
 import { gridSpacing } from 'store/constant';
-import { startFetchCoreInfoAction } from 'store/slices/account';
 import MainCard from 'ui-component/cards/MainCard';
 import UserProfileSkeleton from 'ui-component/cards/Skeleton/UserProfileSkeleton';
 import { RFTabPanel, RFTab } from 'ui-component/RFTabPanel';
 
 import Account from './Account';
 import ChangePassword from './ChangePassword';
-import {
-  handleInputChange,
-  handleOpen,
-  handleClose,
-  handleUpdateEmailOpen,
-  handleUpdateEmailClose,
-  updateEmail,
-  handleClickShowShowToken,
-  tabOptions,
-  saveProfile,
-  requestApiAccess,
-  deleteAccount,
-  updatePassword,
-  handleImportantAnalyticsClose,
-  importantAnalytics,
-  copyShowToken
-} from './helpers';
-import ImportantAnalytics from './ImportantAnalytics.modal';
 import UserProfile from './UserProfile';
+
+const tabOptions = [
+  {
+    label: 'User Profile',
+    icon: <PersonOutlineTwoToneIcon />,
+    caption: 'Main user settings'
+  },
+  {
+    label: 'Account',
+    icon: <DescriptionTwoToneIcon />,
+    caption: 'Show Token and other show settings'
+  },
+  {
+    label: 'Change Password',
+    icon: <VpnKeyTwoToneIcon />,
+    caption: 'Change password'
+  }
+];
 
 const AccountSettings = () => {
   const theme = useTheme();
-  const dispatch = useDispatch();
-  const { logout } = useAuth();
-  const { coreInfo, isDemo } = useSelector((state) => state.account);
+  const { show } = useSelector((state) => state.show);
 
-  const [open, setOpen] = useState(false);
-  const [updateEmailOpen, setUpdateEmailOpen] = useState(false);
-  const [importantAnalyticsOpen, setImportantAnalyticsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showLinearProgress, setShowLinearProgress] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
-  const [isRequestingApi, setIsRequestingApi] = useState(false);
-  const [changePasswordEnabled, setChangePasswordEnabled] = useState(false);
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [showShowToken, setShowShowToken] = useState(false);
   const [gravatar, setGravatar] = useState();
-  const [userProfile, setUserProfile] = useState({
-    firstName: coreInfo?.firstName,
-    lastName: coreInfo?.lastName,
-    showName: coreInfo?.showName,
-    email: coreInfo?.email,
-    facebookUrl: coreInfo?.facebookUrl,
-    youtubeUrl: coreInfo?.youtubeUrl,
-    currentPassword: '',
-    newPassword: ''
-  });
-
-  useKeys(['KeyA', 'KeyC', 'KeyN', 'KeyF', 'KeyO', 'KeyL'], () => {
-    setImportantAnalyticsOpen(true);
-    importantAnalytics();
-  });
 
   useEffect(() => {
-    const init = async () => {
-      setIsLoading(true);
-      const hashedEmail = coreInfo?.email ? md5(coreInfo?.email, { encoding: 'binary' }) : '';
-      const gravatar = `//www.gravatar.com/avatar/${hashedEmail}?r=pg&d=identicon`;
-      setGravatar(gravatar);
-      setChangePasswordEnabled(userProfile?.currentPassword !== '' && userProfile?.newPassword !== '');
-      setIsLoading(false);
-    };
-    init();
-  }, [coreInfo, userProfile?.currentPassword, userProfile?.newPassword]);
+    setIsLoading(true);
+    const hashedEmail = show?.email ? md5(show?.email, { encoding: 'binary' }) : '';
+    const gravatar = `//www.gravatar.com/avatar/${hashedEmail}?r=pg&d=identicon`;
+    setGravatar(gravatar);
+    setIsLoading(false);
+  }, [show]);
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -103,52 +73,18 @@ const AccountSettings = () => {
                     height: '100%'
                   }}
                 >
-                  <RFTab index={0}>
+                  <RFTab index={0} value="UserProfile">
                     {isLoading ? (
                       <UserProfileSkeleton />
                     ) : (
-                      <UserProfile
-                        theme={theme}
-                        gravatar={gravatar}
-                        coreInfo={coreInfo}
-                        isDemo={isDemo}
-                        updateEmail={() =>
-                          updateEmail(dispatch, coreInfo, setIsUpdatingEmail, logout, userProfile, setUpdateEmailOpen, setUserProfile)
-                        }
-                        isUpdatingEmail={isUpdatingEmail}
-                        saveProfile={() => saveProfile(dispatch, userProfile, setShowLinearProgress, startFetchCoreInfoAction)}
-                        userProfile={userProfile}
-                        handleInputChange={(event, value) => handleInputChange(event, value, setUserProfile, userProfile)}
-                        handleUpdateEmailOpen={() => handleUpdateEmailOpen(setUpdateEmailOpen, coreInfo?.email, userProfile?.email)}
-                        handleUpdateEmailClose={() => handleUpdateEmailClose(setUpdateEmailOpen, coreInfo, userProfile, setUserProfile)}
-                        updateEmailOpen={updateEmailOpen}
-                      />
+                      <UserProfile gravatar={gravatar} setShowLinearProgress={setShowLinearProgress} />
                     )}
                   </RFTab>
-                  <RFTab index={1}>
-                    <Account
-                      theme={theme}
-                      open={open}
-                      handleOpen={() => handleOpen(setOpen)}
-                      handleClose={() => handleClose(setOpen)}
-                      deleteAccount={() => deleteAccount(dispatch, coreInfo, setIsDeleting, logout)}
-                      isDeleting={isDeleting}
-                      isDemo={isDemo}
-                      requestApiAccess={() => requestApiAccess(dispatch, setIsRequestingApi)}
-                      isRequestingApi={isRequestingApi}
-                      showToken={coreInfo?.showToken}
-                      showShowToken={showShowToken}
-                      handleClickShowShowToken={() => handleClickShowShowToken(setShowShowToken, showShowToken)}
-                      copyShowToken={() => copyShowToken(dispatch, coreInfo)}
-                    />
+                  <RFTab index={1} value="Account">
+                    <Account />
                   </RFTab>
-                  <RFTab index={2}>
-                    <ChangePassword
-                      changePassword={() => updatePassword(dispatch, userProfile, setIsChangingPassword, logout)}
-                      handleInputChange={(event, value) => handleInputChange(event, value, setUserProfile, userProfile)}
-                      isChangingPassword={isChangingPassword}
-                      changePasswordEnabled={changePasswordEnabled}
-                    />
+                  <RFTab index={2} value="ChangePassword">
+                    <ChangePassword />
                   </RFTab>
                 </CardContent>
               </Grid>
@@ -157,14 +93,6 @@ const AccountSettings = () => {
           </MainCard>
         </Grid>
       </Grid>
-      <Modal
-        open={importantAnalyticsOpen}
-        onClose={handleImportantAnalyticsClose}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-      >
-        <ImportantAnalytics theme={theme} handleClose={() => handleImportantAnalyticsClose(setImportantAnalyticsOpen)} />
-      </Modal>
     </Box>
   );
 };

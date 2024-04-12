@@ -44,7 +44,7 @@ Here is what each variable is for:
 - `REACT_APP_DATADOG_CLIENT_TOKEN`: Used for monitoring. More on that in the [Third Party Integrations](#third-party-integrations) section.
 - `REACT_APP_JWT_VIEWER_SIGN_KEY`: This can be anything, but needs to be same value used in the API environment variables.
 
-Notice the `REACT_APP_DATADOG_CLIENT_TOKEN` is commented out. If you actually want to test metrics in Datadog then you will need to create an account with those services and get an API key. Setup for these services will not be included in this README.
+Notice the `REACT_APP_DATADOG_CLIENT_TOKEN` is commented out. If you actually want to test metrics in Datadog then you will need to create an show with those services and get an API key. Setup for these services will not be included in this README.
 5. **Start Remote Falcon Web** - The final step is to start Remote Falcon Web. To do this, run `npm run start`. Once the application is ready, it should automatically open the app in your default browser. If your browser and app doesn't automatically open, you can manually navigate to `localhost:3000`.
 
 ### Third Party Integrations

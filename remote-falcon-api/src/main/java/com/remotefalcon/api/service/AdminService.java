@@ -3,9 +3,10 @@ package com.remotefalcon.api.service;
 import com.remotefalcon.api.documents.models.Preference;
 import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.documents.models.*;
+import com.remotefalcon.api.documents.models.PsaSequence;
 import com.remotefalcon.api.entity.*;
 import com.remotefalcon.api.enums.LocationCheckMethod;
-import com.remotefalcon.api.enums.UserRole;
+import com.remotefalcon.api.enums.ShowRole;
 import com.remotefalcon.api.enums.ViewerControlMode;
 import com.remotefalcon.api.repository.*;
 import com.remotefalcon.api.repository.mongo.ShowRepository;
@@ -57,7 +58,7 @@ public class AdminService {
         CompletableFuture<ExternalApiAccess> externalApiAccessFuture = CompletableFuture.supplyAsync(() -> this.externalApiAccessRepository.findByRemoteToken(remote.getRemoteToken()));
         CompletableFuture<List<Playlist>> playlistsFuture = CompletableFuture.supplyAsync(() -> this.playlistRepository.findAllByRemoteToken(remote.getRemoteToken()));
         CompletableFuture<List<PlaylistGroup>> playlistGroupsFuture = CompletableFuture.supplyAsync(() -> this.playlistGroupRepository.findAllByRemoteToken(remote.getRemoteToken()));
-        CompletableFuture<List<PsaSequence>> psaSequencesFuture = CompletableFuture.supplyAsync(() -> this.psaSequenceRepository.findAllByRemoteToken(remote.getRemoteToken()));
+        CompletableFuture<List<PsaSequenceOld>> psaSequencesFuture = CompletableFuture.supplyAsync(() -> this.psaSequenceRepository.findAllByRemoteToken(remote.getRemoteToken()));
         CompletableFuture<List<RemoteViewerPages>> remoteViewerPagesFuture = CompletableFuture.supplyAsync(() -> this.remoteViewerPagesRepository.findAllByRemoteToken(remote.getRemoteToken()));
         CompletableFuture<ViewerPageMeta> viewerPageMetaFuture = CompletableFuture.supplyAsync(() -> this.viewerPageMetaRepository.findByRemoteToken(remote.getRemoteToken()));
         CompletableFuture<List<ViewerJukeStats>> viewerJukeStatsFuture = CompletableFuture.supplyAsync(() -> this.viewerJukeStatsRepository.findAllByRemoteToken(remote.getRemoteToken()));
@@ -71,8 +72,6 @@ public class AdminService {
                 .password(remote.getPassword())
                 .showName(remote.getRemoteName())
                 .showSubdomain(remote.getRemoteSubdomain())
-                .firstName(remote.getFirstName())
-                .lastName(remote.getLastName())
                 .emailVerified(remote.getEmailVerified())
                 .createdDate(remote.getCreatedDate() != null ? remote.getCreatedDate().toLocalDateTime() : null)
                 .lastLoginDate(remote.getLastLoginDate() != null ? remote.getLastLoginDate().toLocalDateTime() : null)
@@ -80,9 +79,13 @@ public class AdminService {
                 .pluginVersion(remote.getPluginVersion())
                 .fppVersion(remote.getFppVersion())
                 .lastLoginIp(remote.getLastLoginIp())
-                .facebookUrl(remote.getFacebookUrl())
-                .youtubeUrl(remote.getYoutubeUrl())
-                .userRole(UserRole.valueOf(remote.getUserRole()))
+                .showRole(ShowRole.valueOf(remote.getUserRole()))
+                .userProfile(UserProfile.builder()
+                        .firstName(remote.getFirstName())
+                        .lastName(remote.getLastName())
+                        .facebookUrl(remote.getFacebookUrl())
+                        .youtubeUrl(remote.getYoutubeUrl())
+                        .build())
                 .build();
 
         try {
@@ -90,7 +93,7 @@ public class AdminService {
             ExternalApiAccess externalApiAccess = externalApiAccessFuture.get();
             List<Playlist> playlists = playlistsFuture.get();
             List<PlaylistGroup> playlistGroups = playlistGroupsFuture.get();
-            List<PsaSequence> psaSequences = psaSequencesFuture.get();
+            List<PsaSequenceOld> psaSequenceOlds = psaSequencesFuture.get();
             List<RemoteViewerPages> remoteViewerPages = remoteViewerPagesFuture.get();
             ViewerPageMeta viewerPageMeta = viewerPageMetaFuture.get();
             List<ViewerJukeStats> viewerJukeStats = viewerJukeStatsFuture.get();
@@ -102,7 +105,7 @@ public class AdminService {
             this.setApiAccess(show, externalApiAccess);
             this.setSequences(show, playlists);
             this.setSequenceGroups(show, playlistGroups);
-            this.setPsaSequences(show, psaSequences);
+            this.setPsaSequences(show, psaSequenceOlds);
             this.setPages(show, remoteViewerPages);
 
             Stat stat = Stat.builder()
@@ -112,7 +115,7 @@ public class AdminService {
                     .votingWin(this.setVotingWinStats(viewerVoteWinStats))
                     .build();
 
-            show.setStat(stat);
+            show.setStats(stat);
 
         } catch (ExecutionException | InterruptedException e) {
             log.error("Error migrating: token {}", remote.getRemoteToken(), e);
@@ -126,27 +129,33 @@ public class AdminService {
 
     private void setShowPreferences(Show show, RemotePreference remotePreference, ViewerPageMeta viewerPageMeta) {
         if(remotePreference != null) {
-            LocationCheckMethod locationCheckMethod = null;
+            LocationCheckMethod locationCheckMethod = LocationCheckMethod.NONE;
             if(remotePreference.getEnableGeolocation()) {
                 locationCheckMethod = LocationCheckMethod.GEO;
             }else if(remotePreference.getEnableLocationCode()) {
                 locationCheckMethod = LocationCheckMethod.CODE;
             }
-            show.setPreference(Preference.builder()
+            Integer locationCode = null;
+            try {
+                locationCode = Integer.parseInt(remotePreference.getLocationCode());
+            }catch(Exception e) {
+                //doNothing
+            }
+            show.setPreferences(Preference.builder()
                     .viewerControlEnabled(remotePreference.getViewerControlEnabled())
                     .viewerControlMode(ViewerControlMode.valueOf(remotePreference.getViewerControlMode().toUpperCase()))
                     .resetVotes(remotePreference.getResetVotes())
                     .jukeboxDepth(remotePreference.getJukeboxDepth())
                     .locationCheckMethod(locationCheckMethod)
-                    .remoteLatitude(remotePreference.getRemoteLatitude())
-                    .remoteLongitude(remotePreference.getRemoteLongitude())
+                    .showLatitude(remotePreference.getRemoteLatitude())
+                    .showLongitude(remotePreference.getRemoteLongitude())
                     .allowedRadius(remotePreference.getAllowedRadius())
                     .checkIfVoted(remotePreference.getCheckIfVoted())
                     .psaEnabled(remotePreference.getPsaEnabled())
                     .psaFrequency(remotePreference.getPsaFrequency())
                     .jukeboxRequestLimit(remotePreference.getJukeboxRequestLimit())
                     .jukeboxHistoryLimit(remotePreference.getJukeboxHistoryLimit())
-                    .locationCode(remotePreference.getLocationCode())
+                    .locationCode(locationCode)
                     .hideSequenceCount(remotePreference.getHideSequenceCount())
                     .makeItSnow(remotePreference.getMakeItSnow())
                     .managePsa(remotePreference.getManagePsa())
@@ -159,9 +168,15 @@ public class AdminService {
 
     private void setApiAccess(Show show, ExternalApiAccess externalApiAccess) {
         if(externalApiAccess != null) {
-            show.setApiAccessToken(externalApiAccess.getAccessToken());
-            show.setApiAccessSecret(externalApiAccess.getAccessSecret());
-            show.setApiAccessActive(externalApiAccess.getIsActive());
+            show.setApiAccess(ApiAccess.builder()
+                            .apiAccessActive(externalApiAccess.getIsActive())
+                            .apiAccessToken(externalApiAccess.getAccessToken())
+                            .apiAccessSecret(externalApiAccess.getAccessSecret())
+                    .build());
+        }else {
+            show.setApiAccess(ApiAccess.builder()
+                    .apiAccessActive(false)
+                    .build());
         }
     }
 
@@ -205,10 +220,10 @@ public class AdminService {
         }
     }
 
-    private void setPsaSequences(Show show, List<PsaSequence> psaSequences) {
-        List<PSASequence> newPsaSequences = new ArrayList<>();
-        if(psaSequences != null) {
-            psaSequences.forEach(psaSequence -> newPsaSequences.add(PSASequence.builder()
+    private void setPsaSequences(Show show, List<PsaSequenceOld> psaSequenceOlds) {
+        List<PsaSequence> newPsaSequences = new ArrayList<>();
+        if(psaSequenceOlds != null) {
+            psaSequenceOlds.forEach(psaSequence -> newPsaSequences.add(PsaSequence.builder()
                     .name(psaSequence.getPsaSequenceName())
                     .order(psaSequence.getPsaSequenceOrder())
                     .lastPlayed(psaSequence.getPsaSequenceLastPlayed() != null ? psaSequence.getPsaSequenceLastPlayed().toLocalDateTime() : null)

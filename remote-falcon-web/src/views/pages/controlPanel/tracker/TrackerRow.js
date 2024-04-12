@@ -8,7 +8,7 @@ import Chip from 'ui-component/extended/Chip';
 
 import ViewWorkItem from './ViewWorkItem';
 
-function TrackerRow({ workItem, coreInfo, setIsLoading, fetchWorkItems }) {
+function TrackerRow({ workItem, show, setIsLoading, fetchWorkItems }) {
   const [editWorkItemDrawerOpen, setEditWorkItemDrawerOpen] = useState(false);
 
   const handleEditWorkItemDrawer = () => {
@@ -35,7 +35,7 @@ function TrackerRow({ workItem, coreInfo, setIsLoading, fetchWorkItems }) {
       </TableRow>
       <ViewWorkItem
         workItem={workItem}
-        coreInfo={coreInfo}
+        show={show}
         open={editWorkItemDrawerOpen}
         handleDrawerOpen={handleEditWorkItemDrawer}
         setIsLoading={setIsLoading}
@@ -47,7 +47,7 @@ function TrackerRow({ workItem, coreInfo, setIsLoading, fetchWorkItems }) {
 
 TrackerRow.propTypes = {
   workItem: PropTypes.object,
-  coreInfo: PropTypes.object,
+  show: PropTypes.object,
   setIsLoading: PropTypes.func,
   fetchWorkItems: PropTypes.func
 };

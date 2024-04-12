@@ -21,7 +21,7 @@ const ViewerPageTemplates = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const { remoteViewerPageTemplates } = useSelector((state) => state.controlPanel);
-  const { coreInfo } = useSelector((state) => state.account);
+  const { show } = useSelector((state) => state.show);
 
   const [showSkeletonLoader, setShowSkeletonLoader] = useState(false);
   const [viewerPageTemplateOptions, setViewerPageTemplateOptions] = useState();
@@ -67,7 +67,7 @@ const ViewerPageTemplates = () => {
     };
 
     init();
-  }, [fetchRemoteViewerPageTemplates, coreInfo]);
+  }, [fetchRemoteViewerPageTemplates, show]);
 
   return (
     <Box sx={{ mt: 2 }}>

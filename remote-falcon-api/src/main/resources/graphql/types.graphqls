@@ -1,0 +1,116 @@
+type Show {
+    showToken: ID
+    email: String
+    showName: String
+    showSubdomain: String
+    emailVerified: Boolean
+    createdDate: String
+    lastLoginDate: String
+    expireDate: String
+    pluginVersion: String
+    fppVersion: String
+    lastLoginIp: String
+    showRole: String
+
+    apiAccess: ApiAccess
+    userProfile: UserProfile
+    preferences: Preference
+    sequences: [Sequence]
+    psaSequences: [PsaSequence]
+    pages: [Page]
+
+    serviceToken: String
+}
+
+type ApiAccess {
+    apiAccessToken: String
+    apiAccessSecret: String
+    apiAccessActive: Boolean
+}
+
+type UserProfile {
+    firstName: String
+    lastName: String
+    facebookUrl: String
+    youtubeUrl: String
+}
+
+type Preference {
+    viewerControlEnabled: Boolean
+    viewerControlMode: String
+    resetVotes: Boolean
+    jukeboxDepth: Int
+    locationCheckMethod: String
+    showLatitude: Float
+    showLongitude: Float
+    allowedRadius: Float
+    checkIfVoted: Boolean
+    psaEnabled: Boolean
+    psaFrequency: Int
+    jukeboxRequestLimit: Int
+    jukeboxHistoryLimit: Int
+    locationCode: Int
+    hideSequenceCount: Int
+    makeItSnow: Boolean
+    managePsa: Boolean
+    sequencesPlayed: Int
+    pageTitle: String
+    pageIconUrl: String
+}
+
+type Sequence {
+    name: String
+    displayName: String
+    duration: Int
+    visible: Boolean
+    votes: Int
+    lastVoteTime: String
+    totalVotes: Int
+    index: Int
+    order: Int
+    imageUrl: String
+    active: Boolean
+    ownerVoted: Boolean
+    visibilityCount: Int
+    type: String
+    group: String
+    category: String
+    artist: String
+    total: Int
+}
+
+type PsaSequence {
+    name: String
+    order: Int
+    lastPlayed: String
+}
+
+type Page {
+    name: String
+    active: Boolean
+    html: String
+}
+
+type DashboardStats {
+    page: [Stat]
+    jukeboxByDate: [Stat]
+    jukeboxBySequence: Stat
+    votingByDate: [Stat]
+    votingBySequence: Stat
+    votingWinByDate: [Stat]
+    votingWinBySequence: Stat
+}
+
+type DashboardLiveStats {
+    activeViewers: Int
+    totalViewers: Int
+    currentRequests: Int
+    totalRequests: Int
+}
+
+type Stat {
+    date: Long
+    total: Int
+    unique: Int
+    sequences: [Sequence]
+}

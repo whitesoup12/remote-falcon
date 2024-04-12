@@ -88,7 +88,7 @@ public class DashboardService {
   private List<DashboardStatsResponse.Stat> buildPageStats(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, String timezone, Show show, Boolean fillDays) {
     List<DashboardStatsResponse.Stat> pageStats = new ArrayList<>();
 
-    Map<LocalDate, List<Stat.Page>> pageStatsGroupedByDate = show.getStat().getPage()
+    Map<LocalDate, List<Stat.Page>> pageStatsGroupedByDate = show.getStats().getPage()
             .stream()
             .filter(stat -> stat.getDateTime().isAfter(startDateAtZone.toLocalDateTime()))
             .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
@@ -112,7 +112,7 @@ public class DashboardService {
   private List<DashboardStatsResponse.Stat> buildJukeboxStatsByDate(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, String timezone, Show show, Boolean fillDays) {
     List<DashboardStatsResponse.Stat> jukeboxStats = new ArrayList<>();
 
-    Map<LocalDate, List<Stat.Jukebox>> jukeboxStatsGroupedByDate = show.getStat().getJukebox()
+    Map<LocalDate, List<Stat.Jukebox>> jukeboxStatsGroupedByDate = show.getStats().getJukebox()
             .stream()
             .filter(stat -> stat.getDateTime().isAfter(startDateAtZone.toLocalDateTime()))
             .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
@@ -147,7 +147,7 @@ public class DashboardService {
   private DashboardStatsResponse.Stat buildJukeboxStatsBySequence(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, Show show) {
     List<DashboardStatsResponse.Sequence> sequences = new ArrayList<>();
 
-    Map<String, List<Stat.Jukebox>> jukeboxStatsGroupedBySequence = show.getStat().getJukebox()
+    Map<String, List<Stat.Jukebox>> jukeboxStatsGroupedBySequence = show.getStats().getJukebox()
             .stream()
             .filter(stat -> stat.getDateTime().isAfter(startDateAtZone.toLocalDateTime()))
             .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
@@ -168,7 +168,7 @@ public class DashboardService {
   private List<DashboardStatsResponse.Stat> buildVoteStatsByDate(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, String timezone, Show show, Boolean fillDays) {
     List<DashboardStatsResponse.Stat> votingStats = new ArrayList<>();
 
-    Map<LocalDate, List<Stat.Voting>> votingStatsGroupedByDate = show.getStat().getVoting()
+    Map<LocalDate, List<Stat.Voting>> votingStatsGroupedByDate = show.getStats().getVoting()
             .stream()
             .filter(stat -> stat.getDateTime().isAfter(startDateAtZone.toLocalDateTime()))
             .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
@@ -203,7 +203,7 @@ public class DashboardService {
   private DashboardStatsResponse.Stat buildVoteStatsBySequence(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, Show show) {
     List<DashboardStatsResponse.Sequence> sequences = new ArrayList<>();
 
-    Map<String, List<Stat.Voting>> voteStatsGroupedBySequence = show.getStat().getVoting()
+    Map<String, List<Stat.Voting>> voteStatsGroupedBySequence = show.getStats().getVoting()
             .stream()
             .filter(stat -> stat.getDateTime().isAfter(startDateAtZone.toLocalDateTime()))
             .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
@@ -224,7 +224,7 @@ public class DashboardService {
   private List<DashboardStatsResponse.Stat> buildVoteWinStatsByDate(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, String timezone, Show show, Boolean fillDays) {
     List<DashboardStatsResponse.Stat> votingWinStats = new ArrayList<>();
 
-    Map<LocalDate, List<Stat.VotingWin>> votingWinStatsGroupedByDate = show.getStat().getVotingWin()
+    Map<LocalDate, List<Stat.VotingWin>> votingWinStatsGroupedByDate = show.getStats().getVotingWin()
             .stream()
             .sorted(Comparator.comparing(Stat.VotingWin::getDateTime))
             .filter(stat -> stat.getDateTime().isAfter(startDateAtZone.toLocalDateTime()))
@@ -260,7 +260,7 @@ public class DashboardService {
   private DashboardStatsResponse.Stat buildVoteWinStatsBySequence(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, Show show) {
     List<DashboardStatsResponse.Sequence> sequences = new ArrayList<>();
 
-    Map<String, List<Stat.VotingWin>> voteWinStatsGroupedBySequence = show.getStat().getVotingWin()
+    Map<String, List<Stat.VotingWin>> voteWinStatsGroupedBySequence = show.getStats().getVotingWin()
             .stream()
             .filter(stat -> stat.getDateTime().isAfter(startDateAtZone.toLocalDateTime()))
             .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
@@ -281,7 +281,7 @@ public class DashboardService {
   private Integer buildTotalViewersLiveStat(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, String timezone, Show show, Boolean fillDays) {
     List<DashboardStatsResponse.Stat> pageStats = new ArrayList<>();
 
-    Map<LocalDate, List<Stat.Page>> pageStatsGroupedByDate = show.getStat().getPage()
+    Map<LocalDate, List<Stat.Page>> pageStatsGroupedByDate = show.getStats().getPage()
             .stream()
             .filter(stat -> stat.getDateTime().isAfter(startDateAtZone.toLocalDateTime()))
             .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Avatar, Box, Modal, CircularProgress, useMediaQuery } from '@mui/material';
@@ -21,7 +21,7 @@ const Header = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const { drawerOpen } = useSelector((state) => state.menu);
-  const { coreInfo } = useSelector((state) => state.account);
+  const { show } = useSelector((state) => state.show);
   const matchMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [allJukebokRequests, setAllJukeboxRequests] = useState(null);
@@ -89,12 +89,12 @@ const Header = () => {
           size={matchMobile ? 'small' : 'large'}
           sx={{ ml: 1, background: theme.palette.error.main, '&:hover': { background: theme.palette.error.dark } }}
           onClick={
-            coreInfo?.preference?.viewerControlMode === ViewerControlMode.JUKEBOX
-              ? () => getAllJukeboxRequests(dispatch, setIsFetching, setAllJukeboxRequests, openViewJukeboxRequests, coreInfo)
-              : () => resetVotes(dispatch, setIsFetching, coreInfo)
+            show?.preferences?.viewerControlMode === ViewerControlMode.JUKEBOX
+              ? () => getAllJukeboxRequests(dispatch, setIsFetching, setAllJukeboxRequests, openViewJukeboxRequests, show)
+              : () => resetVotes(dispatch, setIsFetching, show)
           }
         >
-          {coreInfo?.preference?.viewerControlMode === ViewerControlMode.JUKEBOX ? <>View Queue</> : <>Reset Votes</>}
+          {show?.preferences?.viewerControlMode === ViewerControlMode.JUKEBOX ? <>View Queue</> : <>Reset Votes</>}
         </LoadingButton>
       </Box>
 
@@ -123,9 +123,9 @@ const Header = () => {
           handleClose={() => closeViewJukeboxRequests()}
           jukeboxRequests={allJukebokRequests}
           deleteJukeboxRequest={(remoteJukeKey, sequence) =>
-            deleteJukeboxRequest(dispatch, remoteJukeKey, sequence, setAllJukeboxRequests, setIsDeleting, coreInfo)
+            deleteJukeboxRequest(dispatch, remoteJukeKey, sequence, setAllJukeboxRequests, setIsDeleting, show)
           }
-          purgeQueue={() => purgeQueue(dispatch, setAllJukeboxRequests, setIsPurging, coreInfo)}
+          purgeQueue={() => purgeQueue(dispatch, setAllJukeboxRequests, setIsPurging, show)}
           isDeleting={isDeleting}
           isPurging={isPurging}
         />

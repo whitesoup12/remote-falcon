@@ -33,7 +33,7 @@ const ProfileSection = () => {
 
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const { logout } = useAuth();
-  const { coreInfo } = useSelector((state) => state.account);
+  const { show } = useSelector((state) => state.show);
   const [open, setOpen] = useState(false);
   const [gravatar, setGravatar] = useState();
   const [showNameUrl, setShowNameUrl] = useState();
@@ -67,11 +67,11 @@ const ProfileSection = () => {
 
   const prevOpen = useRef(open);
   useEffect(() => {
-    let showUrl = `https://${coreInfo?.showSubdomain}.remotefalcon.com`;
+    let showUrl = `https://${show?.showSubdomain}.remotefalcon.com`;
     if (process?.env?.REACT_APP_HOST_ENV === 'local') {
-      showUrl = `http://${coreInfo?.showSubdomain}.localhost:3000`;
+      showUrl = `http://${show?.showSubdomain}.localhost:3000`;
     } else if (process?.env?.REACT_APP_HOST_ENV === 'development') {
-      showUrl = `https://${coreInfo?.showSubdomain}.remotefalcon.dev`;
+      showUrl = `https://${show?.showSubdomain}.remotefalcon.dev`;
     }
     setShowNameUrl(showUrl);
 
@@ -79,12 +79,12 @@ const ProfileSection = () => {
       anchorRef.current.focus();
     }
 
-    const hashedEmail = coreInfo?.email ? md5(coreInfo?.email, { encoding: 'binary' }) : '';
+    const hashedEmail = show?.email ? md5(show?.email, { encoding: 'binary' }) : '';
     const gravatar = `//www.gravatar.com/avatar/${hashedEmail}?r=pg&d=identicon`;
     setGravatar(gravatar);
 
     prevOpen.current = open;
-  }, [open, coreInfo]);
+  }, [open, show]);
 
   const handleShowNameClick = () => {
     window.open(showNameUrl, '_blank', 'noreferrer');
@@ -169,7 +169,7 @@ const ProfileSection = () => {
                             sx={{ fontWeight: 400, cursor: 'pointer', justifyContent: 'center' }}
                             onClick={() => handleShowNameClick()}
                           >
-                            {coreInfo?.showName}
+                            {show?.showName}
                           </Typography>
                         </Stack>
                         <Stack direction="row" spacing={0.5} alignItems="center" sx={{ pt: 1 }}>

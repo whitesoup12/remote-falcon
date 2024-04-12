@@ -22,13 +22,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
 
 import useAuth from 'hooks/useAuth';
-import useScriptRef from 'hooks/useScriptRef';
 import { useDispatch } from 'store';
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import { StatusResponse } from 'utils/enum';
-import { verifyPasswordResetLinkQql } from 'utils/graphql/account/queries';
+import { VERIFY_PASSWORD_RESET_LINK } from 'utils/graphql/queries';
 import { strengthColor, strengthIndicatorNumFunc } from 'utils/password-strength';
-import { showAlert } from 'views/pages/globalPageHelpers';
+import { showAlertOld } from 'views/pages/globalPageHelpers';
 
 const AuthResetPassword = ({ ...others }) => {
   const theme = useTheme();
@@ -45,7 +44,7 @@ const AuthResetPassword = ({ ...others }) => {
 
   const navigate = useNavigate();
 
-  const [verifyPasswordResetLinkQuery] = useLazyQuery(verifyPasswordResetLinkQql);
+  const [verifyPasswordResetLinkQuery] = useLazyQuery(VERIFY_PASSWORD_RESET_LINK);
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -68,18 +67,17 @@ const AuthResetPassword = ({ ...others }) => {
       },
       onCompleted: (data) => {
         setLinkValid(true);
-        console.log(data);
         setServiceToken(data?.verifyPasswordResetLink?.serviceToken);
       },
       onError: (error) => {
         if (error?.message === StatusResponse.UNAUTHORIZED) {
-          showAlert({
+          showAlertOld({
             dispatch,
             message: 'Invalid Password Reset Link',
             alert: 'error'
           });
         } else {
-          showAlert({ dispatch, alert: 'error' });
+          showAlertOld({ dispatch, alert: 'error' });
         }
         setTimeout(() => {
           navigate('/signin', { replace: true });

@@ -35,7 +35,7 @@ import ViewerPagePreviewDialog from './ViewerPagePreview.dialog';
 const ViewerPage = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { coreInfo } = useSelector((state) => state.account);
+  const { show } = useSelector((state) => state.show);
   const { remoteViewerPages, remoteViewerPageTemplates } = useSelector((state) => state.controlPanel);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -136,7 +136,7 @@ const ViewerPage = () => {
     };
 
     init();
-  }, [fetchRemoteViewerPages, fetchRemoteViewerPageTemplates, coreInfo]);
+  }, [fetchRemoteViewerPages, fetchRemoteViewerPageTemplates, show]);
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -174,7 +174,7 @@ const ViewerPage = () => {
                   setOpenSidePreview,
                   openSidePreview,
                   setOpenPreview,
-                  coreInfo
+                  show
                 ).map(
                   (action) =>
                     action.enabled && (
@@ -256,7 +256,7 @@ const ViewerPage = () => {
             )
           }
           deleteViewerPage={(remoteViewerPageKey) =>
-            deleteViewerPage(dispatch, remoteViewerPageKey, setIsLoading, setManageViewerPagesOpen, fetchRemoteViewerPages, coreInfo)
+            deleteViewerPage(dispatch, remoteViewerPageKey, setIsLoading, setManageViewerPagesOpen, fetchRemoteViewerPages, show)
           }
         />
       </Modal>
@@ -282,7 +282,7 @@ const ViewerPage = () => {
               fetchRemoteViewerPages,
               setNewViewerPageName,
               setCreateViewerPageOpen,
-              coreInfo
+              show
             )
           }
           setNewViewerPageName={setNewViewerPageName}

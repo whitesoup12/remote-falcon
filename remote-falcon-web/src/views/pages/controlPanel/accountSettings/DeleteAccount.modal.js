@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 import MainCard from 'ui-component/cards/MainCard';
 
-const DeleteAccountModal = ({ theme, handleClose, deleteAccount, isDeleting, isDemo }) => (
+const DeleteAccountModal = ({ theme, handleClose, deleteAccount, isDeleting }) => (
   <MainCard
     sx={{
       position: 'absolute',
@@ -46,7 +46,6 @@ const DeleteAccountModal = ({ theme, handleClose, deleteAccount, isDeleting, isD
           <Grid container alignItems="center" justifyContent="flex-end" spacing={2}>
             <Grid item>
               <LoadingButton
-                disabled={isDemo}
                 loading={isDeleting}
                 loadingIndicator={<CircularProgress color="error" size={30} />}
                 variant="contained"
@@ -68,8 +67,7 @@ DeleteAccountModal.propTypes = {
   theme: PropTypes.object,
   handleClose: PropTypes.func,
   deleteAccount: PropTypes.func,
-  isDeleting: PropTypes.bool,
-  isDemo: PropTypes.bool
+  isDeleting: PropTypes.bool
 };
 
 export default DeleteAccountModal;

@@ -6,15 +6,15 @@ import PropTypes from 'prop-types';
 import { useDatadogRum } from 'react-datadog';
 import { useNavigate } from 'react-router-dom';
 
+import { setGraphqlHeaders } from 'index';
 import { useDispatch, useSelector } from 'store';
-import { startLoginAction, startLogoutAction } from 'store/slices/account';
+import { startLoginAction, startLogoutAction } from 'store/slices/show';
 import Loader from 'ui-component/Loader';
 import axios from 'utils/axios';
-import { showAlert } from 'views/pages/globalPageHelpers';
-
-import { setGraphqlHeaders } from '../index';
-import { StatusResponse } from '../utils/enum';
-import { signUpQql, verifyEmailQql, signInQql, coreInfoQql, forgotPasswordGql, resetPasswordGql } from '../utils/graphql/account/queries';
+import { StatusResponse } from 'utils/enum';
+import { SIGN_UP, VERIFY_EMAIL, FORGOT_PASSWORD, RESET_PASSWORD } from 'utils/graphql/mutations';
+import { SIGN_IN, GET_SHOW } from 'utils/graphql/queries';
+import { showAlertOld } from 'views/pages/globalPageHelpers';
 
 const verifyToken = (serviceToken) => {
   if (!serviceToken) {
@@ -40,52 +40,59 @@ const JWTContext = createContext(null);
 
 export const JWTProvider = ({ children }) => {
   const dispatch = useDispatch();
-  const { ...accountState } = useSelector((state) => state.account);
+  const { ...showState } = useSelector((state) => state.show);
 
   const navigate = useNavigate();
 
   const client = useApolloClient();
 
-  const [signUpMutation] = useMutation(signUpQql);
-  const [verifyEmailMutation] = useMutation(verifyEmailQql);
-  const [forgotPasswordMutation] = useMutation(forgotPasswordGql);
-  const [resetPasswordMutation] = useMutation(resetPasswordGql);
+  const [signUpMutation] = useMutation(SIGN_UP);
+  const [verifyEmailMutation] = useMutation(VERIFY_EMAIL);
+  const [forgotPasswordMutation] = useMutation(FORGOT_PASSWORD);
+  const [resetPasswordMutation] = useMutation(RESET_PASSWORD);
 
-  const [signInQuery] = useLazyQuery(signInQql);
-  const [coreInfoQuery] = useLazyQuery(coreInfoQql);
+  const [signInQuery] = useLazyQuery(SIGN_IN);
+  const [getShowQuery] = useLazyQuery(GET_SHOW);
 
   const datadogRum = useDatadogRum();
 
+  const logout = () => {
+    client.clearStore();
+    setSession(null);
+    dispatch(startLogoutAction());
+    navigate('/', { replace: true });
+  };
+
   useEffect(() => {
-    const init = async () => {
+    const init = () => {
       try {
         const serviceToken = window.localStorage.getItem('serviceToken');
         if (serviceToken && verifyToken(serviceToken)) {
           setSession(serviceToken);
-          await coreInfoQuery({
+          getShowQuery({
             onCompleted: (data) => {
-              const coreInfoData = { ...data?.coreInfo };
-              coreInfoData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+              const showData = { ...data?.getShow };
+              showData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
               datadogRum.setUser({
-                id: coreInfoData?.showName,
-                name: `${coreInfoData?.firstName} ${coreInfoData?.lastName}`,
-                email: coreInfoData?.email
+                id: showData?.showName,
+                name: `${showData?.userProfile?.firstName} ${showData?.userProfile?.lastName}`,
+                email: showData?.email
               });
               dispatch(
                 startLoginAction({
-                  ...coreInfoData
+                  ...showData
                 })
               );
             },
             onError: () => {
-              dispatch(startLogoutAction());
+              logout();
             }
           });
         } else {
-          dispatch(startLogoutAction());
+          logout();
         }
       } catch (err) {
-        dispatch(startLogoutAction());
+        logout();
       }
     };
 
@@ -99,28 +106,29 @@ export const JWTProvider = ({ children }) => {
           authorization: `Basic ${Buffer.from(`${email}:${password}`).toString('base64')}`
         }
       },
-      onCompleted: async (data) => {
+      onCompleted: (data) => {
         setSession(data?.signIn?.serviceToken);
-        await coreInfoQuery().then((response) => {
-          const coreInfoData = { ...response?.data?.coreInfo };
-          coreInfoData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          dispatch(
-            startLoginAction({
-              ...coreInfoData
-            })
-          );
+        getShowQuery({
+          onCompleted: (data) => {
+            const showData = { ...data?.getShow };
+            showData.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            dispatch(
+              startLoginAction({
+                ...showData
+              })
+            );
+          }
         });
-        navigate('/control-panel', { replace: true });
       },
       onError: (error) => {
         if (error?.message === StatusResponse.UNAUTHORIZED) {
-          showAlert({ dispatch, message: 'Invalid Credentials', alert: 'warning' });
+          showAlertOld({ dispatch, message: 'Invalid Credentials', alert: 'warning' });
         } else if (error?.message === StatusResponse.SHOW_NOT_FOUND) {
-          showAlert({ dispatch, message: 'Show could not be found!', alert: 'error' });
+          showAlertOld({ dispatch, message: 'Show could not be found!', alert: 'error' });
         } else if (error?.message === StatusResponse.EMAIL_NOT_VERIFIED) {
-          showAlert({ dispatch, message: 'Email has not been verified', alert: 'warning' });
+          showAlertOld({ dispatch, message: 'Email has not been verified', alert: 'warning' });
         } else {
-          showAlert({ dispatch, alert: 'error' });
+          showAlertOld({ dispatch, alert: 'error' });
         }
       }
     });
@@ -139,18 +147,18 @@ export const JWTProvider = ({ children }) => {
         }
       },
       onCompleted: () => {
-        showAlert({ dispatch, message: `A verification email has been sent to ${email}` });
+        showAlertOld({ dispatch, message: `A verification email has been sent to ${email}` });
         setTimeout(() => {
           navigate('/signin', { replace: true });
         }, 3000);
       },
       onError: (error) => {
         if (error?.message === StatusResponse.SHOW_EXISTS) {
-          showAlert({ dispatch, message: 'That email or show name already exists', alert: 'error' });
+          showAlertOld({ dispatch, message: 'That email or show name already exists', alert: 'error' });
         } else if (error?.message === StatusResponse.EMAIL_CANNOT_BE_SENT) {
-          showAlert({ dispatch, message: 'Unable to send verification email', alert: 'error' });
+          showAlertOld({ dispatch, message: 'Unable to send verification email', alert: 'error' });
         } else {
-          showAlert({ dispatch, alert: 'error' });
+          showAlertOld({ dispatch, alert: 'error' });
         }
       }
     });
@@ -162,13 +170,13 @@ export const JWTProvider = ({ children }) => {
         showToken
       },
       onCompleted: () => {
-        showAlert({ dispatch, message: 'Email successfully verified' });
+        showAlertOld({ dispatch, message: 'Email successfully verified' });
         setTimeout(() => {
           navigate('/signin', { replace: true });
         }, 3000);
       },
       onError: () => {
-        showAlert({ dispatch, alert: 'error' });
+        showAlertOld({ dispatch, alert: 'error' });
       }
     });
   };
@@ -179,18 +187,18 @@ export const JWTProvider = ({ children }) => {
         email
       },
       onCompleted: () => {
-        showAlert({ dispatch, message: `Forgot password email sent to ${email}` });
+        showAlertOld({ dispatch, message: `Forgot password email sent to ${email}` });
         setTimeout(() => {
           navigate('/signin', { replace: true });
         }, 3000);
       },
       onError: (error) => {
         if (error?.message === StatusResponse.UNAUTHORIZED) {
-          showAlert({ dispatch, alert: 'error' });
+          showAlertOld({ dispatch, alert: 'error' });
         } else if (error?.message === StatusResponse.EMAIL_CANNOT_BE_SENT) {
-          showAlert({ dispatch, message: 'Unable to send password reset email', alert: 'error' });
+          showAlertOld({ dispatch, message: 'Unable to send password reset email', alert: 'error' });
         } else {
-          showAlert({ dispatch, alert: 'error' });
+          showAlertOld({ dispatch, alert: 'error' });
         }
       }
     });
@@ -205,32 +213,25 @@ export const JWTProvider = ({ children }) => {
         }
       },
       onCompleted: () => {
-        showAlert({ dispatch, message: 'Password Reset' });
+        showAlertOld({ dispatch, message: 'Password Reset' });
         setTimeout(() => {
           navigate('/signin', { replace: true });
         }, 3000);
       },
       onError: () => {
-        showAlert({ dispatch, alert: 'error' });
+        showAlertOld({ dispatch, alert: 'error' });
       }
     });
   };
 
-  const logout = () => {
-    client.clearStore();
-    setSession(null);
-    dispatch(startLogoutAction());
-    navigate('/', { replace: true });
-  };
-
-  if (accountState.isInitialized !== undefined && !accountState.isInitialized) {
+  if (showState.isInitialized !== undefined && !showState.isInitialized) {
     return <Loader />;
   }
 
   return (
     <JWTContext.Provider
       value={{
-        ...accountState,
+        ...showState,
         login,
         logout,
         verifyEmail,

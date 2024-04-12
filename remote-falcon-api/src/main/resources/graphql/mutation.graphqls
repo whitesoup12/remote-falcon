@@ -1,7 +1,14 @@
 type Mutation {
-    #Account
-    forgotPassword(email: String!): Boolean
     signUp(firstName: String!, lastName: String!, showName: String!): Show
+    forgotPassword(email: String!): Boolean
     verifyEmail(showToken: String!): Boolean
     resetPassword: Boolean
+    updatePassword: Boolean
+    updateUserProfile(userProfile: UserProfileInput!): Boolean
+    requestApiAccess: Boolean
+    deleteAccount: Boolean
+    updateShow(email: String!, showName: String!): Boolean
+    updatePreferences(preferences: PreferenceInput!): Boolean
+    updatePages(pages: [PageInput]!): Boolean
+    updatePsaSequences(psaSequences: [PsaSequenceInput]!): Boolean
 }

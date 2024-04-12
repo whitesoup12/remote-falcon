@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { CONTROL_PANEL_PATH } from 'config';
 import useAuth from 'hooks/useAuth';
-import { services } from 'utils/mockAdapter';
 
 import { isExternalViewer } from './helpers/helpers';
 

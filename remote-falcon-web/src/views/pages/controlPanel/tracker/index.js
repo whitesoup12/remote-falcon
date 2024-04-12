@@ -10,14 +10,14 @@ import { useDispatch, useSelector } from 'store';
 import { gridSpacing } from 'store/constant';
 import MainCard from 'ui-component/cards/MainCard';
 import TrackerSkeleton from 'ui-component/cards/Skeleton/TrackerSkeleton';
-import { showAlert } from 'views/pages/globalPageHelpers';
+import { showAlertOld } from 'views/pages/globalPageHelpers';
 
 import TrackerRow from './TrackerRow';
 
 const Tracker = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { coreInfo } = useSelector((state) => state.account);
+  const { show } = useSelector((state) => state.show);
 
   const [isLoading, setIsLoading] = useState(0);
   const [workItems, setWorkItems] = useState([]);
@@ -29,7 +29,7 @@ const Tracker = () => {
       const workItems = workItemsResponse.data;
       setWorkItems(workItems);
     } catch (err) {
-      showAlert({ dispatch, alert: 'error' });
+      showAlertOld({ dispatch, alert: 'error' });
     }
     setIsLoading(false);
   }, [dispatch]);
@@ -42,7 +42,7 @@ const Tracker = () => {
     };
 
     init();
-  }, [dispatch, fetchWorkItems, coreInfo]);
+  }, [dispatch, fetchWorkItems, show]);
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -81,7 +81,7 @@ const Tracker = () => {
                   <TableBody>
                     <>
                       {_.map(workItems, (workItem) => (
-                        <TrackerRow workItem={workItem} coreInfo={coreInfo} setIsLoading={setIsLoading} fetchWorkItems={fetchWorkItems} />
+                        <TrackerRow workItem={workItem} show={show} setIsLoading={setIsLoading} fetchWorkItems={fetchWorkItems} />
                       ))}
                     </>
                   </TableBody>

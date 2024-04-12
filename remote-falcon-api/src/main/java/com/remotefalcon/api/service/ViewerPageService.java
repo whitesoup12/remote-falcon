@@ -327,8 +327,8 @@ public class ViewerPageService {
 
   private Integer currentQueueDepth(ViewerTokenDTO viewerTokenDTO) {
     List<RemoteJuke> jukeboxRequestsFromFirstToLast = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(viewerTokenDTO.getShowToken());
-    List<PsaSequence> psaSequences = this.psaSequenceRepository.findAllByRemoteToken(viewerTokenDTO.getShowToken());
-    List<String> psaSequenceNames = psaSequences.stream().map(PsaSequence::getPsaSequenceName).toList();
+    List<PsaSequenceOld> psaSequenceOlds = this.psaSequenceRepository.findAllByRemoteToken(viewerTokenDTO.getShowToken());
+    List<String> psaSequenceNames = psaSequenceOlds.stream().map(PsaSequenceOld::getPsaSequenceName).toList();
     long psasInQueue = jukeboxRequestsFromFirstToLast.stream().filter(remoteJuke -> psaSequenceNames.contains(remoteJuke.getNextPlaylist())).count();
     return jukeboxRequestsFromFirstToLast.size() - (int) psasInQueue;
   }
@@ -360,11 +360,11 @@ public class ViewerPageService {
     //Get initial data for checks
     RemotePreference remotePreference = this.remotePreferenceRepository.findByRemoteToken(remoteToken);
     List<RemoteJuke> jukeboxRequestsFromFirstToLast = this.remoteJukeRepository.findAllByRemoteTokenOrderByFuturePlaylistSequenceAsc(remoteToken);
-    List<PsaSequence> psaSequences = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
+    List<PsaSequenceOld> psaSequenceOlds = this.psaSequenceRepository.findAllByRemoteToken(remoteToken);
 
     //Set data for checks
     int jukeboxDepth = remotePreference.getJukeboxDepth();
-    List<String> psaSequenceNames = psaSequences.stream().map(PsaSequence::getPsaSequenceName).toList();
+    List<String> psaSequenceNames = psaSequenceOlds.stream().map(PsaSequenceOld::getPsaSequenceName).toList();
     int numberOfPsasInQueue = (int) jukeboxRequestsFromFirstToLast.stream().filter(remoteJuke -> psaSequenceNames.contains(remoteJuke.getNextPlaylist())).count();
 
     //Run checks
@@ -451,7 +451,7 @@ public class ViewerPageService {
     //Add PSA if it is NOT being managed by RF
     if(remotePreference.getPsaEnabled() != null && remotePreference.getPsaEnabled() && !remotePreference.getManagePsa()) {
       //Get next PSA to be played based on the last time the other PSAs were played
-      Optional<PsaSequence> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
+      Optional<PsaSequenceOld> psaSequence = this.psaSequenceRepository.findFirstByRemoteTokenOrderByPsaSequenceLastPlayedAscPsaSequenceOrderAsc(remoteToken);
       if(psaSequence.isPresent()) {
         this.addPSAToQueue(remoteToken, remotePreference.getPsaFrequency(), futureRequestSequence, psaSequence.get());
       }
@@ -550,7 +550,7 @@ public class ViewerPageService {
     this.viewerVoteStatsRepository.save(viewerVoteStats);
   }
 
-  private void addPSAToQueue(String remoteToken, Integer psaFrequency, Integer futureRequestSequence, PsaSequence psaSequence) {
+  private void addPSAToQueue(String remoteToken, Integer psaFrequency, Integer futureRequestSequence, PsaSequenceOld psaSequenceOld) {
     ZonedDateTime todayOhHundred = ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0);
     int jukeStatsCount = this.viewerJukeStatsRepository.countAllByRemoteTokenAndRequestDateTimeAfter(remoteToken, todayOhHundred);
     if(jukeStatsCount % psaFrequency == 0) {
@@ -558,12 +558,12 @@ public class ViewerPageService {
       this.remoteJukeRepository.save(RemoteJuke.builder()
               .remoteToken(remoteToken)
               .futurePlaylistSequence(futureRequestSequence)
-              .nextPlaylist(psaSequence.getPsaSequenceName())
+              .nextPlaylist(psaSequenceOld.getPsaSequenceName())
               .ownerRequested(false)
               .build());
 
-      psaSequence.setPsaSequenceLastPlayed(ZonedDateTime.now());
-      this.psaSequenceRepository.save(psaSequence);
+      psaSequenceOld.setPsaSequenceLastPlayed(ZonedDateTime.now());
+      this.psaSequenceRepository.save(psaSequenceOld);
     }
   }
 

@@ -2,15 +2,15 @@ package com.remotefalcon.api.controller;
 
 import com.remotefalcon.api.aop.RequiresAccess;
 import com.remotefalcon.api.aop.RequiresAdminAccess;
-import com.remotefalcon.api.documents.Show;
 import com.remotefalcon.api.entity.*;
-import com.remotefalcon.api.request.*;
+import com.remotefalcon.api.request.CustomLocationRequest;
+import com.remotefalcon.api.request.SequenceKeyRequest;
+import com.remotefalcon.api.request.ViewerPagePublicRequest;
 import com.remotefalcon.api.response.GitHubIssueResponse;
 import com.remotefalcon.api.response.PublicViewerPagesResponse;
 import com.remotefalcon.api.service.ControlPanelService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,53 +21,12 @@ import java.util.List;
 public class ControlPanelController {
   private final ControlPanelService controlPanelService;
 
-  @QueryMapping
-  @RequiresAccess()
-  public Show coreInfo() {
-    return controlPanelService.coreInfo();
-  }
 
-  @DeleteMapping(value = "/controlPanel/deleteViewerStats")
-  @RequiresAccess
-  public ResponseEntity<?> deleteViewerStats() {
-    return this.controlPanelService.deleteViewerStats();
-  }
 
-  @PostMapping(value = "/controlPanel/updateActiveTheme")
-  @RequiresAccess
-  public ResponseEntity<?> updateActiveTheme(@RequestBody ActiveThemeRequest request) {
-    return this.controlPanelService.updateActiveTheme(request);
-  }
 
-  @PostMapping(value = "/controlPanel/updatePassword")
-  @RequiresAccess
-  public ResponseEntity<?> updatePassword(HttpServletRequest httpServletRequest) {
-    return this.controlPanelService.updatePassword(httpServletRequest);
-  }
 
-  @PostMapping(value = "/controlPanel/updateShowName")
-  @RequiresAccess
-  public ResponseEntity<?> updateShowName(@RequestBody UpdateShowName request) {
-    return this.controlPanelService.updateShowName(request);
-  }
 
-  @PostMapping(value = "/controlPanel/userProfile")
-  @RequiresAccess
-  public ResponseEntity<UserProfile> userProfile(@RequestBody UserProfile request) {
-    return this.controlPanelService.userProfile(request);
-  }
 
-  @PostMapping(value = "/controlPanel/requestApiAccess")
-  @RequiresAccess
-  public ResponseEntity<?> requestApiAccess() {
-    return this.controlPanelService.requestApiAccess();
-  }
-
-  @DeleteMapping(value = "/controlPanel/deleteAccount")
-  @RequiresAccess
-  public ResponseEntity<?> deleteAccount() {
-    return this.controlPanelService.deleteAccount();
-  }
 
   @GetMapping(value = "/controlPanel/remotePrefs")
   @RequiresAccess
