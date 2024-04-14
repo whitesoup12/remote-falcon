@@ -35,20 +35,16 @@ const ViewerPageSettings = ({ setShowLinearProgress }) => {
 
   const handleViewerPageChange = (event, value) => {
     setShowLinearProgress(true);
-    const updatedPages = _.cloneDeep({
-      ...show?.pages
-    });
+    const updatedPages = _.cloneDeep([...show?.pages]);
     _.forEach(updatedPages, (page) => {
       page.active = page?.name === value?.id;
     });
-    savePagesService(_.values(updatedPages), updatePagesMutation, (response) => {
+    savePagesService(updatedPages, updatePagesMutation, (response) => {
       if (response?.success) {
         dispatch(
           setShow({
             ...show,
-            pages: {
-              ...updatedPages
-            }
+            pages: [...updatedPages]
           })
         );
         showAlert(dispatch, response?.toast);

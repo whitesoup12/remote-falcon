@@ -52,7 +52,7 @@ export const savePagesService = (updatedPages, updatePagesMutation, callback) =>
     onCompleted: () => {
       callback({
         success: true,
-        toast: { message: 'Viewer Settings Saved' }
+        toast: { message: 'Viewer Pages Saved' }
       });
     },
     onError: () => {
