@@ -185,6 +185,7 @@ public class AdminService {
         if(playlists != null) {
             playlists.forEach(playlist -> sequences.add(Sequence.builder()
                     .name(playlist.getSequenceName())
+                    .key(playlist.getSequenceKey())
                     .displayName(playlist.getSequenceDisplayName())
                     .duration(playlist.getSequenceDuration())
                     .visible(playlist.getSequenceVisible())

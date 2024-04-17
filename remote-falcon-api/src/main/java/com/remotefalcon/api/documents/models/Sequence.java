@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 public class Sequence {
     private String name;
+    private Long key;
     private String displayName;
     private Integer duration;
     private Boolean visible;

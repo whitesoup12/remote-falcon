@@ -11,4 +11,7 @@ type Mutation {
     updatePreferences(preferences: PreferenceInput!): Boolean
     updatePages(pages: [PageInput]!): Boolean
     updatePsaSequences(psaSequences: [PsaSequenceInput]!): Boolean
+    updateSequences(sequences: [SequenceInput]!): Boolean
+    updateSequenceGroups(sequenceGroups: [SequenceGroupInput]!): Boolean
+    playSequenceFromControlPanel(sequence: SequenceInput!): Boolean
 }

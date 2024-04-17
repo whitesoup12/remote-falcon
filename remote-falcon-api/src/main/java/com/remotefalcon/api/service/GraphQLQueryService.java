@@ -1,6 +1,7 @@
 package com.remotefalcon.api.service;
 
 import com.remotefalcon.api.documents.Show;
+import com.remotefalcon.api.documents.models.Sequence;
 import com.remotefalcon.api.enums.StatusResponse;
 import com.remotefalcon.api.enums.ViewerControlMode;
 import com.remotefalcon.api.repository.mongo.ShowRepository;
@@ -12,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -68,6 +71,9 @@ public class GraphQLQueryService {
         if(show.isPresent()) {
             show.get().setLastLoginDate(LocalDateTime.now());
             this.showRepository.save(show.get());
+            List<Sequence> sequences = show.get().getSequences();
+            sequences.sort(Comparator.comparing(Sequence::getOrder));
+            show.get().setSequences(sequences);
             return show.get();
         }
         throw new RuntimeException(StatusResponse.UNEXPECTED_ERROR.name());

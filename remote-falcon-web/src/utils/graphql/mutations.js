@@ -66,8 +66,26 @@ export const UPDATE_PSA_SEQUENCES = gql`
   }
 `;
 
+export const UPDATE_SEQUENCES = gql`
+  mutation ($sequences: [SequenceInput]!) {
+    updateSequences(sequences: $sequences)
+  }
+`;
+
+export const UPDATE_SEQUENCE_GROUPS = gql`
+  mutation ($sequenceGroups: [SequenceGroupInput]!) {
+    updateSequenceGroups(sequenceGroups: $sequenceGroups)
+  }
+`;
+
 export const UPDATE_SHOW = gql`
   mutation ($email: String!, $showName: String!) {
     updateShow(email: $email, showName: $showName)
+  }
+`;
+
+export const PLAY_SEQUENCE_FROM_CONTROL_PANEL = gql`
+  mutation ($sequence: SequenceInput!) {
+    playSequenceFromControlPanel(sequence: $sequence)
   }
 `;

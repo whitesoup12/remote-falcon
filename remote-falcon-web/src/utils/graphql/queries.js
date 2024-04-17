@@ -65,6 +65,7 @@ export const GET_SHOW = gql`
       }
       sequences {
         name
+        key
         displayName
         duration
         visible
@@ -82,6 +83,13 @@ export const GET_SHOW = gql`
         category
         artist
         total
+      }
+      sequenceGroups {
+        name
+        votes
+        lastVoteTime
+        totalVotes
+        visibilityCount
       }
       psaSequences {
         name

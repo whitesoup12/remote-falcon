@@ -2,10 +2,7 @@ package com.remotefalcon.api.controller;
 
 import com.remotefalcon.api.aop.RequiresAccess;
 import com.remotefalcon.api.documents.Show;
-import com.remotefalcon.api.documents.models.Page;
-import com.remotefalcon.api.documents.models.Preference;
-import com.remotefalcon.api.documents.models.PsaSequence;
-import com.remotefalcon.api.documents.models.UserProfile;
+import com.remotefalcon.api.documents.models.*;
 import com.remotefalcon.api.response.dashboard.DashboardLiveStatsResponse;
 import com.remotefalcon.api.response.dashboard.DashboardStatsResponse;
 import com.remotefalcon.api.service.DashboardService;
@@ -96,6 +93,24 @@ public class GraphQLController {
     @RequiresAccess
     public Boolean updatePsaSequences(@Argument List<PsaSequence> psaSequences) {
         return this.graphQLMutationService.updatePsaSequences(psaSequences);
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean updateSequences(@Argument List<Sequence> sequences) {
+        return this.graphQLMutationService.updateSequences(sequences);
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean updateSequenceGroups(@Argument List<SequenceGroup> sequenceGroups) {
+        return this.graphQLMutationService.updateSequenceGroups(sequenceGroups);
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean playSequenceFromControlPanel(@Argument Sequence sequence) {
+        return this.graphQLMutationService.playSequenceFromControlPanel(sequence);
     }
 
 

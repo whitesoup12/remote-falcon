@@ -1,6 +1,5 @@
 import { StatusResponse } from '../utils/enum';
 import { GET_SHOW } from '../utils/graphql/queries';
-import { showAlertOld } from '../views/pages/globalPageHelpers';
 
 export const deleteAccountService = (deleteAccountMutation, callback) => {
   deleteAccountMutation({
@@ -15,6 +14,27 @@ export const deleteAccountService = (deleteAccountMutation, callback) => {
         toast: { alert: 'error' }
       });
     }
+  });
+};
+
+export const playSequenceFromControlPanelService = (sequence, playSequenceFromControlPanelMutation, callback) => {
+  playSequenceFromControlPanelMutation({
+    variables: {
+      sequence
+    },
+    onCompleted: () => {
+      callback({
+        success: true,
+        toast: { message: `${sequence?.name} Playing Next` }
+      });
+    },
+    onError: () => {
+      callback({
+        success: false,
+        toast: { alert: 'error' }
+      });
+    },
+    refetchQueries: [{ query: GET_SHOW, awaitRefetchQueries: true }]
   });
 };
 
@@ -97,6 +117,48 @@ export const savePsaSequencesService = (updatedPsaSequences, updatePsaSequencesM
       callback({
         success: true,
         toast: { message: 'Viewer Settings Saved' }
+      });
+    },
+    onError: () => {
+      callback({
+        success: false,
+        toast: { alert: 'error' }
+      });
+    },
+    refetchQueries: [{ query: GET_SHOW, awaitRefetchQueries: true }]
+  });
+};
+
+export const saveSequencesService = (updatedSequences, updateSequencesMutation, callback) => {
+  updateSequencesMutation({
+    variables: {
+      sequences: updatedSequences
+    },
+    onCompleted: () => {
+      callback({
+        success: true,
+        toast: { message: 'Sequences Saved' }
+      });
+    },
+    onError: () => {
+      callback({
+        success: false,
+        toast: { alert: 'error' }
+      });
+    },
+    refetchQueries: [{ query: GET_SHOW, awaitRefetchQueries: true }]
+  });
+};
+
+export const saveSequenceGroupsService = (updatedSequenceGroups, updateSequenceGroupsMutation, callback) => {
+  updateSequenceGroupsMutation({
+    variables: {
+      sequenceGroups: updatedSequenceGroups
+    },
+    onCompleted: () => {
+      callback({
+        success: true,
+        toast: { message: 'Sequence Group Saved' }
       });
     },
     onError: () => {

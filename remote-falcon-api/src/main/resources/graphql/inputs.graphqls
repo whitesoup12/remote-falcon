@@ -30,6 +30,7 @@ input PreferenceInput {
 
 input SequenceInput {
     name: String
+    key: Long
     displayName: String
     duration: Int
     visible: Boolean
@@ -47,6 +48,14 @@ input SequenceInput {
     category: String
     artist: String
     total: Int
+}
+
+input SequenceGroupInput {
+    name: String
+    votes: Int
+    lastVoteTime: String
+    totalVotes: Int
+    visibilityCount: Int
 }
 
 input PsaSequenceInput {

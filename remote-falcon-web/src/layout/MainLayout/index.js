@@ -12,7 +12,6 @@ import { drawerWidth } from 'store/constant';
 import { openDrawer } from 'store/slices/menu';
 import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
 
-import { closeCreateNewSequenceGroup } from '../../views/pages/controlPanel/sequences/helpers';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import WhatsNew from './WhatsNew.modal';

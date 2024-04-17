@@ -280,4 +280,32 @@ public class GraphQLMutationService {
         }
         throw new RuntimeException(StatusResponse.UNEXPECTED_ERROR.name());
     }
+
+    public Boolean updateSequences(List<Sequence> sequences) {
+        Optional<Show> show = this.showRepository.findByShowToken(authUtil.tokenDTO.getShowToken());
+        if(show.isPresent()) {
+            show.get().setSequences(sequences);
+            this.showRepository.save(show.get());
+            return true;
+        }
+        throw new RuntimeException(StatusResponse.UNEXPECTED_ERROR.name());
+    }
+
+    public Boolean updateSequenceGroups(List<SequenceGroup> sequenceGroups) {
+        Optional<Show> show = this.showRepository.findByShowToken(authUtil.tokenDTO.getShowToken());
+        if(show.isPresent()) {
+            show.get().setSequenceGroups(sequenceGroups);
+            this.showRepository.save(show.get());
+            return true;
+        }
+        throw new RuntimeException(StatusResponse.UNEXPECTED_ERROR.name());
+    }
+
+    public Boolean playSequenceFromControlPanel(Sequence sequence) {
+        Optional<Show> show = this.showRepository.findByShowToken(authUtil.tokenDTO.getShowToken());
+        if(show.isPresent()) {
+            return true;
+        }
+        throw new RuntimeException(StatusResponse.UNEXPECTED_ERROR.name());
+    }
 }

@@ -16,6 +16,7 @@ type Show {
     userProfile: UserProfile
     preferences: Preference
     sequences: [Sequence]
+    sequenceGroups: [SequenceGroup]
     psaSequences: [PsaSequence]
     pages: [Page]
 
@@ -60,6 +61,7 @@ type Preference {
 
 type Sequence {
     name: String
+    key: Long
     displayName: String
     duration: Int
     visible: Boolean
@@ -77,6 +79,14 @@ type Sequence {
     category: String
     artist: String
     total: Int
+}
+
+type SequenceGroup {
+    name: String
+    votes: Int
+    lastVoteTime: String
+    totalVotes: Int
+    visibilityCount: Int
 }
 
 type PsaSequence {
