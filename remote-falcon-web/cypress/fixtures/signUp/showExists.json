@@ -1,0 +1,20 @@
+{
+  "errors": [
+    {
+      "message": "SHOW_EXISTS",
+      "locations": [
+        {
+          "line": 2,
+          "column": 3
+        }
+      ],
+      "path": ["signUp"],
+      "extensions": {
+        "classification": "DataFetchingException"
+      }
+    }
+  ],
+  "data": {
+    "signUp": null
+  }
+}

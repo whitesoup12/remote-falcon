@@ -30,7 +30,7 @@ public class GraphQLController {
     Mutations
      ********/
     @MutationMapping
-    public Show signUp(@Argument String firstName, @Argument String lastName, @Argument String showName) {
+    public Boolean signUp(@Argument String firstName, @Argument String lastName, @Argument String showName) {
         return graphQLMutationService.signUp(firstName, lastName, showName);
     }
 

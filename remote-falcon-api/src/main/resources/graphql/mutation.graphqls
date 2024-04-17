@@ -1,5 +1,5 @@
 type Mutation {
-    signUp(firstName: String!, lastName: String!, showName: String!): Show
+    signUp(firstName: String, lastName: String, showName: String!): Boolean
     forgotPassword(email: String!): Boolean
     verifyEmail(showToken: String!): Boolean
     resetPassword: Boolean

@@ -71,18 +71,13 @@ const AppBar = ({ ...others }) => {
               <Logo />
             </Typography>
             <Stack direction="row" sx={{ display: { xs: 'none', sm: 'block' } }} spacing={2}>
-              <Button
-                color="inherit"
-                component={Link}
-                href="https://github.com/whitesoup12/remote-falcon-tracker/wiki/Remote-Falcon-Wiki"
-                target="_blank"
-              >
+              <Button id="appbar-documentation" color="inherit" component={Link} href="https://docs.remotefalcon.com" target="_blank">
                 Documentation
               </Button>
-              <Button color="inherit" component={RouterLink} to="/signin">
+              <Button id="appbar-signin" color="inherit" component={RouterLink} to="/signin">
                 Sign In
               </Button>
-              <Button component={RouterLink} to="/signup" disableElevation variant="contained" color="secondary">
+              <Button id="appbar-signup" component={RouterLink} to="/signup" disableElevation variant="contained" color="secondary">
                 Sign Up
               </Button>
             </Stack>

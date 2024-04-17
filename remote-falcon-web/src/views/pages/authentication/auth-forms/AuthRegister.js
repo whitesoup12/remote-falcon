@@ -77,6 +77,7 @@ const AuthRegister = () => {
             <Grid container spacing={matchDownSM ? 0 : 2}>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  id="signup-first-name"
                   fullWidth
                   label="First Name"
                   margin="normal"
@@ -90,6 +91,7 @@ const AuthRegister = () => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  id="signup-last-name"
                   fullWidth
                   label="Last Name"
                   margin="normal"
@@ -103,9 +105,9 @@ const AuthRegister = () => {
               </Grid>
             </Grid>
             <FormControl fullWidth error={Boolean(touched.showName && errors.showName)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-showname-register">Show Name</InputLabel>
+              <InputLabel htmlFor="signup-last-name-error">Show Name</InputLabel>
               <OutlinedInput
-                id="outlined-adornment-showname-register"
+                id="signup-show-name"
                 type="text"
                 value={values.showName}
                 name="showName"
@@ -114,16 +116,16 @@ const AuthRegister = () => {
                 inputProps={{}}
               />
               {touched.showName && errors.showName && (
-                <FormHelperText error id="standard-weight-helper-text--register">
+                <FormHelperText error id="signup-show-name-error">
                   {errors.showName}
                 </FormHelperText>
               )}
             </FormControl>
 
             <FormControl fullWidth error={Boolean(touched.email && errors.email)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-email-register">Email Address</InputLabel>
+              <InputLabel htmlFor="signup-email">Email Address</InputLabel>
               <OutlinedInput
-                id="outlined-adornment-email-register"
+                id="signup-email"
                 type="email"
                 value={values.email}
                 name="email"
@@ -132,16 +134,16 @@ const AuthRegister = () => {
                 inputProps={{}}
               />
               {touched.email && errors.email && (
-                <FormHelperText error id="standard-weight-helper-text--register">
+                <FormHelperText error id="signup-email-error">
                   {errors.email}
                 </FormHelperText>
               )}
             </FormControl>
 
             <FormControl fullWidth error={Boolean(touched.password && errors.password)} sx={{ ...theme.typography.customInput }}>
-              <InputLabel htmlFor="outlined-adornment-password-register">Password</InputLabel>
+              <InputLabel htmlFor="signup-password">Password</InputLabel>
               <OutlinedInput
-                id="outlined-adornment-password-register"
+                id="signup-password"
                 type={showPassword ? 'text' : 'password'}
                 value={values.password}
                 name="password"
@@ -167,7 +169,7 @@ const AuthRegister = () => {
                 inputProps={{}}
               />
               {touched.password && errors.password && (
-                <FormHelperText error id="standard-weight-helper-text-password-register">
+                <FormHelperText error id="signup-password-error">
                   {errors.password}
                 </FormHelperText>
               )}
@@ -199,6 +201,7 @@ const AuthRegister = () => {
               ) : (
                 <AnimateButton>
                   <Button
+                    id="signup-submit"
                     disableElevation
                     disabled={isSubmitting}
                     fullWidth

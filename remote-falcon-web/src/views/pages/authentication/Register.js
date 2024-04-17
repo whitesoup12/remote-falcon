@@ -44,7 +44,13 @@ const Register = () => {
                   </Grid>
                   <Grid item xs={12}>
                     <Grid item container direction="column" alignItems="center" xs={12}>
-                      <Typography component={Link} to="/signin" variant="subtitle1" sx={{ textDecoration: 'none' }}>
+                      <Typography
+                        id="signup-signin-instead"
+                        component={Link}
+                        to="/signin"
+                        variant="subtitle1"
+                        sx={{ textDecoration: 'none' }}
+                      >
                         Need to sign in instead?
                       </Typography>
                     </Grid>

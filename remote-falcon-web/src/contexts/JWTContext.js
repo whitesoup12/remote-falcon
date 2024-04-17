@@ -14,7 +14,7 @@ import axios from 'utils/axios';
 import { StatusResponse } from 'utils/enum';
 import { SIGN_UP, VERIFY_EMAIL, FORGOT_PASSWORD, RESET_PASSWORD } from 'utils/graphql/mutations';
 import { SIGN_IN, GET_SHOW } from 'utils/graphql/queries';
-import { showAlertOld } from 'views/pages/globalPageHelpers';
+import { showAlert, showAlertOld } from 'views/pages/globalPageHelpers';
 
 const verifyToken = (serviceToken) => {
   if (!serviceToken) {
@@ -147,18 +147,18 @@ export const JWTProvider = ({ children }) => {
         }
       },
       onCompleted: () => {
-        showAlertOld({ dispatch, message: `A verification email has been sent to ${email}` });
+        showAlert(dispatch, { id: 'snackbar-sign-up', message: `A verification email has been sent to ${email}` });
         setTimeout(() => {
           navigate('/signin', { replace: true });
         }, 3000);
       },
       onError: (error) => {
         if (error?.message === StatusResponse.SHOW_EXISTS) {
-          showAlertOld({ dispatch, message: 'That email or show name already exists', alert: 'error' });
+          showAlert(dispatch, { id: 'snackbar-sign-up', message: 'That email or show name already exists', alert: 'error' });
         } else if (error?.message === StatusResponse.EMAIL_CANNOT_BE_SENT) {
-          showAlertOld({ dispatch, message: 'Unable to send verification email', alert: 'error' });
+          showAlert(dispatch, { id: 'snackbar-sign-up', message: 'Unable to send verification email', alert: 'error' });
         } else {
-          showAlertOld({ dispatch, alert: 'error' });
+          showAlert(dispatch, { alert: 'error' });
         }
       }
     });

@@ -193,17 +193,17 @@ const KeyFeaturePage = () => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={12} sx={{ mt: 3 }}>
+        <Grid id="keyfeature-signin-signup" item xs={12} sx={{ mt: 3 }}>
           <Grid container justifyContent="center" spacing={gridSpacing}>
             <Grid item>
               <AnimateButton>
-                <Button component={RouterLink} to="/signup" size="large" variant="contained" color="secondary">
+                <Button id="keyfeature-signup" component={RouterLink} to="/signup" size="large" variant="contained" color="secondary">
                   Sign Up
                 </Button>
               </AnimateButton>
             </Grid>
             <Grid item>
-              <Button component={RouterLink} to="/signin" size="large" variant="text">
+              <Button id="keyfeature-signin" component={RouterLink} to="/signin" size="large" variant="text">
                 Sign In
               </Button>
             </Grid>

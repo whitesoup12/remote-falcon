@@ -17,6 +17,7 @@ export const showAlertOld = ({ dispatch, message, alert }) => {
 export const showAlert = (dispatch, { ...toast }) => {
   dispatch(
     openSnackbar({
+      id: toast?.id,
       open: true,
       message: toast?.alert === 'error' && !toast?.message ? unexpectedErrorMessage : toast?.message,
       alert: {

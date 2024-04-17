@@ -31,7 +31,7 @@ public class GraphQLMutationService {
     private final ShowRepository showRepository;
     private final HttpServletRequest httpServletRequest;
 
-    public Show signUp(String firstName, String lastName, String showName) {
+    public Boolean signUp(String firstName, String lastName, String showName) {
         String showSubdomain = showName.replaceAll("\\s", "").toLowerCase();
         String[] basicAuthCredentials = this.authUtil.getBasicAuthCredentials(httpServletRequest);
         if (basicAuthCredentials != null) {
@@ -53,8 +53,8 @@ public class GraphQLMutationService {
                 throw new RuntimeException(StatusResponse.EMAIL_CANNOT_BE_SENT.name());
             }
 
-            newShow = this.showRepository.save(newShow);
-            return newShow;
+            this.showRepository.save(newShow);
+            return true;
         }
         throw new RuntimeException(StatusResponse.UNEXPECTED_ERROR.name());
     }

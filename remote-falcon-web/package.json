@@ -33,6 +33,7 @@
     "axios-mock-adapter": "^1.20.0",
     "chance": "^1.1.8",
     "csstype": "^3.0.11",
+    "cypress": "^13.7.3",
     "date-fns": "^2.28.0",
     "draft-js": "^0.11.7",
     "emoji-picker-react": "^3.5.1",
@@ -102,7 +103,9 @@
     "lint": "eslint --fix --ext .js,.jsx ./src",
     "test": "npm run lint && react-scripts test",
     "eject": "react-scripts eject",
-    "nuke-modules": "if [ -d node_modules ]; then rm -rf node_modules; fi"
+    "nuke-modules": "if [ -d node_modules ]; then rm -rf node_modules; fi",
+    "cypress:open": "npx cypress open",
+    "cypress:run": "npx cypress run"
   },
   "eslintConfig": {
     "extends": [
@@ -135,6 +138,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-react-app": "6.0.0",
     "eslint-import-resolver-typescript": "^2.7.1",
+    "eslint-plugin-cypress": "^2.15.2",
     "eslint-plugin-flowtype": "^5.7.2",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.5.1",

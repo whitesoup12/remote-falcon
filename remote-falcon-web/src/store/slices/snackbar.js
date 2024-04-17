@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
+  id: 'snackbar',
   action: false,
   open: false,
   message: 'Note archived',
@@ -23,8 +24,9 @@ const snackbar = createSlice({
   initialState,
   reducers: {
     openSnackbar(state, action) {
-      const { open, message, anchorOrigin, variant, alert, transition, actionButton } = action.payload;
+      const { open, message, anchorOrigin, variant, alert, transition, actionButton, id } = action.payload;
 
+      state.id = id || initialState.id;
       state.action = !state.action;
       state.open = open || initialState.open;
       state.message = message || initialState.message;
