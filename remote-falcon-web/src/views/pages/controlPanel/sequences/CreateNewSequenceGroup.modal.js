@@ -9,10 +9,10 @@ import PropTypes from 'prop-types';
 import MainCard from 'ui-component/cards/MainCard';
 import RFLoadingButton from 'ui-component/RFLoadingButton';
 
-import { saveSequenceGroupsService } from '../../../../services/mutations.service';
+import { saveSequenceGroupsService } from '../../../../services/controlPanel/mutations.service';
 import { useDispatch, useSelector } from '../../../../store';
 import { setShow } from '../../../../store/slices/show';
-import { UPDATE_SEQUENCE_GROUPS } from '../../../../utils/graphql/mutations';
+import { UPDATE_SEQUENCE_GROUPS } from '../../../../utils/graphql/controlPanel/mutations';
 import { showAlert } from '../../globalPageHelpers';
 
 const CreateNewSequenceGroup = ({ handleClose }) => {

@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'store';
 import RevenueCard from 'ui-component/cards/RevenueCard';
 import DashboardStatsSkeleton from 'ui-component/cards/Skeleton/DashboardStatsSkeleton';
 import { ViewerControlMode } from 'utils/enum';
-import { DASHBOARD_LIVE_STATS } from 'utils/graphql/queries';
+import { DASHBOARD_LIVE_STATS } from 'utils/graphql/controlPanel/queries';
 
 import { showAlertOld } from '../../globalPageHelpers';
 

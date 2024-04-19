@@ -25,7 +25,7 @@ import useAuth from 'hooks/useAuth';
 import { useDispatch } from 'store';
 import AnimateButton from 'ui-component/extended/AnimateButton';
 import { StatusResponse } from 'utils/enum';
-import { VERIFY_PASSWORD_RESET_LINK } from 'utils/graphql/queries';
+import { VERIFY_PASSWORD_RESET_LINK } from 'utils/graphql/controlPanel/queries';
 import { strengthColor, strengthIndicatorNumFunc } from 'utils/password-strength';
 import { showAlertOld } from 'views/pages/globalPageHelpers';
 

@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { TextField } from '@mui/material';
 import htmlToReact from 'html-to-react';
 import sign from 'jwt-encode';
@@ -10,20 +11,19 @@ import Loading from 'react-fullscreen-loading';
 import { Helmet } from 'react-helmet';
 
 import useInterval from 'hooks/useInterval';
-import {
-  getExternalViewerPageService,
-  getExternalViewerPageDetailsService,
-  addSequenceToQueueService,
-  voteForSequenceService,
-  insertViewerPageStatsService,
-  updateActiveViewerService
-} from 'services/viewer/viewerPage.service';
+import { getExternalViewerPageDetailsService, addSequenceToQueueService, voteForSequenceService } from 'services/viewer/viewerPage.service';
 import { useDispatch } from 'store';
 import { unexpectedErrorMessage } from 'store/constant';
 import { openSnackbar } from 'store/slices/snackbar';
 import axios from 'utils/axios';
 import { getSubdomain } from 'utils/route-guard/helpers/helpers';
 
+import { setGraphqlHeaders } from '../../../index';
+import { insertViewerPageStatsService } from '../../../services/viewer/mutations.service';
+import { ViewerControlMode } from '../../../utils/enum';
+import { INSERT_VIEWER_PAGE_STATS } from '../../../utils/graphql/viewer/mutations';
+import { GET_SHOW } from '../../../utils/graphql/viewer/queries';
+import { showAlert } from '../globalPageHelpers';
 import { defaultProcessingInstructions, processingInstructions, viewerPageMessageElements } from './helpers/helpers';
 
 const ExternalViewerPage = () => {
@@ -31,8 +31,9 @@ const ExternalViewerPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [viewerTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
-  const [remoteViewerPage, setRemoteViewerPage] = useState(null);
-  const [externalViewerPageDetails, setExternalViewerPageDetails] = useState(null);
+  const [show, setShow] = useState();
+  const [activeViewerPage, setActiveViewerPage] = useState();
+
   const [remoteViewerReactPage, setRemoteViewerReactPage] = useState(null);
   const [viewerLatitude, setViewerLatitude] = useState(0.0);
   const [viewerLongitude, setViewerLongitude] = useState(0.0);
@@ -40,46 +41,31 @@ const ExternalViewerPage = () => {
   const [messageDisplayTime] = useState(6000);
   const [makeItSnowScript, setMakeItSnowScript] = useState(null);
 
+  const [getShowQuery] = useLazyQuery(GET_SHOW);
+  const [insertViewerPageStatsMutation] = useMutation(INSERT_VIEWER_PAGE_STATS);
+
   const setSession = (serviceToken) => {
     if (serviceToken) {
       localStorage.setItem('serviceToken', serviceToken);
+      setGraphqlHeaders(serviceToken);
       axios.defaults.headers.common.Authorization = `Bearer ${serviceToken}`;
     } else {
       localStorage.removeItem('serviceToken');
+      setGraphqlHeaders(null);
       delete axios.defaults.headers.common.Authorization;
     }
   };
 
   const signViewerJwt = useCallback(async () => {
-    const subdomain = getSubdomain();
+    const showSubdomain = getSubdomain();
     const viewerJwtData = {
-      subdomain,
+      showSubdomain,
       expiresIn: 86400,
       iss: 'remotefalcon'
     };
     const viewerJwt = sign(viewerJwtData, process?.env?.REACT_APP_JWT_VIEWER_SIGN_KEY);
     setSession(viewerJwt);
   }, []);
-
-  const fetchExternalViewerPage = useCallback(async () => {
-    try {
-      const externalViewerPageResponse = await getExternalViewerPageService();
-      const viewerPage = externalViewerPageResponse.data;
-      setRemoteViewerPage(viewerPage);
-    } catch (err) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: unexpectedErrorMessage,
-          variant: 'alert',
-          alert: {
-            color: 'error'
-          },
-          close: true
-        })
-      );
-    }
-  }, [dispatch]);
 
   const setViewerLocation = useCallback(async () => {
     if ('geolocation' in navigator) {
@@ -90,32 +76,32 @@ const ExternalViewerPage = () => {
     }
   }, []);
 
-  const getExternalViewerPageDetails = useCallback(async () => {
-    let showName = '';
-    try {
-      const externalViewerPageDetailsResponse = await getExternalViewerPageDetailsService();
-      setExternalViewerPageDetails({
-        ...externalViewerPageDetailsResponse.data
-      });
-      showName = externalViewerPageDetailsResponse.data?.remotePreferences?.showName;
-      if (externalViewerPageDetails?.remotePreferences?.enableGeolocation) {
-        setViewerLocation();
-      }
-    } catch (err) {
-      dispatch(
-        openSnackbar({
-          open: true,
-          message: unexpectedErrorMessage,
-          variant: 'alert',
-          alert: {
-            color: 'error'
-          },
-          close: true
-        })
-      );
-    }
-    return showName;
-  }, [dispatch, externalViewerPageDetails?.remotePreferences?.enableGeolocation, setViewerLocation]);
+  // const getExternalViewerPageDetails = useCallback(async () => {
+  //   let showName = '';
+  //   try {
+  //     const externalViewerPageDetailsResponse = await getExternalViewerPageDetailsService();
+  //     setExternalViewerPageDetails({
+  //       ...externalViewerPageDetailsResponse.data
+  //     });
+  //     showName = externalViewerPageDetailsResponse.data?.remotePreferences?.showName;
+  //     if (externalViewerPageDetails?.remotePreferences?.enableGeolocation) {
+  //       setViewerLocation();
+  //     }
+  //   } catch (err) {
+  //     dispatch(
+  //       openSnackbar({
+  //         open: true,
+  //         message: unexpectedErrorMessage,
+  //         variant: 'alert',
+  //         alert: {
+  //           color: 'error'
+  //         },
+  //         close: true
+  //       })
+  //     );
+  //   }
+  //   return showName;
+  // }, [dispatch, externalViewerPageDetails?.remotePreferences?.enableGeolocation, setViewerLocation]);
 
   const showViewerMessage = useCallback(
     (response) => {
@@ -143,18 +129,14 @@ const ExternalViewerPage = () => {
     [messageDisplayTime]
   );
 
-  const insertViewerPageStats = useCallback(async () => {
-    await insertViewerPageStatsService();
-  }, []);
-
   const addSequenceToQueue = useCallback(
     async (e) => {
       const sequenceName = e.target.attributes.getNamedItem('data-key') ? e.target.attributes.getNamedItem('data-key').value : '';
-      if (externalViewerPageDetails?.remotePreferences?.enableGeolocation) {
+      if (show?.preferences?.enableGeolocation) {
         await setViewerLocation();
       }
-      if (externalViewerPageDetails?.remotePreferences?.enableLocationCode) {
-        if (enteredLocationCode?.target?.value !== externalViewerPageDetails?.remotePreferences?.locationCode) {
+      if (show?.preferences?.enableLocationCode) {
+        if (enteredLocationCode?.target?.value !== show?.preferences?.locationCode) {
           const invalidCodeResponse = {
             status: 202,
             data: {
@@ -178,9 +160,9 @@ const ExternalViewerPage = () => {
     },
     [
       enteredLocationCode?.target?.value,
-      externalViewerPageDetails?.remotePreferences?.enableGeolocation,
-      externalViewerPageDetails?.remotePreferences?.enableLocationCode,
-      externalViewerPageDetails?.remotePreferences?.locationCode,
+      show?.preferences?.enableGeolocation,
+      show?.preferences?.enableLocationCode,
+      show?.preferences?.locationCode,
       setViewerLocation,
       showViewerMessage,
       viewerLatitude,
@@ -192,11 +174,11 @@ const ExternalViewerPage = () => {
   const voteForSequence = useCallback(
     async (e) => {
       const sequenceName = e.target.attributes.getNamedItem('data-key') ? e.target.attributes.getNamedItem('data-key').value : '';
-      if (externalViewerPageDetails?.remotePreferences?.enableGeolocation) {
+      if (show?.preferences?.enableGeolocation) {
         await setViewerLocation();
       }
-      if (externalViewerPageDetails?.remotePreferences?.enableLocationCode) {
-        if (enteredLocationCode?.target?.value !== externalViewerPageDetails?.remotePreferences?.locationCode) {
+      if (show?.preferences?.enableLocationCode) {
+        if (enteredLocationCode?.target?.value !== show?.preferences?.locationCode) {
           const invalidCodeResponse = {
             status: 202,
             data: {
@@ -220,9 +202,9 @@ const ExternalViewerPage = () => {
     },
     [
       enteredLocationCode?.target?.value,
-      externalViewerPageDetails?.remotePreferences?.enableGeolocation,
-      externalViewerPageDetails?.remotePreferences?.enableLocationCode,
-      externalViewerPageDetails?.remotePreferences?.locationCode,
+      show?.preferences?.enableGeolocation,
+      show?.preferences?.enableLocationCode,
+      show?.preferences?.locationCode,
       setViewerLocation,
       showViewerMessage,
       viewerLatitude,
@@ -241,9 +223,9 @@ const ExternalViewerPage = () => {
   const convertViewerPageToReact = useCallback(async () => {
     const isValidNode = () => true;
 
-    let parsedViewerPage = remoteViewerPage;
+    let parsedViewerPage = activeViewerPage;
 
-    if (externalViewerPageDetails?.remotePreferences?.makeItSnow) {
+    if (show?.preferences?.makeItSnow) {
       setMakeItSnowScript(<script type="text/javascript" src="https://app.embed.im/snow.js" />);
     }
 
@@ -251,73 +233,67 @@ const ExternalViewerPage = () => {
     const processNodeDefinitions = new htmlToReact.ProcessNodeDefinitions(React);
     let instructions = defaultProcessingInstructions(processNodeDefinitions);
 
-    parsedViewerPage = parsedViewerPage?.replace(/{QUEUE_DEPTH}/g, externalViewerPageDetails?.remotePreferences?.jukeboxDepth);
+    parsedViewerPage = parsedViewerPage?.replace(/{QUEUE_DEPTH}/g, show?.preferences?.jukeboxDepth);
     parsedViewerPage = displayCurrentViewerMessages(parsedViewerPage);
 
     const sequencesElement = [];
     const categoriesPlaced = [];
 
-    _.map(externalViewerPageDetails?.sequences, (sequence) => {
-      if (sequence.sequenceVisible && sequence.sequenceVisibleCount === 0) {
+    _.map(show?.sequences, (sequence) => {
+      if (sequence.visible && sequence.visibilityCount === 0) {
         let sequenceImageElement = [<></>];
-        if (sequence && sequence.sequenceImageUrl && sequence.sequenceImageUrl.replace(/\s/g, '').length) {
-          const classname = `sequence-image sequence-image-${sequence.sequenceKey}`;
-          sequenceImageElement = (
-            <img alt={sequence.sequenceName} className={classname} src={sequence.sequenceImageUrl} data-key={sequence.sequenceName} />
-          );
+        if (sequence && sequence.imageUrl && sequence.imageUrl.replace(/\s/g, '').length) {
+          const classname = `sequence-image sequence-image-${sequence.key}`;
+          sequenceImageElement = <img alt={sequence.name} className={classname} src={sequence.imageUrl} data-key={sequence.name} />;
         }
-        if (externalViewerPageDetails?.remotePreferences?.viewerControlMode === 'voting') {
-          if (sequence.sequenceVotes !== -1) {
-            if (sequence.sequenceCategory == null || sequence.sequenceCategory === '') {
-              const votingListClassname = `cell-vote-playlist cell-vote-playlist-${sequence.sequenceKey}`;
-              const votingListArtistClassname = `cell-vote-playlist-artist cell-vote-playlist-artist-${sequence.sequenceKey}`;
+        if (show?.preferences?.viewerControlMode === ViewerControlMode.VOTING) {
+          if (sequence.votes !== -1) {
+            if (sequence.category == null || sequence.category === '') {
+              const votingListClassname = `cell-vote-playlist cell-vote-playlist-${sequence.key}`;
+              const votingListArtistClassname = `cell-vote-playlist-artist cell-vote-playlist-artist-${sequence.key}`;
               sequencesElement.push(
                 <>
-                  <div className={votingListClassname} onClick={(e) => voteForSequence(e)} data-key={sequence.sequenceName}>
+                  <div className={votingListClassname} onClick={(e) => voteForSequence(e)} data-key={sequence.name}>
                     {sequenceImageElement}
-                    {sequence.sequenceDisplayName}
-                    <div className={votingListArtistClassname}>{sequence.sequenceArtist}</div>
+                    {sequence.displayName}
+                    <div className={votingListArtistClassname}>{sequence.artist}</div>
                   </div>
-                  <div className="cell-vote">{sequence.sequenceVotes}</div>
+                  <div className="cell-vote">{sequence.votes}</div>
                 </>
               );
-            } else if (!_.includes(categoriesPlaced, sequence.sequenceCategory)) {
-              categoriesPlaced.push(sequence.sequenceCategory);
+            } else if (!_.includes(categoriesPlaced, sequence.category)) {
+              categoriesPlaced.push(sequence.category);
               const categorizedSequencesArray = [];
-              const categorizedSequencesToIterate = _.cloneDeep(externalViewerPageDetails?.sequences);
+              const categorizedSequencesToIterate = _.cloneDeep(show?.sequences);
               _.map(categorizedSequencesToIterate, (categorizedSequence) => {
-                if (categorizedSequence.sequenceVisible) {
-                  if (categorizedSequence.sequenceCategory === sequence.sequenceCategory) {
+                if (categorizedSequence.visible) {
+                  if (categorizedSequence.category === sequence.category) {
                     sequenceImageElement = [<></>];
-                    if (
-                      categorizedSequence &&
-                      categorizedSequence.sequenceImageUrl &&
-                      categorizedSequence.sequenceImageUrl.replace(/\s/g, '').length
-                    ) {
-                      const classname = `sequence-image sequence-image-${categorizedSequence.sequenceKey}`;
+                    if (categorizedSequence && categorizedSequence.imageUrl && categorizedSequence.imageUrl.replace(/\s/g, '').length) {
+                      const classname = `sequence-image sequence-image-${categorizedSequence.key}`;
                       sequenceImageElement = (
                         <img
-                          alt={categorizedSequence.sequenceName}
+                          alt={categorizedSequence.name}
                           className={classname}
-                          src={categorizedSequence.sequenceImageUrl}
-                          data-key={categorizedSequence.sequenceName}
+                          src={categorizedSequence.imageUrl}
+                          data-key={categorizedSequence.name}
                         />
                       );
                     }
-                    const categorizedVotingListClassname = `cell-vote-playlist cell-vote-playlist-${sequence.sequenceKey}`;
-                    const categorizedVotingListArtistClassname = `cell-vote-playlist-artist cell-vote-playlist-artist-${sequence.sequenceKey}`;
+                    const categorizedVotingListClassname = `cell-vote-playlist cell-vote-playlist-${sequence.key}`;
+                    const categorizedVotingListArtistClassname = `cell-vote-playlist-artist cell-vote-playlist-artist-${sequence.key}`;
                     const theElement = (
                       <>
                         <div
                           className={categorizedVotingListClassname}
                           onClick={(e) => voteForSequence(e)}
-                          data-key={categorizedSequence.sequenceName}
+                          data-key={categorizedSequence.name}
                         >
                           {sequenceImageElement}
-                          {categorizedSequence.sequenceDisplayName}
-                          <div className={categorizedVotingListArtistClassname}>{categorizedSequence.sequenceArtist}</div>
+                          {categorizedSequence.displayName}
+                          <div className={categorizedVotingListArtistClassname}>{categorizedSequence.artist}</div>
                         </div>
-                        <div className="cell-vote">{categorizedSequence.sequenceVotes}</div>
+                        <div className="cell-vote">{categorizedSequence.votes}</div>
                       </>
                     );
                     categorizedSequencesArray.push(theElement);
@@ -328,61 +304,57 @@ const ExternalViewerPage = () => {
               sequencesElement.push(
                 <>
                   <div className="category-section" style={{ width: '100%', display: 'flex', flexWrap: 'wrap' }}>
-                    <div className="category-label">{sequence.sequenceCategory}</div>
+                    <div className="category-label">{sequence.category}</div>
                     {categorizedSequencesArray}
                   </div>
                 </>
               );
             }
           }
-        } else if (externalViewerPageDetails?.remotePreferences?.viewerControlMode === 'jukebox') {
-          if (sequence.sequenceCategory == null || sequence.sequenceCategory === '') {
-            const jukeboxListClassname = `jukebox-list jukebox-list-${sequence.sequenceKey}`;
-            const jukeboxListArtistClassname = `jukebox-list-artist jukebox-list-artist-${sequence.sequenceKey}`;
+        } else if (show?.preferences?.viewerControlMode === ViewerControlMode.JUKEBOX) {
+          if (sequence.category == null || sequence.category === '') {
+            const jukeboxListClassname = `jukebox-list jukebox-list-${sequence.key}`;
+            const jukeboxListArtistClassname = `jukebox-list-artist jukebox-list-artist-${sequence.key}`;
             sequencesElement.push(
               <>
-                <div className={jukeboxListClassname} onClick={(e) => addSequenceToQueue(e)} data-key={sequence.sequenceName}>
+                <div className={jukeboxListClassname} onClick={(e) => addSequenceToQueue(e)} data-key={sequence.name}>
                   {sequenceImageElement}
-                  {sequence.sequenceDisplayName}
-                  <div className={jukeboxListArtistClassname}>{sequence.sequenceArtist}</div>
+                  {sequence.displayName}
+                  <div className={jukeboxListArtistClassname}>{sequence.artist}</div>
                 </div>
               </>
             );
-          } else if (!_.includes(categoriesPlaced, sequence.sequenceCategory)) {
-            categoriesPlaced.push(sequence.sequenceCategory);
+          } else if (!_.includes(categoriesPlaced, sequence.category)) {
+            categoriesPlaced.push(sequence.category);
             const categorizedSequencesArray = [];
-            const categorizedSequencesToIterate = _.cloneDeep(externalViewerPageDetails?.sequences);
+            const categorizedSequencesToIterate = _.cloneDeep(show?.sequences);
             _.map(categorizedSequencesToIterate, (categorizedSequence) => {
-              if (categorizedSequence.sequenceVisible) {
-                if (categorizedSequence.sequenceCategory === sequence.sequenceCategory) {
+              if (categorizedSequence.visible) {
+                if (categorizedSequence.category === sequence.category) {
                   sequenceImageElement = [<></>];
-                  if (
-                    categorizedSequence &&
-                    categorizedSequence.sequenceImageUrl &&
-                    categorizedSequence.sequenceImageUrl.replace(/\s/g, '').length
-                  ) {
-                    const classname = `sequence-image sequence-image-${categorizedSequence.sequenceKey}`;
+                  if (categorizedSequence && categorizedSequence.imageUrl && categorizedSequence.imageUrl.replace(/\s/g, '').length) {
+                    const classname = `sequence-image sequence-image-${categorizedSequence.key}`;
                     sequenceImageElement = (
                       <img
-                        alt={categorizedSequence.sequenceName}
+                        alt={categorizedSequence.name}
                         className={classname}
-                        src={categorizedSequence.sequenceImageUrl}
-                        data-key={categorizedSequence.sequenceName}
+                        src={categorizedSequence.imageUrl}
+                        data-key={categorizedSequence.name}
                       />
                     );
                   }
-                  const categorizedJukeboxListClassname = `jukebox-list jukebox-list-${categorizedSequence.sequenceKey}`;
-                  const categorizedJukeboxListArtistClassname = `jukebox-list-artist jukebox-list-artist-${categorizedSequence.sequenceKey}`;
+                  const categorizedJukeboxListClassname = `jukebox-list jukebox-list-${categorizedSequence.key}`;
+                  const categorizedJukeboxListArtistClassname = `jukebox-list-artist jukebox-list-artist-${categorizedSequence.key}`;
                   const theElement = (
                     <>
                       <div
                         className={categorizedJukeboxListClassname}
                         onClick={(e) => addSequenceToQueue(e)}
-                        data-key={categorizedSequence.sequenceName}
+                        data-key={categorizedSequence.name}
                       >
                         {sequenceImageElement}
-                        {categorizedSequence.sequenceDisplayName}
-                        <div className={categorizedJukeboxListArtistClassname}>{categorizedSequence.sequenceArtist}</div>
+                        {categorizedSequence.displayName}
+                        <div className={categorizedJukeboxListArtistClassname}>{categorizedSequence.artist}</div>
                       </div>
                     </>
                   );
@@ -394,7 +366,7 @@ const ExternalViewerPage = () => {
             sequencesElement.push(
               <>
                 <div className="category-section ">
-                  <div className="category-label">{sequence.sequenceCategory}</div>
+                  <div className="category-label">{sequence.category}</div>
                   {categorizedSequencesArray}
                 </div>
               </>
@@ -405,7 +377,7 @@ const ExternalViewerPage = () => {
     });
 
     const jukeboxRequestsElement = [];
-    _.map(externalViewerPageDetails?.jukeboxRequests, (request) => {
+    _.map(show?.jukeboxRequests, (request) => {
       jukeboxRequestsElement.push(
         <>
           <div className="jukebox-queue">{request}</div>
@@ -421,14 +393,14 @@ const ExternalViewerPage = () => {
 
     instructions = processingInstructions(
       processNodeDefinitions,
-      externalViewerPageDetails?.remotePreferences?.viewerControlEnabled,
-      externalViewerPageDetails?.remotePreferences?.viewerControlMode,
-      externalViewerPageDetails?.remotePreferences?.enableLocationCode,
+      show?.preferences?.viewerControlEnabled,
+      show?.preferences?.viewerControlMode,
+      show?.preferences?.enableLocationCode,
       sequencesElement,
       jukeboxRequestsElement,
-      externalViewerPageDetails?.whatsPlaying,
-      externalViewerPageDetails?.nextSequence,
-      externalViewerPageDetails?.queueDepth,
+      show?.whatsPlaying,
+      show?.nextSequence,
+      show?.queueDepth,
       locationCodeElement
     );
 
@@ -436,35 +408,61 @@ const ExternalViewerPage = () => {
     setRemoteViewerReactPage(reactHtml);
   }, [
     addSequenceToQueue,
-    externalViewerPageDetails?.jukeboxRequests,
-    externalViewerPageDetails?.nextSequence,
-    externalViewerPageDetails?.queueDepth,
-    externalViewerPageDetails?.remotePreferences?.enableLocationCode,
-    externalViewerPageDetails?.remotePreferences?.jukeboxDepth,
-    externalViewerPageDetails?.remotePreferences?.makeItSnow,
-    externalViewerPageDetails?.remotePreferences?.viewerControlEnabled,
-    externalViewerPageDetails?.remotePreferences?.viewerControlMode,
-    externalViewerPageDetails?.sequences,
-    externalViewerPageDetails?.whatsPlaying,
-    remoteViewerPage,
+    show?.jukeboxRequests,
+    show?.nextSequence,
+    show?.queueDepth,
+    show?.preferences?.enableLocationCode,
+    show?.preferences?.jukeboxDepth,
+    show?.preferences?.makeItSnow,
+    show?.preferences?.viewerControlEnabled,
+    show?.preferences?.viewerControlMode,
+    show?.sequences,
+    show?.whatsPlaying,
+    activeViewerPage,
     voteForSequence
   ]);
+
+  const getActiveViewerPage = (showData) => {
+    _.forEach(showData?.pages, (page) => {
+      if (page?.active) {
+        setActiveViewerPage(page?.html);
+      }
+    });
+  };
+
+  const getShow = useCallback(() => {
+    getShowQuery({
+      onCompleted: (data) => {
+        const showData = { ...data?.getShow };
+        setShow(showData);
+        getActiveViewerPage(showData);
+        insertViewerPageStatsService(insertViewerPageStatsMutation, () => {});
+        setLoading(false);
+      },
+      onError: () => {
+        showAlert(dispatch, { alert: 'error' });
+      }
+    });
+  }, [dispatch, getShowQuery, insertViewerPageStatsMutation]);
 
   useEffect(() => {
     const init = async () => {
       setLoading(true);
       await signViewerJwt();
-      await fetchExternalViewerPage();
-      setLoading(false);
-      insertViewerPageStats();
+      // await fetchExternalViewerPage();
+
+      getShow();
+
+      // insertViewerPageStats();
     };
 
     init();
-  }, [fetchExternalViewerPage, insertViewerPageStats, signViewerJwt]);
+  }, [signViewerJwt, getShow]);
 
   useInterval(async () => {
-    getExternalViewerPageDetails();
-    updateActiveViewerService();
+    getShow();
+    // getExternalViewerPageDetails();
+    // updateActiveViewerService();
   }, 5000);
 
   useInterval(async () => {
@@ -481,8 +479,8 @@ const ExternalViewerPage = () => {
             }
           `}
         </style>
-        <title>{externalViewerPageDetails?.viewerPageMeta?.viewerPageTitle}</title>
-        <link rel="icon" href={externalViewerPageDetails?.viewerPageMeta?.viewerPageIconLink} />
+        <title>{show?.preferences?.viewerPageTitle}</title>
+        <link rel="icon" href={show?.viewerPageMeta?.viewerPageIconLink} />
         {makeItSnowScript}
       </Helmet>
       <Loading loading={loading} background="black" loaderColor="white" />

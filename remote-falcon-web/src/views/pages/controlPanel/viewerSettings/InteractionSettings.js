@@ -9,11 +9,11 @@ import PropTypes from 'prop-types';
 
 import MainCard from 'ui-component/cards/MainCard';
 
-import { savePreferencesService, savePsaSequencesService } from '../../../../services/mutations.service';
+import { savePreferencesService, savePsaSequencesService } from '../../../../services/controlPanel/mutations.service';
 import { useDispatch, useSelector } from '../../../../store';
 import { setShow } from '../../../../store/slices/show';
 import { LocationCheckMethod } from '../../../../utils/enum';
-import { UPDATE_PREFERENCES, UPDATE_PSA_SEQUENCES } from '../../../../utils/graphql/mutations';
+import { UPDATE_PREFERENCES, UPDATE_PSA_SEQUENCES } from '../../../../utils/graphql/controlPanel/mutations';
 import { showAlert } from '../../globalPageHelpers';
 
 const locationCheckMethods = [

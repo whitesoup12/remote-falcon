@@ -7,9 +7,9 @@ import { gridSpacing } from 'store/constant';
 import RFLoadingButton from 'ui-component/RFLoadingButton';
 
 import useAuth from '../../../../hooks/useAuth';
-import { updatePasswordService } from '../../../../services/mutations.service';
+import { updatePasswordService } from '../../../../services/controlPanel/mutations.service';
 import { useDispatch } from '../../../../store';
-import { UPDATE_PASSWORD } from '../../../../utils/graphql/mutations';
+import { UPDATE_PASSWORD } from '../../../../utils/graphql/controlPanel/mutations';
 import { showAlert } from '../../globalPageHelpers';
 
 const ChangePassword = () => {

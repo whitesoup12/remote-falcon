@@ -13,10 +13,10 @@ import PropTypes from 'prop-types';
 
 import Chip from 'ui-component/extended/Chip';
 
-import { playSequenceFromControlPanelService, saveSequencesService } from '../../../../services/mutations.service';
+import { playSequenceFromControlPanelService, saveSequencesService } from '../../../../services/controlPanel/mutations.service';
 import { useDispatch, useSelector } from '../../../../store';
 import { setShow } from '../../../../store/slices/show';
-import { PLAY_SEQUENCE_FROM_CONTROL_PANEL, UPDATE_SEQUENCES } from '../../../../utils/graphql/mutations';
+import { PLAY_SEQUENCE_FROM_CONTROL_PANEL, UPDATE_SEQUENCES } from '../../../../utils/graphql/controlPanel/mutations';
 import { showAlert } from '../../globalPageHelpers';
 import SequenceDetails from './SequenceDetails';
 

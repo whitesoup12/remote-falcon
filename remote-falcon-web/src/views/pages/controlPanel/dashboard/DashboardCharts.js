@@ -13,7 +13,7 @@ import DashboardChartsSkeleton from 'ui-component/cards/Skeleton/DashboardCharts
 import SubCard from 'ui-component/cards/SubCard';
 import RFLoadingButton from 'ui-component/RFLoadingButton';
 import { ViewerControlMode } from 'utils/enum';
-import { DASHBOARD_STATS } from 'utils/graphql/queries';
+import { DASHBOARD_STATS } from 'utils/graphql/controlPanel/queries';
 
 import { showAlertOld } from '../../globalPageHelpers';
 import ApexBarChart from './ApexBarChart';
@@ -55,7 +55,6 @@ const DashboardCharts = () => {
         timezone: show?.preferences?.timezone
       },
       onCompleted: (data) => {
-        console.log(show?.preferences?.viewerControlMode);
         setDashboardStats(data?.dashboardStats);
       },
       onError: () => {

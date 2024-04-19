@@ -21,10 +21,10 @@ import PropTypes from 'prop-types';
 
 import MainCard from 'ui-component/cards/MainCard';
 
-import { savePagesService } from '../../../../services/mutations.service';
+import { savePagesService } from '../../../../services/controlPanel/mutations.service';
 import { useDispatch, useSelector } from '../../../../store';
 import { setShow } from '../../../../store/slices/show';
-import { UPDATE_PAGES } from '../../../../utils/graphql/mutations';
+import { UPDATE_PAGES } from '../../../../utils/graphql/controlPanel/mutations';
 import { showAlert } from '../../globalPageHelpers';
 
 const ManageViewerPagesModal = ({ setManageViewerPagesOpen, editViewerPage }) => {

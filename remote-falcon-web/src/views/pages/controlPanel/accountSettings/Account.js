@@ -12,10 +12,10 @@ import MainCard from 'ui-component/cards/MainCard';
 import RFLoadingButton from 'ui-component/RFLoadingButton';
 
 import useAuth from '../../../../hooks/useAuth';
-import { deleteAccountService, requestApiAccessService } from '../../../../services/mutations.service';
+import { deleteAccountService, requestApiAccessService } from '../../../../services/controlPanel/mutations.service';
 import { useDispatch, useSelector } from '../../../../store';
 import { setShow } from '../../../../store/slices/show';
-import { DELETE_ACCOUNT, REQUEST_API_ACCESS } from '../../../../utils/graphql/mutations';
+import { DELETE_ACCOUNT, REQUEST_API_ACCESS } from '../../../../utils/graphql/controlPanel/mutations';
 import { showAlert } from '../../globalPageHelpers';
 import DeleteAccountModal from './DeleteAccount.modal';
 

@@ -10,7 +10,7 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@apollo/client@^3.8.10":
+"@apollo/client@^3.7.1", "@apollo/client@^3.8.10":
   "integrity" "sha512-p/22RZ8ehHyvySnC20EHPPe0gdu8Xp6ZCiXOfdEe1ZORw5cUteD/TLc66tfKv8qu8NLIfbiWoa+6s70XnKvxqg=="
   "resolved" "https://registry.npmjs.org/@apollo/client/-/client-3.8.10.tgz"
   "version" "3.8.10"
@@ -1918,6 +1918,11 @@
     "long" "^4.0.0"
     "protobufjs" "^6.10.0"
     "yargs" "^16.2.0"
+
+"@habx/apollo-multi-endpoint-link@^2.9.0":
+  "integrity" "sha512-QH/6wm0m2g0mXk2T6ik/2Sv1hlr2wXR9kPvSVHcQJERmShBMFj2KWfPg6Fiai/8+katf9xmhr7JFC0SXWsqmpg=="
+  "resolved" "https://registry.npmjs.org/@habx/apollo-multi-endpoint-link/-/apollo-multi-endpoint-link-2.9.0.tgz"
+  "version" "2.9.0"
 
 "@hapi/address@2.x.x":
   "integrity" "sha512-QD1PhQk+s31P1ixsX0H0Suoupp3VMXzIVMSwobR3F3MSUO2YCV0B7xqLcUw/Bh8yuvd3LhpyqLQWTNcRmp6IdQ=="

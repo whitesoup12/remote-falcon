@@ -1,0 +1,71 @@
+input UserProfileInput {
+    firstName: String
+    lastName: String
+    facebookUrl: String
+    youtubeUrl: String
+}
+
+input PreferenceInput {
+    viewerControlEnabled: Boolean
+    viewerControlMode: String
+    resetVotes: Boolean
+    jukeboxDepth: Int
+    locationCheckMethod: String
+    showLatitude: Float
+    showLongitude: Float
+    allowedRadius: Float
+    checkIfVoted: Boolean
+    psaEnabled: Boolean
+    psaFrequency: Int
+    jukeboxRequestLimit: Int
+    jukeboxHistoryLimit: Int
+    locationCode: Int
+    hideSequenceCount: Int
+    makeItSnow: Boolean
+    managePsa: Boolean
+    sequencesPlayed: Int
+    pageTitle: String
+    pageIconUrl: String
+}
+
+input SequenceInput {
+    name: String
+    key: Long
+    displayName: String
+    duration: Int
+    visible: Boolean
+    votes: Int
+    lastVoteTime: String
+    totalVotes: Int
+    index: Int
+    order: Int
+    imageUrl: String
+    active: Boolean
+    ownerVoted: Boolean
+    visibilityCount: Int
+    type: String
+    group: String
+    category: String
+    artist: String
+    total: Int
+}
+
+input SequenceGroupInput {
+    name: String
+    votes: Int
+    lastVoteTime: String
+    totalVotes: Int
+    visibilityCount: Int
+}
+
+input PsaSequenceInput {
+    name: String
+    order: Int
+    lastPlayed: String
+}
+
+input PageInput {
+    name: String
+    active: Boolean
+    html: String
+}

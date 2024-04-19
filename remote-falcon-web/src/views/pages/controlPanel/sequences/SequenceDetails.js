@@ -10,10 +10,10 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 
-import { saveSequencesService } from '../../../../services/mutations.service';
+import { saveSequencesService } from '../../../../services/controlPanel/mutations.service';
 import { useDispatch, useSelector } from '../../../../store';
 import { setShow } from '../../../../store/slices/show';
-import { UPDATE_SEQUENCES } from '../../../../utils/graphql/mutations';
+import { UPDATE_SEQUENCES } from '../../../../utils/graphql/controlPanel/mutations';
 import { showAlert } from '../../globalPageHelpers';
 import CreateNewSequenceGroup from './CreateNewSequenceGroup.modal';
 import ManageSequenceGroups from './ManageSequenceGroups.modal';

@@ -53,7 +53,7 @@ describe('Sign Up', () => {
 
   context('Sign Up', () => {
     it('Show or email exists', () => {
-      cy.intercept('POST', '/remotefalcon/api/graphql', { fixture: 'signUp/showExists.json' }).as('signUp');
+      cy.intercept('POST', '/remote-falcon-control-panel/graphql', { fixture: 'signUp/showExists.json' }).as('signUp');
       cy.get('#signup-first-name').focus().type('First').blur();
       cy.get('#signup-last-name').focus().type('Last').blur();
       cy.get('#signup-show-name').focus().type('Show Name').blur();
@@ -71,7 +71,7 @@ describe('Sign Up', () => {
       });
     });
     it('Successful', () => {
-      cy.intercept('POST', '/remotefalcon/api/graphql', { fixture: 'signUp/successful.json' }).as('signUp');
+      cy.intercept('POST', '/remote-falcon-control-panel/graphql', { fixture: 'signUp/successful.json' }).as('signUp');
       cy.get('#signup-first-name').focus().type('First').blur();
       cy.get('#signup-last-name').focus().type('Last').blur();
       cy.get('#signup-show-name').focus().type('Show Name').blur();

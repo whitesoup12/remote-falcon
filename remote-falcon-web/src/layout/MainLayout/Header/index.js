@@ -98,9 +98,9 @@ const Header = () => {
         </LoadingButton>
       </Box>
 
-      <Box sx={{ mr: -3 }}>
-        <NotificationSection />
-      </Box>
+      {/* <Box sx={{ mr: -3 }}> */}
+      {/*  <NotificationSection /> */}
+      {/* </Box> */}
 
       <Box sx={{ mr: 1 }}>
         <LocalizationSection />

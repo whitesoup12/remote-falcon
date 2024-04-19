@@ -2,7 +2,7 @@ import fileDownload from 'js-file-download';
 import _ from 'lodash';
 import moment from 'moment/moment';
 
-import { downloadStatsToExcelService } from 'services/controlPanel/dashboard.service';
+import axios from 'utils/axios';
 import { showAlertOld } from 'views/pages/globalPageHelpers';
 
 export const uniqueViewersByDate = (dashboardStats) => {
@@ -124,6 +124,17 @@ export const sequenceVoteWins = (dashboardStats) => {
     yValue: 'Total Wins: ',
     data
   };
+};
+
+const downloadStatsToExcelService = async (timezone) => {
+  const response = await axios.post(
+    '/remote-falcon-control-panel/controlPanel/downloadStatsToExcel',
+    {
+      timezone
+    },
+    { responseType: 'blob' }
+  );
+  return response;
 };
 
 export const downloadStatsToExcel = async (dispatch, timezone, setIsDownloadingStats) => {

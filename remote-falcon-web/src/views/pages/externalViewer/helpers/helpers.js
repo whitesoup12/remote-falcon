@@ -1,4 +1,6 @@
 // eslint-disable-next-line import/prefer-default-export
+import { ViewerControlMode } from '../../../../utils/enum';
+
 const locationCodeNode = (value) => ({
   replaceChildren: true,
   shouldProcessNode(node) {
@@ -177,7 +179,7 @@ export const processingInstructions = (
       locationCodeDynamicContainerNode(<></>),
       allNodes(processNodeDefinitions)
     ];
-  } else if (viewerControlMode === 'jukebox') {
+  } else if (viewerControlMode === ViewerControlMode.JUKEBOX) {
     processedNodes = [
       locationCodeNode(<>{locationCode}</>),
       sequencesNode(<>{sequences}</>),

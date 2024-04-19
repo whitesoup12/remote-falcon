@@ -12,8 +12,8 @@ import { startLoginAction, startLogoutAction } from 'store/slices/show';
 import Loader from 'ui-component/Loader';
 import axios from 'utils/axios';
 import { StatusResponse } from 'utils/enum';
-import { SIGN_UP, VERIFY_EMAIL, FORGOT_PASSWORD, RESET_PASSWORD } from 'utils/graphql/mutations';
-import { SIGN_IN, GET_SHOW } from 'utils/graphql/queries';
+import { SIGN_UP, VERIFY_EMAIL, FORGOT_PASSWORD, RESET_PASSWORD } from 'utils/graphql/controlPanel/mutations';
+import { SIGN_IN, GET_SHOW } from 'utils/graphql/controlPanel/queries';
 import { showAlert, showAlertOld } from 'views/pages/globalPageHelpers';
 
 const verifyToken = (serviceToken) => {

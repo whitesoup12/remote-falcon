@@ -8,12 +8,12 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 
 import useAuth from 'hooks/useAuth';
-import { saveShowService, saveUserProfileService } from 'services/mutations.service';
+import { saveShowService, saveUserProfileService } from 'services/controlPanel/mutations.service';
 import { useDispatch, useSelector } from 'store';
 import { gridSpacing } from 'store/constant';
 import { setShow } from 'store/slices/show';
 import Avatar from 'ui-component/extended/Avatar';
-import { UPDATE_SHOW, UPDATE_USER_PROFILE } from 'utils/graphql/mutations';
+import { UPDATE_SHOW, UPDATE_USER_PROFILE } from 'utils/graphql/controlPanel/mutations';
 
 import { showAlert } from '../../globalPageHelpers';
 import UpdateEmailModal from './UpdateEmail.modal';

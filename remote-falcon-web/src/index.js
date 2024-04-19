@@ -1,5 +1,6 @@
-import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink, ApolloLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
+import { MultiAPILink } from '@habx/apollo-multi-endpoint-link';
 import DataDog from 'react-datadog';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
@@ -15,11 +16,6 @@ import { store } from 'store';
 
 import 'assets/scss/style.scss';
 
-const graphQLURI = `${process?.env?.REACT_APP_BASE_API_PATH}/remotefalcon/api/graphql`;
-const httpLink = createHttpLink({
-  uri: graphQLURI
-});
-
 const defaultOptions = {
   watchQuery: {
     fetchPolicy: 'network-only'
@@ -32,13 +28,26 @@ const defaultOptions = {
   }
 };
 
+const controlPanelURI = `${process?.env?.REACT_APP_BASE_API_PATH}/remote-falcon-control-panel`;
+const viewerURI = `${process?.env?.REACT_APP_BASE_API_PATH_2}/remote-falcon-viewer`;
+
+const link = ApolloLink.from([
+  new MultiAPILink({
+    endpoints: {
+      controlPanel: controlPanelURI,
+      viewer: viewerURI
+    },
+    createHttpLink: () => createHttpLink()
+  })
+]);
+
 const client = new ApolloClient({
   cache: new InMemoryCache({
     dataIdFromObject: () => null,
     addTypename: false
   }),
   defaultOptions,
-  link: httpLink,
+  link,
   connectToDevTools: process?.env?.REACT_APP_HOST_ENV === 'local'
 });
 
@@ -57,7 +66,7 @@ export function setGraphqlHeaders(serviceToken) {
       }
     }));
   }
-  client.setLink(authLink.concat(httpLink));
+  client.setLink(authLink.concat(link));
 }
 
 ReactDOM.render(

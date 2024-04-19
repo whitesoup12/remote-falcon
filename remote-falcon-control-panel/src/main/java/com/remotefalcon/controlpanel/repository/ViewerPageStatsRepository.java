@@ -1,0 +1,16 @@
+package com.remotefalcon.controlpanel.repository;
+
+import com.remotefalcon.controlpanel.entity.ViewerPageStats;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import jakarta.transaction.Transactional;
+import java.time.ZonedDateTime;
+import java.util.List;
+
+public interface ViewerPageStatsRepository extends JpaRepository<ViewerPageStats, Integer> {
+  @Transactional
+  void deleteAllByRemoteToken(String remoteToken);
+  List<ViewerPageStats> findAllByRemoteTokenAndPageVisitDateTimeBetween(String remoteToken, ZonedDateTime startDate, ZonedDateTime endDate);
+  List<ViewerPageStats> findAllByPageVisitDateTimeBefore(ZonedDateTime pageVisitDateTime);
+  List<ViewerPageStats> findAllByRemoteToken(String remoteToken);
+}
