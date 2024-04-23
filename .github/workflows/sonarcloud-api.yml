@@ -1,11 +1,11 @@
 name: SonarCloud Remote Falcon API
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'remote-falcon-api/**'
+  # pull_request:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'remote-falcon-api/**'
 jobs:
   build:
     name: Build and analyze
