@@ -1,4 +1,4 @@
-name: Build and Push remote-falcon-control-panel
+name: Build and Push Remote Falcon Control Panel
 on:
   workflow_dispatch:
   # push:
