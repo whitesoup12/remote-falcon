@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: remote-falcon-control-panel
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+server:
+  servlet:
+    contextPath: /remote-falcon-control-panel
+  port: 8080
+
+info:
+  build:
+    artifact: remote-falcon-control-panel
+
+management:
+  endpoints:
+    web:
+      cors:
+        allowed-origins: "*"
+        allowed-methods: "OPTIONS, GET, POST, PUT, DELETE"
+        allowed-headers: "*"
+
+sendgrid:
+  mail-from: "noreply@remotefalcon.com"

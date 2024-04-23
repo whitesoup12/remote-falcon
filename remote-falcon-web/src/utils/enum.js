@@ -1,3 +1,9 @@
+export const Environments = {
+  LOCAL: 'local',
+  TEST: 'test',
+  PRODUCTION: 'production'
+};
+
 export const ViewerControlMode = {
   JUKEBOX: 'JUKEBOX',
   VOTING: 'VOTING'

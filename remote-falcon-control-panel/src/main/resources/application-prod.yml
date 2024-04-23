@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: "jdbc:mysql://remote-falcon-mysql-2024-do-user-7518603-0.c.db.ondigitalocean.com:25060/remotefalcon"
+  data:
+    mongodb:
+      uri: "mongodb+srv://remote-falcon-mongo-0968d40a.mongo.ondigitalocean.com/remote-falcon"
+
+web:
+  url: "https://remotefalcon.com"

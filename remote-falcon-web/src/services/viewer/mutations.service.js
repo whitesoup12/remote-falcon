@@ -1,20 +1,42 @@
-import moment from 'moment/moment';
-
-// eslint-disable-next-line import/prefer-default-export
-export const insertViewerPageStatsService = (insertViewerPageStatsMutation, callback) => {
-  insertViewerPageStatsMutation({
+export const addSequenceToQueueService = (addSequenceToQueueMutation, name, viewerLatitude, viewerLongitude, callback) => {
+  addSequenceToQueueMutation({
     variables: {
-      date: moment().format('YYYY-MM-DDTHH:mm:ss')
+      name,
+      latitude: parseFloat(viewerLatitude),
+      longitude: parseFloat(viewerLongitude)
     },
-    onCompleted: () => {
+    onCompleted: (response) => {
       callback({
-        success: true
+        success: true,
+        response
       });
     },
-    onError: () => {
+    onError: (error) => {
       callback({
         success: false,
-        toast: { alert: 'error' }
+        error
+      });
+    }
+  });
+};
+
+export const voteForSequenceService = (voteForSequenceMutation, name, viewerLatitude, viewerLongitude, callback) => {
+  voteForSequenceMutation({
+    variables: {
+      name,
+      latitude: parseFloat(viewerLatitude),
+      longitude: parseFloat(viewerLongitude)
+    },
+    onCompleted: (response) => {
+      callback({
+        success: true,
+        response
+      });
+    },
+    onError: (error) => {
+      callback({
+        success: false,
+        error
       });
     }
   });

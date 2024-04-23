@@ -1,6 +1,6 @@
 package com.remotefalcon.controlpanel.repository.mongo;
 
-import com.remotefalcon.controlpanel.documents.Show;
+import com.remotefalcon.library.documents.Show;
 import jakarta.transaction.Transactional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 

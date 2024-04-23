@@ -1,6 +1,6 @@
 package com.remotefalcon.viewer.aop;
 
-import com.remotefalcon.viewer.enums.StatusResponse;
+import com.remotefalcon.library.enums.StatusResponse;
 import com.remotefalcon.viewer.util.AuthUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;

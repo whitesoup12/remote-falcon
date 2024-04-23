@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.remotefalcon.api</groupId>
+    <groupId>com.remotefalcon</groupId>
     <artifactId>remote-falcon-viewer</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
@@ -168,6 +168,13 @@
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>${jacoco.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.remotefalcon</groupId>
+            <artifactId>remote-falcon-library</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/../remote-falcon-library/target/remote-falcon-library.jar</systemPath>
         </dependency>
     </dependencies>
 

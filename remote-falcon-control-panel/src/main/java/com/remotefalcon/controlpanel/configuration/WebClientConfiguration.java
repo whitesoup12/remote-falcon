@@ -8,7 +8,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfiguration {
 
-  @Value("${GITHUB_PAT}")
+  @Value("${github.pat}")
   String gitHubPat;
 
   @Bean

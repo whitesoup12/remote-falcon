@@ -10,7 +10,7 @@ metadata:
   name: #{Application}#
   namespace: #{Namespace}#
   labels:
-    tags.datadoghq.com/env: #{HOST_ENV}#
+    tags.datadoghq.com/env: #{Env}#
     tags.datadoghq.com/service: #{Application}#
 spec:
   replicas: #{Replicas}#
@@ -23,7 +23,7 @@ spec:
         com.datadoghq.ad.logs: '[{"source": "java", "service": "remote-falcon-viewer", "log_processing_rules": [{"type": "multi_line", "name": "log_start_with_date", "pattern" : "\\d{4}-(0?[1-9]|1[012])-(0?[1-9]|[12][0-9]|3[01])"}]}]'
       labels:
         app: #{Application}#
-        tags.datadoghq.com/env: #{HOST_ENV}#
+        tags.datadoghq.com/env: #{Env}#
         tags.datadoghq.com/service: #{Application}#
     spec:
       volumes:
@@ -46,22 +46,33 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        - name: BASE_URL
-          value: #{BASE_URL}#
-        - name: BASE_APP_URL
-          value: #{BASE_APP_URL}#
-        - name: MAIL_FROM
-          value: #{MAIL_FROM}#
-        - name: DATABASE_URL
-          value: #{DATABASE_URL}#
-        - name: SENDGRID_KEY
-          value: #{SENDGRID_KEY}#
-        - name: JWT_SIGN_KEY
-          value: #{JWT_SIGN_KEY}#
-        - name: JWT_VIEWER_SIGN_KEY
-          value: #{JWT_VIEWER_SIGN_KEY}#
-        - name: GITHUB_PAT
-          value: #{GITHUB_PAT}#
+          - name: SPRING_PROFILES_ACTIVE
+            value: #{Env}#
+          - name: spring.datasource.username
+            valueFrom:
+              secretKeyRef:
+                name: remote-falcon-viewer
+                key: mysql-user
+          - name: spring.datasource.password
+            valueFrom:
+              secretKeyRef:
+                name: remote-falcon-viewer
+                key: mysql-pass
+          - name: spring.data.mongodb.username
+            valueFrom:
+              secretKeyRef:
+                name: remote-falcon-viewer
+                key: mongo-user
+          - name: spring.data.mongodb.password
+            valueFrom:
+              secretKeyRef:
+                name: remote-falcon-viewer
+                key: mongo-pass
+          - name: jwt.viewer
+            valueFrom:
+              secretKeyRef:
+                name: remote-falcon-viewer
+                key: jwt-viewer
         - name: DD_ENV
           valueFrom:
             fieldRef:

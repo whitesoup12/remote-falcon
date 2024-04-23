@@ -7,21 +7,23 @@ import { TextField } from '@mui/material';
 import htmlToReact from 'html-to-react';
 import sign from 'jwt-encode';
 import _ from 'lodash';
+import moment from 'moment';
 import Loading from 'react-fullscreen-loading';
 import { Helmet } from 'react-helmet';
 
 import useInterval from 'hooks/useInterval';
-import { getExternalViewerPageDetailsService, addSequenceToQueueService, voteForSequenceService } from 'services/viewer/viewerPage.service';
 import { useDispatch } from 'store';
-import { unexpectedErrorMessage } from 'store/constant';
-import { openSnackbar } from 'store/slices/snackbar';
-import axios from 'utils/axios';
 import { getSubdomain } from 'utils/route-guard/helpers/helpers';
 
-import { setGraphqlHeaders } from '../../../index';
-import { insertViewerPageStatsService } from '../../../services/viewer/mutations.service';
-import { ViewerControlMode } from '../../../utils/enum';
-import { INSERT_VIEWER_PAGE_STATS } from '../../../utils/graphql/viewer/mutations';
+import { setSession } from '../../../contexts/JWTContext';
+import { addSequenceToQueueService, voteForSequenceService } from '../../../services/viewer/mutations.service';
+import { LocationCheckMethod, ViewerControlMode } from '../../../utils/enum';
+import {
+  ADD_SEQUENCE_TO_QUEUE,
+  INSERT_VIEWER_PAGE_STATS,
+  UPDATE_ACTIVE_VIEWERS,
+  VOTE_FOR_SEQUENCE
+} from '../../../utils/graphql/viewer/mutations';
 import { GET_SHOW } from '../../../utils/graphql/viewer/queries';
 import { showAlert } from '../globalPageHelpers';
 import { defaultProcessingInstructions, processingInstructions, viewerPageMessageElements } from './helpers/helpers';
@@ -30,7 +32,6 @@ const ExternalViewerPage = () => {
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
-  const [viewerTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [show, setShow] = useState();
   const [activeViewerPage, setActiveViewerPage] = useState();
 
@@ -43,18 +44,9 @@ const ExternalViewerPage = () => {
 
   const [getShowQuery] = useLazyQuery(GET_SHOW);
   const [insertViewerPageStatsMutation] = useMutation(INSERT_VIEWER_PAGE_STATS);
-
-  const setSession = (serviceToken) => {
-    if (serviceToken) {
-      localStorage.setItem('serviceToken', serviceToken);
-      setGraphqlHeaders(serviceToken);
-      axios.defaults.headers.common.Authorization = `Bearer ${serviceToken}`;
-    } else {
-      localStorage.removeItem('serviceToken');
-      setGraphqlHeaders(null);
-      delete axios.defaults.headers.common.Authorization;
-    }
-  };
+  const [updateActiveViewersMutation] = useMutation(UPDATE_ACTIVE_VIEWERS);
+  const [addSequenceToQueueMutation] = useMutation(ADD_SEQUENCE_TO_QUEUE);
+  const [voteForSequenceMutation] = useMutation(VOTE_FOR_SEQUENCE);
 
   const signViewerJwt = useCallback(async () => {
     const showSubdomain = getSubdomain();
@@ -76,46 +68,19 @@ const ExternalViewerPage = () => {
     }
   }, []);
 
-  // const getExternalViewerPageDetails = useCallback(async () => {
-  //   let showName = '';
-  //   try {
-  //     const externalViewerPageDetailsResponse = await getExternalViewerPageDetailsService();
-  //     setExternalViewerPageDetails({
-  //       ...externalViewerPageDetailsResponse.data
-  //     });
-  //     showName = externalViewerPageDetailsResponse.data?.remotePreferences?.showName;
-  //     if (externalViewerPageDetails?.remotePreferences?.enableGeolocation) {
-  //       setViewerLocation();
-  //     }
-  //   } catch (err) {
-  //     dispatch(
-  //       openSnackbar({
-  //         open: true,
-  //         message: unexpectedErrorMessage,
-  //         variant: 'alert',
-  //         alert: {
-  //           color: 'error'
-  //         },
-  //         close: true
-  //       })
-  //     );
-  //   }
-  //   return showName;
-  // }, [dispatch, externalViewerPageDetails?.remotePreferences?.enableGeolocation, setViewerLocation]);
-
   const showViewerMessage = useCallback(
     (response) => {
-      if (response?.status === 200) {
+      if (response?.success) {
         viewerPageMessageElements.requestSuccessful.current = viewerPageMessageElements?.requestSuccessful?.block;
-      } else if (response?.status === 202 && response?.data?.message === 'SONG_REQUESTED') {
+      } else if (response?.error?.message === 'SEQUENCE_REQUESTED') {
         viewerPageMessageElements.requestPlaying.current = viewerPageMessageElements?.requestPlaying?.block;
-      } else if (response?.status === 202 && response?.data?.message === 'INVALID_LOCATION') {
+      } else if (response?.error?.message === 'INVALID_LOCATION') {
         viewerPageMessageElements.invalidLocation.current = viewerPageMessageElements?.invalidLocation?.block;
-      } else if (response?.status === 202 && response?.data?.message === 'QUEUE_FULL') {
+      } else if (response?.error?.message === 'QUEUE_FULL') {
         viewerPageMessageElements.queueFull.current = viewerPageMessageElements?.queueFull?.block;
-      } else if (response?.status === 202 && response?.data?.message === 'INVALID_CODE') {
+      } else if (response?.error?.message === 'INVALID_CODE') {
         viewerPageMessageElements.invalidLocationCode.current = viewerPageMessageElements?.invalidLocationCode?.block;
-      } else if (response?.status === 202 && response?.data?.message === 'ALREADY_VOTED') {
+      } else if (response?.error?.message === 'ALREADY_VOTED') {
         viewerPageMessageElements.alreadyVoted.current = viewerPageMessageElements?.alreadyVoted?.block;
       } else {
         viewerPageMessageElements.requestFailed.current = viewerPageMessageElements?.requestFailed?.block;
@@ -135,11 +100,10 @@ const ExternalViewerPage = () => {
       if (show?.preferences?.enableGeolocation) {
         await setViewerLocation();
       }
-      if (show?.preferences?.enableLocationCode) {
-        if (enteredLocationCode?.target?.value !== show?.preferences?.locationCode) {
+      if (show?.preferences?.locationCheckMethod === LocationCheckMethod.CODE) {
+        if (parseInt(enteredLocationCode, 10) !== parseInt(show?.preferences?.locationCode, 10)) {
           const invalidCodeResponse = {
-            status: 202,
-            data: {
+            error: {
               message: 'INVALID_CODE'
             }
           };
@@ -148,26 +112,20 @@ const ExternalViewerPage = () => {
           return;
         }
       }
-      const request = {
-        viewerLatitude,
-        viewerLongitude,
-        timezone: viewerTimezone,
-        date: new Date().getTime(),
-        sequence: sequenceName
-      };
-      const addSequenceToQueueResponse = await addSequenceToQueueService(request);
-      showViewerMessage(addSequenceToQueueResponse);
+      addSequenceToQueueService(addSequenceToQueueMutation, sequenceName, viewerLatitude || 0.0, viewerLongitude || 0.0, (response) => {
+        showViewerMessage(response);
+      });
     },
     [
-      enteredLocationCode?.target?.value,
       show?.preferences?.enableGeolocation,
-      show?.preferences?.enableLocationCode,
+      show?.preferences?.locationCheckMethod,
       show?.preferences?.locationCode,
-      setViewerLocation,
-      showViewerMessage,
+      addSequenceToQueueMutation,
       viewerLatitude,
       viewerLongitude,
-      viewerTimezone
+      setViewerLocation,
+      enteredLocationCode,
+      showViewerMessage
     ]
   );
 
@@ -177,11 +135,10 @@ const ExternalViewerPage = () => {
       if (show?.preferences?.enableGeolocation) {
         await setViewerLocation();
       }
-      if (show?.preferences?.enableLocationCode) {
-        if (enteredLocationCode?.target?.value !== show?.preferences?.locationCode) {
+      if (show?.preferences?.locationCheckMethod === LocationCheckMethod.CODE) {
+        if (parseInt(enteredLocationCode, 10) !== parseInt(show?.preferences?.locationCode, 10)) {
           const invalidCodeResponse = {
-            status: 202,
-            data: {
+            error: {
               message: 'INVALID_CODE'
             }
           };
@@ -190,26 +147,20 @@ const ExternalViewerPage = () => {
           return;
         }
       }
-      const request = {
-        viewerLatitude,
-        viewerLongitude,
-        timezone: viewerTimezone,
-        date: new Date().getTime(),
-        sequence: sequenceName
-      };
-      const voteForSequenceResponse = await voteForSequenceService(request);
-      showViewerMessage(voteForSequenceResponse);
+      voteForSequenceService(voteForSequenceMutation, sequenceName, viewerLatitude || 0.0, viewerLongitude || 0.0, (response) => {
+        showViewerMessage(response);
+      });
     },
     [
-      enteredLocationCode?.target?.value,
       show?.preferences?.enableGeolocation,
-      show?.preferences?.enableLocationCode,
+      show?.preferences?.locationCheckMethod,
       show?.preferences?.locationCode,
-      setViewerLocation,
-      showViewerMessage,
+      voteForSequenceMutation,
       viewerLatitude,
       viewerLongitude,
-      viewerTimezone
+      setViewerLocation,
+      enteredLocationCode,
+      showViewerMessage
     ]
   );
 
@@ -247,7 +198,15 @@ const ExternalViewerPage = () => {
           sequenceImageElement = <img alt={sequence.name} className={classname} src={sequence.imageUrl} data-key={sequence.name} />;
         }
         if (show?.preferences?.viewerControlMode === ViewerControlMode.VOTING) {
-          if (sequence.votes !== -1) {
+          let sequenceVotes = 0;
+          _.forEach(show?.votes, (vote) => {
+            if (vote?.sequence?.name === sequence?.name) {
+              sequenceVotes = vote?.votes;
+            }
+          });
+          // const sequenceVotes = _.find(show?.votes, (vote) => vote?.sequence?.name === sequence?.name);
+          // console.log(sequenceVotes);
+          if (sequenceVotes !== -1) {
             if (sequence.category == null || sequence.category === '') {
               const votingListClassname = `cell-vote-playlist cell-vote-playlist-${sequence.key}`;
               const votingListArtistClassname = `cell-vote-playlist-artist cell-vote-playlist-artist-${sequence.key}`;
@@ -258,7 +217,7 @@ const ExternalViewerPage = () => {
                     {sequence.displayName}
                     <div className={votingListArtistClassname}>{sequence.artist}</div>
                   </div>
-                  <div className="cell-vote">{sequence.votes}</div>
+                  <div className="cell-vote">{sequenceVotes}</div>
                 </>
               );
             } else if (!_.includes(categoriesPlaced, sequence.category)) {
@@ -266,6 +225,13 @@ const ExternalViewerPage = () => {
               const categorizedSequencesArray = [];
               const categorizedSequencesToIterate = _.cloneDeep(show?.sequences);
               _.map(categorizedSequencesToIterate, (categorizedSequence) => {
+                let categorizedSequenceVotes = 0;
+                _.forEach(show?.votes, (vote) => {
+                  if (vote?.sequence?.name === categorizedSequence?.name) {
+                    categorizedSequenceVotes = vote?.votes;
+                  }
+                });
+                // const categorizedSequenceVotes = _.find(show?.votes, (vote) => vote?.sequence?.name === categorizedSequence?.name);
                 if (categorizedSequence.visible) {
                   if (categorizedSequence.category === sequence.category) {
                     sequenceImageElement = [<></>];
@@ -293,7 +259,7 @@ const ExternalViewerPage = () => {
                           {categorizedSequence.displayName}
                           <div className={categorizedVotingListArtistClassname}>{categorizedSequence.artist}</div>
                         </div>
-                        <div className="cell-vote">{categorizedSequence.votes}</div>
+                        <div className="cell-vote">{categorizedSequenceVotes}</div>
                       </>
                     );
                     categorizedSequencesArray.push(theElement);
@@ -377,17 +343,20 @@ const ExternalViewerPage = () => {
     });
 
     const jukeboxRequestsElement = [];
-    _.map(show?.jukeboxRequests, (request) => {
-      jukeboxRequestsElement.push(
-        <>
-          <div className="jukebox-queue">{request}</div>
-        </>
-      );
+    _.map(show?.requests, (request, index) => {
+      // Don't add Playing Now to list
+      if (index !== 0) {
+        jukeboxRequestsElement.push(
+          <>
+            <div className="jukebox-queue">{request?.sequence?.displayName}</div>
+          </>
+        );
+      }
     });
 
     const locationCodeElement = (
       <>
-        <TextField type="text" name="locationCode" onChange={setEnteredLocationCode} />
+        <TextField type="number" name="locationCode" onChange={(e) => setEnteredLocationCode(e?.target?.value)} />
       </>
     );
 
@@ -395,30 +364,30 @@ const ExternalViewerPage = () => {
       processNodeDefinitions,
       show?.preferences?.viewerControlEnabled,
       show?.preferences?.viewerControlMode,
-      show?.preferences?.enableLocationCode,
+      show?.preferences?.locationCheckMethod,
       sequencesElement,
       jukeboxRequestsElement,
-      show?.whatsPlaying,
-      show?.nextSequence,
-      show?.queueDepth,
+      show?.playingNow,
+      show?.playingNext,
+      show?.requests?.length,
       locationCodeElement
     );
 
     const reactHtml = htmlToReactParser.parseWithInstructions(parsedViewerPage, isValidNode, instructions);
     setRemoteViewerReactPage(reactHtml);
   }, [
+    activeViewerPage,
     addSequenceToQueue,
-    show?.jukeboxRequests,
-    show?.nextSequence,
-    show?.queueDepth,
-    show?.preferences?.enableLocationCode,
+    show?.requests,
+    show?.playingNext,
+    show?.playingNow,
+    show?.preferences?.locationCheckMethod,
     show?.preferences?.jukeboxDepth,
     show?.preferences?.makeItSnow,
     show?.preferences?.viewerControlEnabled,
     show?.preferences?.viewerControlMode,
+    show?.requests?.length,
     show?.sequences,
-    show?.whatsPlaying,
-    activeViewerPage,
     voteForSequence
   ]);
 
@@ -430,20 +399,37 @@ const ExternalViewerPage = () => {
     });
   };
 
+  const orderSequencesForVoting = (showData) => {
+    let updatedSequences = [];
+    _.forEach(showData?.sequences, (sequence) => {
+      const sequenceVotes = _.find(showData?.votes, (vote) => vote?.sequence?.name === sequence?.name);
+      updatedSequences.push({
+        ...sequence,
+        votes: sequenceVotes?.votes || 0,
+        lastVoteTime: sequenceVotes?.lastVoteTime
+      });
+    });
+    updatedSequences = _.orderBy(updatedSequences, ['votes', 'lastVoteTime'], ['desc', 'asc']);
+    showData.sequences = updatedSequences;
+  };
+
   const getShow = useCallback(() => {
     getShowQuery({
       onCompleted: (data) => {
         const showData = { ...data?.getShow };
+        orderSequencesForVoting(showData);
         setShow(showData);
         getActiveViewerPage(showData);
-        insertViewerPageStatsService(insertViewerPageStatsMutation, () => {});
+        if (showData?.preferences?.locationCheckMethod === LocationCheckMethod.GEO) {
+          setViewerLocation();
+        }
         setLoading(false);
       },
       onError: () => {
         showAlert(dispatch, { alert: 'error' });
       }
-    });
-  }, [dispatch, getShowQuery, insertViewerPageStatsMutation]);
+    }).then();
+  }, [dispatch, getShowQuery, setViewerLocation]);
 
   useEffect(() => {
     const init = async () => {
@@ -452,21 +438,24 @@ const ExternalViewerPage = () => {
       // await fetchExternalViewerPage();
 
       getShow();
-
-      // insertViewerPageStats();
+      insertViewerPageStatsMutation({
+        variables: {
+          date: moment().format('YYYY-MM-DDTHH:mm:ss')
+        }
+      }).then();
+      updateActiveViewersMutation().then();
     };
 
-    init();
-  }, [signViewerJwt, getShow]);
+    init().then();
+  }, [signViewerJwt, getShow, insertViewerPageStatsMutation, updateActiveViewersMutation]);
 
-  useInterval(async () => {
+  useInterval(() => {
     getShow();
-    // getExternalViewerPageDetails();
-    // updateActiveViewerService();
+    updateActiveViewersMutation().then();
   }, 5000);
 
   useInterval(async () => {
-    convertViewerPageToReact();
+    await convertViewerPageToReact();
   }, 500);
 
   return (
@@ -479,8 +468,8 @@ const ExternalViewerPage = () => {
             }
           `}
         </style>
-        <title>{show?.preferences?.viewerPageTitle}</title>
-        <link rel="icon" href={show?.viewerPageMeta?.viewerPageIconLink} />
+        <title>{show?.preferences?.pageTitle}</title>
+        <link rel="icon" href={show?.preferences?.pageIconUrl} />
         {makeItSnowScript}
       </Helmet>
       <Loading loading={loading} background="black" loaderColor="white" />

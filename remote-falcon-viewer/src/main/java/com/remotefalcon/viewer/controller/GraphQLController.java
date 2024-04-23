@@ -1,7 +1,7 @@
 package com.remotefalcon.viewer.controller;
 
+import com.remotefalcon.library.documents.Show;
 import com.remotefalcon.viewer.aop.RequiresAccess;
-import com.remotefalcon.viewer.documents.Show;
 import com.remotefalcon.viewer.service.GraphQLMutationService;
 import com.remotefalcon.viewer.service.GraphQLQueryService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,36 @@ public class GraphQLController {
     @RequiresAccess
     public Boolean insertViewerPageStats(@Argument LocalDateTime date) {
         return graphQLMutationService.insertViewerPageStats(date);
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean updateActiveViewers() {
+        return graphQLMutationService.updateActiveViewers();
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean updatePlayingNow(@Argument String playingNow) {
+        return graphQLMutationService.updatePlayingNow(playingNow);
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean updatePlayingNext(@Argument String playingNext) {
+        return graphQLMutationService.updatePlayingNext(playingNext);
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean addSequenceToQueue(@Argument String name, @Argument Float latitude, @Argument Float longitude) {
+        return graphQLMutationService.addSequenceToQueue(name, latitude, longitude);
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean voteForSequence(@Argument String name, @Argument Float latitude, @Argument Float longitude) {
+        return graphQLMutationService.voteForSequence(name, latitude, longitude);
     }
 
 

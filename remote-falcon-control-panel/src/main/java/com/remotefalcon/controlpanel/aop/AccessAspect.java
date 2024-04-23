@@ -1,6 +1,6 @@
 package com.remotefalcon.controlpanel.aop;
 
-import com.remotefalcon.controlpanel.enums.StatusResponse;
+import com.remotefalcon.library.enums.StatusResponse;
 import com.remotefalcon.controlpanel.util.AuthUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;

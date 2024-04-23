@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
+import { useMutation } from '@apollo/client';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Avatar, Box, Modal, CircularProgress, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -10,10 +11,11 @@ import { useDispatch, useSelector } from 'store';
 import { openDrawer } from 'store/slices/menu';
 
 import { ViewerControlMode } from '../../../utils/enum';
+import { RESET_ALL_VOTES } from '../../../utils/graphql/controlPanel/mutations';
+import { showAlert } from '../../../views/pages/globalPageHelpers';
 import LogoSection from '../LogoSection';
-import { getAllJukeboxRequests, purgeQueue, resetVotes, deleteJukeboxRequest } from './helpers';
+import { resetVotes } from './helpers';
 import LocalizationSection from './LocalizationSection';
-import NotificationSection from './NotificationSection';
 import ProfileSection from './ProfileSection';
 import ViewJukeboxRequests from './ViewJukeboxRequests.modal';
 
@@ -24,17 +26,23 @@ const Header = () => {
   const { show } = useSelector((state) => state.show);
   const matchMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const [allJukebokRequests, setAllJukeboxRequests] = useState(null);
-  const [isFetching, setIsFetching] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isPurging, setIsPurging] = useState(false);
-
   const [viewJukeboxRequestsOpen, setViewJukeboxRequestsOpen] = useState(false);
-  const openViewJukeboxRequests = () => {
-    setViewJukeboxRequestsOpen(true);
-  };
-  const closeViewJukeboxRequests = () => {
-    setViewJukeboxRequestsOpen(false);
+  const [isResettingVotes, setIsResettingVotes] = useState(false);
+
+  const [resetAllVotesMutation] = useMutation(RESET_ALL_VOTES);
+
+  const resetAllVotes = () => {
+    setIsResettingVotes(true);
+    resetAllVotesMutation({
+      onCompleted: () => {
+        setIsResettingVotes(false);
+        showAlert(dispatch, { message: 'All Votes Reset' });
+      },
+      onError: () => {
+        setIsResettingVotes(false);
+        showAlert(dispatch, { alert: 'error' });
+      }
+    }).then();
   };
 
   return (
@@ -83,15 +91,15 @@ const Header = () => {
 
       <Box>
         <LoadingButton
-          loading={isFetching}
+          loading={isResettingVotes}
           loadingIndicator={<CircularProgress color="error" size={25} />}
           variant="contained"
           size={matchMobile ? 'small' : 'large'}
           sx={{ ml: 1, background: theme.palette.error.main, '&:hover': { background: theme.palette.error.dark } }}
           onClick={
             show?.preferences?.viewerControlMode === ViewerControlMode.JUKEBOX
-              ? () => getAllJukeboxRequests(dispatch, setIsFetching, setAllJukeboxRequests, openViewJukeboxRequests, show)
-              : () => resetVotes(dispatch, setIsFetching, show)
+              ? () => setViewJukeboxRequestsOpen(true)
+              : () => resetAllVotes()
           }
         >
           {show?.preferences?.viewerControlMode === ViewerControlMode.JUKEBOX ? <>View Queue</> : <>Reset Votes</>}
@@ -114,21 +122,11 @@ const Header = () => {
 
       <Modal
         open={viewJukeboxRequestsOpen}
-        onClose={() => closeViewJukeboxRequests()}
+        onClose={() => setViewJukeboxRequestsOpen(false)}
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
       >
-        <ViewJukeboxRequests
-          theme={theme}
-          handleClose={() => closeViewJukeboxRequests()}
-          jukeboxRequests={allJukebokRequests}
-          deleteJukeboxRequest={(remoteJukeKey, sequence) =>
-            deleteJukeboxRequest(dispatch, remoteJukeKey, sequence, setAllJukeboxRequests, setIsDeleting, show)
-          }
-          purgeQueue={() => purgeQueue(dispatch, setAllJukeboxRequests, setIsPurging, show)}
-          isDeleting={isDeleting}
-          isPurging={isPurging}
-        />
+        <ViewJukeboxRequests handleClose={() => setViewJukeboxRequestsOpen(false)} />
       </Modal>
     </>
   );

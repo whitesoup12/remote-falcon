@@ -1,0 +1,80 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: remote-falcon-local
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: remote-falcon-viewer
+  namespace: remote-falcon-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: remote-falcon-viewer
+  template:
+    metadata:
+      labels:
+        app: remote-falcon-viewer
+    spec:
+      containers:
+        - name: remote-falcon-viewer
+          image: remote-falcon-viewer:latest
+          imagePullPolicy: Never
+          resources:
+            requests:
+              memory: 500Mi
+              cpu: 250m
+            limits:
+              memory: 750Mi
+              cpu: 500m
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "local"
+            - name: spring.datasource.username
+              valueFrom:
+                secretKeyRef:
+                  name: remote-falcon-viewer
+                  key: mysql-user
+            - name: spring.datasource.password
+              valueFrom:
+                secretKeyRef:
+                  name: remote-falcon-viewer
+                  key: mysql-pass
+            - name: spring.data.mongodb.username
+              valueFrom:
+                secretKeyRef:
+                  name: remote-falcon-viewer
+                  key: mongo-user
+            - name: spring.data.mongodb.password
+              valueFrom:
+                secretKeyRef:
+                  name: remote-falcon-viewer
+                  key: mongo-pass
+            - name: jwt.viewer
+              valueFrom:
+                secretKeyRef:
+                  name: remote-falcon-viewer
+                  key: jwt-viewer
+          startupProbe:
+            httpGet:
+              path: /remote-falcon-viewer/actuator/health
+              port: 8080
+            failureThreshold: 60
+          livenessProbe:
+            httpGet:
+              path: /remote-falcon-viewer/actuator/health
+              port: 8080
+            initialDelaySeconds: 0
+            timeoutSeconds: 10
+            failureThreshold: 60
+          readinessProbe:
+            httpGet:
+              path: /remote-falcon-viewer/actuator/health
+              port: 8080
+            failureThreshold: 60
+            initialDelaySeconds: 0

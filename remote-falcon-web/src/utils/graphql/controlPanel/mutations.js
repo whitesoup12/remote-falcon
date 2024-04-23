@@ -89,3 +89,21 @@ export const PLAY_SEQUENCE_FROM_CONTROL_PANEL = gql`
     playSequenceFromControlPanel(sequence: $sequence)
   }
 `;
+
+export const DELETE_SINGLE_REQUEST = gql`
+  mutation ($position: Int!) @api(name: controlPanel) {
+    deleteSingleRequest(position: $position)
+  }
+`;
+
+export const DELETE_ALL_REQUESTS = gql`
+  mutation @api(name: controlPanel) {
+    deleteAllRequests
+  }
+`;
+
+export const RESET_ALL_VOTES = gql`
+  mutation @api(name: controlPanel) {
+    resetAllVotes
+  }
+`;

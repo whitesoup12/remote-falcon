@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/prefer-default-export
-import { ViewerControlMode } from '../../../../utils/enum';
+import { LocationCheckMethod, ViewerControlMode } from '../../../../utils/enum';
 
 const locationCodeNode = (value) => ({
   replaceChildren: true,
@@ -154,7 +154,7 @@ export const processingInstructions = (
   processNodeDefinitions,
   viewerControlEnabled,
   viewerControlMode,
-  enableLocationCode,
+  locationCheckMethod,
   sequences,
   jukeboxRequests,
   nowPlaying,
@@ -189,7 +189,7 @@ export const processingInstructions = (
       jukeboxQueueNode(<>{jukeboxRequests}</>),
       votingDynamicContainerNode(<></>),
       votingPlaylistsDynamicContainerNode(<></>),
-      enableLocationCode ? blankNode(null) : locationCodeDynamicContainerNode(<></>),
+      locationCheckMethod === LocationCheckMethod.CODE ? blankNode(null) : locationCodeDynamicContainerNode(<></>),
       afterHoursNode(<></>),
       allNodes(processNodeDefinitions)
     ];
@@ -204,7 +204,7 @@ export const processingInstructions = (
       jukeboxQueueNode(<></>),
       jukeboxDynamicContainerNode(<></>),
       jukeboxPlaylistsDynamicContainerNode(<></>),
-      enableLocationCode ? blankNode(null) : locationCodeDynamicContainerNode(<></>),
+      locationCheckMethod === LocationCheckMethod.CODE ? blankNode(null) : locationCodeDynamicContainerNode(<></>),
       afterHoursNode(<></>),
       allNodes(processNodeDefinitions)
     ];

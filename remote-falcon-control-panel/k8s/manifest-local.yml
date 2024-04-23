@@ -1,0 +1,95 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: remote-falcon-local
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: remote-falcon-control-panel
+  namespace: remote-falcon-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: remote-falcon-control-panel
+  template:
+    metadata:
+      labels:
+        app: remote-falcon-control-panel
+    spec:
+      containers:
+      - name: remote-falcon-control-panel
+        image: remote-falcon-control-panel:latest
+        imagePullPolicy: Never
+        resources:
+          requests:
+            memory: 500Mi
+            cpu: 250m
+          limits:
+            memory: 750Mi
+            cpu: 500m
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "local"
+        - name: spring.datasource.username
+          valueFrom:
+            secretKeyRef:
+              name: remote-falcon-control-panel
+              key: mysql-user
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              name: remote-falcon-control-panel
+              key: mysql-pass
+        - name: spring.data.mongodb.username
+          valueFrom:
+            secretKeyRef:
+              name: remote-falcon-control-panel
+              key: mongo-user
+        - name: spring.data.mongodb.password
+          valueFrom:
+            secretKeyRef:
+              name: remote-falcon-control-panel
+              key: mongo-pass
+        - name: github.pat
+          valueFrom:
+            secretKeyRef:
+              name: remote-falcon-control-panel
+              key: github-pat
+        - name: sendgrid.key
+          valueFrom:
+            secretKeyRef:
+              name: remote-falcon-control-panel
+              key: sendgrid-key
+        - name: jwt.user
+          valueFrom:
+            secretKeyRef:
+              name: remote-falcon-control-panel
+              key: jwt-user
+        - name: jwt.viewer
+          valueFrom:
+            secretKeyRef:
+              name: remote-falcon-control-panel
+              key: jwt-viewer
+        startupProbe:
+          httpGet:
+            path: /remote-falcon-control-panel/actuator/health
+            port: 8080
+          failureThreshold: 60
+        livenessProbe:
+          httpGet:
+            path: /remote-falcon-control-panel/actuator/health
+            port: 8080
+          initialDelaySeconds: 0
+          timeoutSeconds: 10
+          failureThreshold: 60
+        readinessProbe:
+          httpGet:
+            path: /remote-falcon-control-panel/actuator/health
+            port: 8080
+          failureThreshold: 60
+          initialDelaySeconds: 0

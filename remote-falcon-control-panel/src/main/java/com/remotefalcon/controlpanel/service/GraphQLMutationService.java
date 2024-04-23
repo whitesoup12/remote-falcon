@@ -1,10 +1,10 @@
 package com.remotefalcon.controlpanel.service;
 
-import com.remotefalcon.controlpanel.documents.Show;
-import com.remotefalcon.controlpanel.documents.models.*;
-import com.remotefalcon.controlpanel.enums.ShowRole;
-import com.remotefalcon.controlpanel.enums.StatusResponse;
-import com.remotefalcon.controlpanel.enums.ViewerControlMode;
+import com.remotefalcon.library.documents.Show;
+import com.remotefalcon.library.models.*;
+import com.remotefalcon.library.enums.ShowRole;
+import com.remotefalcon.library.enums.StatusResponse;
+import com.remotefalcon.library.enums.ViewerControlMode;
 import com.remotefalcon.controlpanel.repository.mongo.ShowRepository;
 import com.remotefalcon.controlpanel.util.AuthUtil;
 import com.remotefalcon.controlpanel.util.ClientUtil;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -304,6 +305,50 @@ public class GraphQLMutationService {
     public Boolean playSequenceFromControlPanel(Sequence sequence) {
         Optional<Show> show = this.showRepository.findByShowToken(authUtil.tokenDTO.getShowToken());
         if(show.isPresent()) {
+            return true;
+        }
+        throw new RuntimeException(StatusResponse.UNEXPECTED_ERROR.name());
+    }
+
+    public Boolean deleteSingleRequest(Integer position) {
+        Optional<Show> show = this.showRepository.findByShowToken(authUtil.tokenDTO.getShowToken());
+        if(show.isPresent()) {
+            List<Request> updatedRequests = show.get().getRequests().stream()
+                    .filter(request -> !Objects.equals(request.getPosition(), position))
+                    .toList();
+            int requestPosition = 1;
+            for(Request request : updatedRequests) {
+                request.setPosition(requestPosition);
+                requestPosition++;
+            }
+            if(updatedRequests.isEmpty()) {
+                show.get().setPlayingNext("");
+            }else {
+                show.get().setPlayingNext(updatedRequests.get(0).getSequence().getDisplayName());
+            }
+            show.get().setRequests(updatedRequests);
+            this.showRepository.save(show.get());
+            return true;
+        }
+        throw new RuntimeException(StatusResponse.UNEXPECTED_ERROR.name());
+    }
+
+    public Boolean deleteAllRequests() {
+        Optional<Show> show = this.showRepository.findByShowToken(authUtil.tokenDTO.getShowToken());
+        if(show.isPresent()) {
+            show.get().setRequests(new ArrayList<>());
+            show.get().setPlayingNext("");
+            this.showRepository.save(show.get());
+            return true;
+        }
+        throw new RuntimeException(StatusResponse.UNEXPECTED_ERROR.name());
+    }
+
+    public Boolean resetAllVotes() {
+        Optional<Show> show = this.showRepository.findByShowToken(authUtil.tokenDTO.getShowToken());
+        if(show.isPresent()) {
+            show.get().setVotes(new ArrayList<>());
+            this.showRepository.save(show.get());
             return true;
         }
         throw new RuntimeException(StatusResponse.UNEXPECTED_ERROR.name());

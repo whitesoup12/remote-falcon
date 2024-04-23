@@ -22,12 +22,12 @@ public class DashboardStatsResponse {
     private Long date;
     private Integer total;
     private Integer unique;
-    private List<Sequence> sequences;
+    private List<SequenceStat> sequences;
   }
 
   @Data
   @Builder
-  public static class Sequence {
+  public static class SequenceStat {
     private String name;
     private Integer total;
   }

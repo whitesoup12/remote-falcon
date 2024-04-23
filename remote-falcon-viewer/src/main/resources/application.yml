@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: remote-falcon-viewer
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+server:
+  servlet:
+    contextPath: /remote-falcon-viewer
+  port: 8080
+
+info:
+  build:
+    artifact: remote-falcon-viewer
+
+management:
+  endpoints:
+    web:
+      cors:
+        allowed-origins: "*"
+        allowed-methods: "OPTIONS, GET, POST, PUT, DELETE"
+        allowed-headers: "*"

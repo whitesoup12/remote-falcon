@@ -31,6 +31,8 @@ export const GET_SHOW = gql`
       fppVersion
       lastLoginIp
       showRole
+      playingNow
+      playingNext
       serviceToken
       apiAccess {
         apiAccessActive
@@ -54,7 +56,6 @@ export const GET_SHOW = gql`
         psaEnabled
         psaFrequency
         jukeboxRequestLimit
-        jukeboxHistoryLimit
         locationCode
         hideSequenceCount
         makeItSnow
@@ -69,26 +70,18 @@ export const GET_SHOW = gql`
         displayName
         duration
         visible
-        votes
-        lastVoteTime
-        totalVotes
         index
         order
         imageUrl
         active
-        ownerVoted
         visibilityCount
         type
         group
         category
         artist
-        total
       }
       sequenceGroups {
         name
-        votes
-        lastVoteTime
-        totalVotes
         visibilityCount
       }
       psaSequences {
@@ -101,6 +94,25 @@ export const GET_SHOW = gql`
         active
         html
       }
+      requests {
+        sequence {
+          name
+        }
+        position
+        ownerRequested
+      }
+      votes {
+        sequence {
+          name
+        }
+        votes
+        lastVoteTime
+        ownerVoted
+      }
+      activeViewers {
+        ipAddress
+        visitDateTime
+      }
     }
   }
 `;
@@ -112,6 +124,8 @@ export const DASHBOARD_LIVE_STATS = gql`
       totalViewers
       currentRequests
       totalRequests
+      currentVotes
+      totalVotes
     }
   }
 `;

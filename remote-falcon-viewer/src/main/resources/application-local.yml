@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: "jdbc:mysql://localhost:3306/remotefalcon"
+  data:
+    mongodb:
+      uri: "mongodb://localhost:27017/remote-falcon"
+
+server:
+  port: 8081

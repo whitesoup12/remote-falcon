@@ -39,8 +39,13 @@ const DashboardHeader = () => {
         const dashboardLiveStats = data?.dashboardLiveStats;
         setActiveViewers(dashboardLiveStats?.activeViewers?.toString());
         setTotalViewers(`${dashboardLiveStats?.totalViewers} Today`);
-        setCurrentRequests(dashboardLiveStats?.currentRequests?.toString());
-        setTotalRequests(`${dashboardLiveStats?.totalRequests} Today`);
+        if (show?.preferences?.viewerControlMode === ViewerControlMode.JUKEBOX) {
+          setCurrentRequests(dashboardLiveStats?.currentRequests?.toString());
+          setTotalRequests(`${dashboardLiveStats?.totalRequests} Today`);
+        } else {
+          setCurrentRequests(dashboardLiveStats?.currentVotes?.toString());
+          setTotalRequests(`${dashboardLiveStats?.totalVotes} Today`);
+        }
       },
       onError: () => {
         showAlertOld({ dispatch, alert: 'error' });

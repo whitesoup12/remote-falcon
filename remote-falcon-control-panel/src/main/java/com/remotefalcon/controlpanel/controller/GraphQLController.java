@@ -1,8 +1,8 @@
 package com.remotefalcon.controlpanel.controller;
 
 import com.remotefalcon.controlpanel.aop.RequiresAccess;
-import com.remotefalcon.controlpanel.documents.Show;
-import com.remotefalcon.controlpanel.documents.models.*;
+import com.remotefalcon.library.documents.Show;
+import com.remotefalcon.library.models.*;
 import com.remotefalcon.controlpanel.response.dashboard.DashboardLiveStatsResponse;
 import com.remotefalcon.controlpanel.response.dashboard.DashboardStatsResponse;
 import com.remotefalcon.controlpanel.service.DashboardService;
@@ -111,6 +111,24 @@ public class GraphQLController {
     @RequiresAccess
     public Boolean playSequenceFromControlPanel(@Argument Sequence sequence) {
         return this.graphQLMutationService.playSequenceFromControlPanel(sequence);
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean deleteSingleRequest(@Argument Integer position) {
+        return this.graphQLMutationService.deleteSingleRequest(position);
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean deleteAllRequests() {
+        return this.graphQLMutationService.deleteAllRequests();
+    }
+
+    @MutationMapping
+    @RequiresAccess
+    public Boolean resetAllVotes() {
+        return this.graphQLMutationService.resetAllVotes();
     }
 
 

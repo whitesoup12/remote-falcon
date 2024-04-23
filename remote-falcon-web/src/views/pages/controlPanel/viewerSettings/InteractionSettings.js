@@ -5,6 +5,7 @@ import InfoTwoToneIcon from '@mui/icons-material/InfoTwoTone';
 import SaveTwoToneIcon from '@mui/icons-material/SaveTwoTone';
 import { Grid, CardActions, Divider, Typography, Switch, TextField, Autocomplete, IconButton, Tooltip, Stack } from '@mui/material';
 import _ from 'lodash';
+import moment from 'moment/moment';
 import PropTypes from 'prop-types';
 
 import MainCard from 'ui-component/cards/MainCard';
@@ -42,7 +43,7 @@ const InteractionSettings = ({ setShowLinearProgress }) => {
   const getPsaOptions = useCallback(() => {
     const psaOptions = [];
     _.forEach(show?.sequences, (sequence) => {
-      psaOptions.push({ label: sequence.displayName, id: sequence.displayName });
+      psaOptions.push({ label: sequence.name, id: sequence.name });
     });
     setPsaOptions(psaOptions);
     const existingPsaSequences = [];
@@ -127,7 +128,7 @@ const InteractionSettings = ({ setShowLinearProgress }) => {
     const psaSequences = [];
     const selectedPsas = [];
     value.forEach((psaSequence, index) => {
-      psaSequences.push({ name: psaSequence.label, order: index });
+      psaSequences.push({ name: psaSequence.label, order: index, lastPlayed: moment().format('YYYY-MM-DDTHH:mm:ss') });
       selectedPsas.push({ label: psaSequence?.label, id: psaSequence?.label });
     });
     setSelectedPsaOptions(selectedPsas);

@@ -14,4 +14,7 @@ type Mutation {
     updateSequences(sequences: [SequenceInput]!): Boolean
     updateSequenceGroups(sequenceGroups: [SequenceGroupInput]!): Boolean
     playSequenceFromControlPanel(sequence: SequenceInput!): Boolean
+    deleteSingleRequest(position: Int!): Boolean
+    deleteAllRequests: Boolean
+    resetAllVotes: Boolean
 }

@@ -1,6 +1,6 @@
 package com.remotefalcon.viewer.repository;
 
-import com.remotefalcon.viewer.documents.Show;
+import com.remotefalcon.library.documents.Show;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;

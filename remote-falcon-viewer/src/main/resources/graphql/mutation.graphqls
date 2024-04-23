@@ -1,3 +1,8 @@
 type Mutation {
     insertViewerPageStats(date: String!): Boolean
+    updateActiveViewers: Boolean
+    updatePlayingNow(playingNow: String): Boolean
+    updatePlayingNext(playingNext: String): Boolean
+    addSequenceToQueue(name: String!, latitude: Float, longitude: Float): Boolean
+    voteForSequence(name: String!, latitude: Float, longitude: Float): Boolean
 }

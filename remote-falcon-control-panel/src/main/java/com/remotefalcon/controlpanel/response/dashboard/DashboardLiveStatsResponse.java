@@ -10,4 +10,6 @@ public class DashboardLiveStatsResponse {
     private Integer totalViewers;
     private Integer currentRequests;
     private Integer totalRequests;
+    private Integer currentVotes;
+    private Integer totalVotes;
 }

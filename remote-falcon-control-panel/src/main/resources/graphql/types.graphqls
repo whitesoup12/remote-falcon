@@ -19,6 +19,11 @@ type Show {
     sequenceGroups: [SequenceGroup]
     psaSequences: [PsaSequence]
     pages: [Page]
+    requests: [Request]
+    votes: [Vote]
+    activeViewers: [ActiveViewer]
+    playingNow: String
+    playingNext: String
 
     serviceToken: String
 }
@@ -49,7 +54,6 @@ type Preference {
     psaEnabled: Boolean
     psaFrequency: Int
     jukeboxRequestLimit: Int
-    jukeboxHistoryLimit: Int
     locationCode: Int
     hideSequenceCount: Int
     makeItSnow: Boolean
@@ -65,28 +69,39 @@ type Sequence {
     displayName: String
     duration: Int
     visible: Boolean
-    votes: Int
-    lastVoteTime: String
-    totalVotes: Int
     index: Int
     order: Int
     imageUrl: String
     active: Boolean
-    ownerVoted: Boolean
     visibilityCount: Int
     type: String
     group: String
     category: String
     artist: String
-    total: Int
 }
 
 type SequenceGroup {
     name: String
-    votes: Int
-    lastVoteTime: String
-    totalVotes: Int
     visibilityCount: Int
+}
+
+type Request {
+    sequence: Sequence
+    position: Int
+    ownerRequested: Boolean
+}
+
+type Vote {
+    sequence: Sequence
+    votes: Int
+    viewersVoted: [String]
+    lastVoteTime: String
+    ownerVoted: Boolean
+}
+
+type ActiveViewer {
+    ipAddress: String
+    visitDateTime: String
 }
 
 type PsaSequence {
@@ -116,11 +131,18 @@ type DashboardLiveStats {
     totalViewers: Int
     currentRequests: Int
     totalRequests: Int
+    currentVotes: Int
+    totalVotes: Int
 }
 
 type Stat {
     date: Long
     total: Int
     unique: Int
-    sequences: [Sequence]
+    sequences: [SequenceStat]
+}
+
+type SequenceStat {
+    name: String
+    total: Int
 }

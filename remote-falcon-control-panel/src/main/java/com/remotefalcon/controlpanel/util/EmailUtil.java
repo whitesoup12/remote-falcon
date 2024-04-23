@@ -1,7 +1,7 @@
 package com.remotefalcon.controlpanel.util;
 
-import com.remotefalcon.controlpanel.documents.Show;
-import com.remotefalcon.controlpanel.enums.EmailTemplate;
+import com.remotefalcon.library.documents.Show;
+import com.remotefalcon.library.enums.EmailTemplate;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
@@ -19,27 +19,27 @@ import java.io.IOException;
 @Slf4j
 public class EmailUtil {
 
-  @Value("${MAIL_FROM}")
+  @Value("${sendgrid.mail-from}")
   String mailFrom;
 
-  @Value("${SENDGRID_KEY}")
+  @Value("${sendgrid.key}")
   String sendgridKey;
 
-  @Value("${BASE_APP_URL}")
-  String baseAppUrl;
+  @Value("${web.url}")
+  String webUrl;
 
   public Response sendSignUpEmail(Show show) {
     Personalization personalization = new Personalization();
     personalization.addTo(new Email(show.getEmail()));
     personalization.addDynamicTemplateData("Show_Name", show.getShowName());
-    personalization.addDynamicTemplateData("Verify_Link", String.format("%s/verifyEmail/%s/%s", baseAppUrl, show.getShowToken(), show.getShowSubdomain()));
+    personalization.addDynamicTemplateData("Verify_Link", String.format("%s/verifyEmail/%s/%s", webUrl, show.getShowToken(), show.getShowSubdomain()));
     return sendEmail(EmailTemplate.SIGN_UP, personalization);
   }
 
   public Response sendForgotPasswordEmail(Show show, String passwordResetLink) {
     Personalization personalization = new Personalization();
     personalization.addTo(new Email(show.getEmail()));
-    personalization.addDynamicTemplateData("Reset_Password_Link", String.format("%s/resetPassword/%s", baseAppUrl, passwordResetLink));
+    personalization.addDynamicTemplateData("Reset_Password_Link", String.format("%s/resetPassword/%s", webUrl, passwordResetLink));
     return sendEmail(EmailTemplate.FORGOT_PASSWORD, personalization);
   }
 

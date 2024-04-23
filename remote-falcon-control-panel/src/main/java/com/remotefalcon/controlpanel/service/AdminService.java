@@ -1,13 +1,11 @@
 package com.remotefalcon.controlpanel.service;
 
-import com.remotefalcon.controlpanel.documents.models.Preference;
-import com.remotefalcon.controlpanel.documents.Show;
-import com.remotefalcon.controlpanel.documents.models.*;
-import com.remotefalcon.controlpanel.documents.models.PsaSequence;
+import com.remotefalcon.library.documents.Show;
+import com.remotefalcon.library.models.*;
 import com.remotefalcon.controlpanel.entity.*;
-import com.remotefalcon.controlpanel.enums.LocationCheckMethod;
-import com.remotefalcon.controlpanel.enums.ShowRole;
-import com.remotefalcon.controlpanel.enums.ViewerControlMode;
+import com.remotefalcon.library.enums.LocationCheckMethod;
+import com.remotefalcon.library.enums.ShowRole;
+import com.remotefalcon.library.enums.ViewerControlMode;
 import com.remotefalcon.controlpanel.repository.*;
 import com.remotefalcon.controlpanel.repository.mongo.ShowRepository;
 import lombok.RequiredArgsConstructor;
@@ -86,6 +84,11 @@ public class AdminService {
                         .facebookUrl(remote.getFacebookUrl())
                         .youtubeUrl(remote.getYoutubeUrl())
                         .build())
+                .requests(new ArrayList<>())
+                .votes(new ArrayList<>())
+                .activeViewers(new ArrayList<>())
+                .playingNow("")
+                .playingNext("")
                 .build();
 
         try {
@@ -154,7 +157,6 @@ public class AdminService {
                     .psaEnabled(remotePreference.getPsaEnabled())
                     .psaFrequency(remotePreference.getPsaFrequency())
                     .jukeboxRequestLimit(remotePreference.getJukeboxRequestLimit())
-                    .jukeboxHistoryLimit(remotePreference.getJukeboxHistoryLimit())
                     .locationCode(locationCode)
                     .hideSequenceCount(remotePreference.getHideSequenceCount())
                     .makeItSnow(remotePreference.getMakeItSnow())
@@ -189,14 +191,10 @@ public class AdminService {
                     .displayName(playlist.getSequenceDisplayName())
                     .duration(playlist.getSequenceDuration())
                     .visible(playlist.getSequenceVisible())
-                    .votes(playlist.getSequenceVotes())
-                    .lastVoteTime(playlist.getSequenceVoteTime() != null ? playlist.getSequenceVoteTime().toLocalDateTime() : null)
-                    .totalVotes(playlist.getSequenceVotesTotal())
                     .index(playlist.getSequenceIndex())
                     .order(playlist.getSequenceOrder())
                     .imageUrl(playlist.getSequenceImageUrl())
                     .active(playlist.getIsSequenceActive())
-                    .ownerVoted(playlist.getOwnerVoted())
                     .visibilityCount(playlist.getSequenceVisibleCount())
                     .type(playlist.getSequenceType())
                     .group(playlist.getSequenceGroup())
@@ -212,9 +210,6 @@ public class AdminService {
         if(playlistGroups != null) {
             playlistGroups.forEach(playlistGroup -> sequenceGroups.add(SequenceGroup.builder()
                     .name(playlistGroup.getSequenceGroupName())
-                    .votes(playlistGroup.getSequenceGroupVotes())
-                    .lastVoteTime(playlistGroup.getSequenceGroupVoteTime() != null ? playlistGroup.getSequenceGroupVoteTime().toLocalDateTime() : null)
-                    .totalVotes(playlistGroup.getSequenceGroupVotesTotal())
                     .visibilityCount(playlistGroup.getSequenceGroupVisibleCount())
                     .build()));
             show.setSequenceGroups(sequenceGroups);

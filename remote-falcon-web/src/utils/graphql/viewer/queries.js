@@ -4,6 +4,8 @@ export const GET_SHOW = gql`
   query @api(name: viewer) {
     getShow {
       showSubdomain
+      playingNow
+      playingNext
       preferences {
         viewerControlEnabled
         viewerControlMode
@@ -17,7 +19,6 @@ export const GET_SHOW = gql`
         psaEnabled
         psaFrequency
         jukeboxRequestLimit
-        jukeboxHistoryLimit
         locationCode
         hideSequenceCount
         makeItSnow
@@ -32,37 +33,45 @@ export const GET_SHOW = gql`
         displayName
         duration
         visible
-        votes
-        lastVoteTime
-        totalVotes
         index
         order
         imageUrl
         active
-        ownerVoted
         visibilityCount
         type
         group
         category
         artist
-        total
       }
       sequenceGroups {
         name
-        votes
-        lastVoteTime
-        totalVotes
         visibilityCount
-      }
-      psaSequences {
-        name
-        order
-        lastPlayed
       }
       pages {
         name
         active
         html
+      }
+      requests {
+        sequence {
+          name
+          displayName
+        }
+        position
+        ownerRequested
+      }
+      votes {
+        sequence {
+          name
+          displayName
+        }
+        votes
+        lastVoteTime
+        ownerVoted
+      }
+      activeViewers {
+        ipAddress
+        visitDateTime
       }
     }
   }

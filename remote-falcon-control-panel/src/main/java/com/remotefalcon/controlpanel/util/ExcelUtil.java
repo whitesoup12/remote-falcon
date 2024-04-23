@@ -140,7 +140,7 @@ public class ExcelUtil {
       cell = row.createCell(1);
       StringBuilder sequenceRequests = new StringBuilder();
       int sequenceRequestIndex = 1;
-      for(DashboardStatsResponse.Sequence sequenceRequest : request.getSequences()) {
+      for(DashboardStatsResponse.SequenceStat sequenceRequest : request.getSequences()) {
         sequenceRequests.append(String.format("%s: %s", sequenceRequest.getName(), sequenceRequest.getTotal()));
         if(request.getSequences().size() > sequenceRequestIndex) {
           sequenceRequests.append("\r\n");
@@ -216,7 +216,7 @@ public class ExcelUtil {
       cell = row.createCell(1);
       StringBuilder sequenceRequests = new StringBuilder();
       int sequenceVoteIndex = 1;
-      for(DashboardStatsResponse.Sequence sequenceVote : vote.getSequences()) {
+      for(DashboardStatsResponse.SequenceStat sequenceVote : vote.getSequences()) {
         sequenceRequests.append(String.format("%s: %s", sequenceVote.getName(), sequenceVote.getTotal()));
         if(vote.getSequences().size() > sequenceVoteIndex) {
           sequenceRequests.append("\r\n");
@@ -292,7 +292,7 @@ public class ExcelUtil {
       cell = row.createCell(1);
       StringBuilder sequenceRequests = new StringBuilder();
       int sequenceVoteIndex = 1;
-      for(DashboardStatsResponse.Sequence sequenceWin : win.getSequences()) {
+      for(DashboardStatsResponse.SequenceStat sequenceWin : win.getSequences()) {
         sequenceRequests.append(String.format("%s: %s", sequenceWin.getName(), sequenceWin.getTotal()));
         if(win.getSequences().size() > sequenceVoteIndex) {
           sequenceRequests.append("\r\n");

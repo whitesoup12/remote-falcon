@@ -7,12 +7,12 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.remotefalcon.controlpanel.documents.Show;
+import com.remotefalcon.library.documents.Show;
 import com.remotefalcon.controlpanel.dto.TokenDTO;
 import com.remotefalcon.controlpanel.dto.ViewerTokenDTO;
 import com.remotefalcon.controlpanel.entity.ExternalApiAccess;
 import com.remotefalcon.controlpanel.entity.Remote;
-import com.remotefalcon.controlpanel.enums.StatusResponse;
+import com.remotefalcon.library.enums.StatusResponse;
 import com.remotefalcon.controlpanel.repository.ExternalApiAccessRepository;
 import com.remotefalcon.controlpanel.repository.RemoteRepository;
 import com.remotefalcon.controlpanel.repository.mongo.ShowRepository;
@@ -37,10 +37,10 @@ public class AuthUtil {
   private final ExternalApiAccessRepository externalApiAccessRepository;
   private final ShowRepository showRepository;
 
-  @Value("${JWT_SIGN_KEY}")
+  @Value("${jwt.user}")
   String jwtSignKey;
 
-  @Value("${JWT_VIEWER_SIGN_KEY}")
+  @Value("${jwt.viewer}")
   String jwtViewerSignKey;
 
   public TokenDTO tokenDTO;

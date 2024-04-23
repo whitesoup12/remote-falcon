@@ -1,24 +1,23 @@
 package com.remotefalcon.controlpanel.service;
 
-import com.remotefalcon.controlpanel.documents.Show;
-import com.remotefalcon.controlpanel.documents.models.Stat;
+import com.remotefalcon.library.documents.Show;
+import com.remotefalcon.library.models.ActiveViewer;
+import com.remotefalcon.library.models.Stat;
 import com.remotefalcon.controlpanel.dto.TokenDTO;
-import com.remotefalcon.controlpanel.enums.StatusResponse;
+import com.remotefalcon.library.enums.StatusResponse;
 import com.remotefalcon.controlpanel.repository.mongo.ShowRepository;
 import com.remotefalcon.controlpanel.response.dashboard.DashboardLiveStatsResponse;
 import com.remotefalcon.controlpanel.response.dashboard.DashboardStatsResponse;
 import com.remotefalcon.controlpanel.util.AuthUtil;
 import com.remotefalcon.controlpanel.util.ExcelUtil;
+import com.remotefalcon.library.models.Vote;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,11 +68,19 @@ public class DashboardService {
     ZonedDateTime startDateAtZone = ZonedDateTime.ofInstant(Instant.ofEpochMilli(startDate), ZoneId.of(timezone));
     ZonedDateTime endDateAtZone = ZonedDateTime.ofInstant(Instant.ofEpochMilli(endDate), ZoneId.of(timezone));
 
+    List<ActiveViewer> filteredActiveViewers = show.get().getActiveViewers().stream()
+            .filter(activeViewer -> activeViewer.getVisitDateTime().isAfter(LocalDateTime.now().minusMinutes(1)))
+            .toList();
+    show.get().setActiveViewers(filteredActiveViewers);
+    this.showRepository.save(show.get());
+
     return DashboardLiveStatsResponse.builder()
-            .activeViewers(0) // TODO
+            .activeViewers(filteredActiveViewers.size())
             .totalViewers(this.buildTotalViewersLiveStat(startDateAtZone, endDateAtZone, timezone, show.get(), false))
-            .currentRequests(0) // TODO
-            .totalRequests(0) // TODO
+            .currentRequests(show.get().getRequests().size())
+            .totalRequests(this.buildTotalRequestsLiveStat(startDateAtZone, endDateAtZone, timezone, show.get(), false))
+            .currentVotes(show.get().getVotes().stream().mapToInt(Vote::getVotes).sum())
+            .totalVotes(this.buildTotalVotesLiveStat(startDateAtZone, endDateAtZone, timezone, show.get(), false))
             .build();
   }
 
@@ -123,16 +130,16 @@ public class DashboardService {
     }
 
     jukeboxStatsGroupedByDate.forEach((date, stat) -> {
-      List<DashboardStatsResponse.Sequence> sequences = new ArrayList<>();
+      List<DashboardStatsResponse.SequenceStat> sequences = new ArrayList<>();
       Map<String, List<Stat.Jukebox>> requests = stat.stream()
               .collect(Collectors.groupingBy(Stat.Jukebox::getName));
-      requests.forEach((sequence, request) -> sequences.add(DashboardStatsResponse.Sequence.builder()
+      requests.forEach((sequence, request) -> sequences.add(DashboardStatsResponse.SequenceStat.builder()
               .total(request.size())
               .name(sequence)
               .build()));
       jukeboxStats.add(DashboardStatsResponse.Stat.builder()
               .sequences(sequences.stream()
-                      .sorted(Comparator.comparing(DashboardStatsResponse.Sequence::getTotal).reversed())
+                      .sorted(Comparator.comparing(DashboardStatsResponse.SequenceStat::getTotal).reversed())
                       .toList())
               .date(ZonedDateTime.of(date, date.atStartOfDay().toLocalTime(), ZoneId.of(timezone)).toInstant().toEpochMilli())
               .total(stat.size())
@@ -145,7 +152,7 @@ public class DashboardService {
   }
 
   private DashboardStatsResponse.Stat buildJukeboxStatsBySequence(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, Show show) {
-    List<DashboardStatsResponse.Sequence> sequences = new ArrayList<>();
+    List<DashboardStatsResponse.SequenceStat> sequences = new ArrayList<>();
 
     Map<String, List<Stat.Jukebox>> jukeboxStatsGroupedBySequence = show.getStats().getJukebox()
             .stream()
@@ -153,12 +160,12 @@ public class DashboardService {
             .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
             .collect(Collectors.groupingBy(Stat.Jukebox::getName));
 
-    jukeboxStatsGroupedBySequence.forEach((sequence, stat) -> sequences.add(DashboardStatsResponse.Sequence.builder()
+    jukeboxStatsGroupedBySequence.forEach((sequence, stat) -> sequences.add(DashboardStatsResponse.SequenceStat.builder()
             .total(stat.size())
             .name(sequence)
             .build()));
 
-    sequences.sort(Comparator.comparing(DashboardStatsResponse.Sequence::getTotal).reversed());
+    sequences.sort(Comparator.comparing(DashboardStatsResponse.SequenceStat::getTotal).reversed());
 
     return DashboardStatsResponse.Stat.builder()
             .sequences(sequences)
@@ -179,16 +186,16 @@ public class DashboardService {
     }
 
     votingStatsGroupedByDate.forEach((date, stat) -> {
-      List<DashboardStatsResponse.Sequence> sequences = new ArrayList<>();
+      List<DashboardStatsResponse.SequenceStat> sequences = new ArrayList<>();
       Map<String, List<Stat.Voting>> votes = stat.stream()
               .collect(Collectors.groupingBy(Stat.Voting::getName));
-      votes.forEach((sequence, vote) -> sequences.add(DashboardStatsResponse.Sequence.builder()
+      votes.forEach((sequence, vote) -> sequences.add(DashboardStatsResponse.SequenceStat.builder()
               .total(vote.size())
               .name(sequence)
               .build()));
       votingStats.add(DashboardStatsResponse.Stat.builder()
               .sequences(sequences.stream()
-                      .sorted(Comparator.comparing(DashboardStatsResponse.Sequence::getTotal).reversed())
+                      .sorted(Comparator.comparing(DashboardStatsResponse.SequenceStat::getTotal).reversed())
                       .toList())
               .date(ZonedDateTime.of(date, date.atStartOfDay().toLocalTime(), ZoneId.of(timezone)).toInstant().toEpochMilli())
               .total(stat.size())
@@ -201,7 +208,7 @@ public class DashboardService {
   }
 
   private DashboardStatsResponse.Stat buildVoteStatsBySequence(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, Show show) {
-    List<DashboardStatsResponse.Sequence> sequences = new ArrayList<>();
+    List<DashboardStatsResponse.SequenceStat> sequences = new ArrayList<>();
 
     Map<String, List<Stat.Voting>> voteStatsGroupedBySequence = show.getStats().getVoting()
             .stream()
@@ -209,12 +216,12 @@ public class DashboardService {
             .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
             .collect(Collectors.groupingBy(Stat.Voting::getName));
 
-    voteStatsGroupedBySequence.forEach((sequence, stat) -> sequences.add(DashboardStatsResponse.Sequence.builder()
+    voteStatsGroupedBySequence.forEach((sequence, stat) -> sequences.add(DashboardStatsResponse.SequenceStat.builder()
             .total(stat.size())
             .name(sequence)
             .build()));
 
-    sequences.sort(Comparator.comparing(DashboardStatsResponse.Sequence::getTotal).reversed());
+    sequences.sort(Comparator.comparing(DashboardStatsResponse.SequenceStat::getTotal).reversed());
 
     return DashboardStatsResponse.Stat.builder()
             .sequences(sequences)
@@ -236,16 +243,16 @@ public class DashboardService {
     }
 
     votingWinStatsGroupedByDate.forEach((date, stat) -> {
-      List<DashboardStatsResponse.Sequence> sequences = new ArrayList<>();
+      List<DashboardStatsResponse.SequenceStat> sequences = new ArrayList<>();
       Map<String, List<Stat.VotingWin>> voteWins = stat.stream()
               .collect(Collectors.groupingBy(Stat.VotingWin::getName));
-      voteWins.forEach((sequence, win) -> sequences.add(DashboardStatsResponse.Sequence.builder()
+      voteWins.forEach((sequence, win) -> sequences.add(DashboardStatsResponse.SequenceStat.builder()
               .total(win.size())
               .name(sequence)
               .build()));
       votingWinStats.add(DashboardStatsResponse.Stat.builder()
               .sequences(sequences.stream()
-                      .sorted(Comparator.comparing(DashboardStatsResponse.Sequence::getTotal).reversed())
+                      .sorted(Comparator.comparing(DashboardStatsResponse.SequenceStat::getTotal).reversed())
                       .toList())
               .date(ZonedDateTime.of(date, date.atStartOfDay().toLocalTime(), ZoneId.of(timezone)).toInstant().toEpochMilli())
               .total(stat.size())
@@ -258,7 +265,7 @@ public class DashboardService {
   }
 
   private DashboardStatsResponse.Stat buildVoteWinStatsBySequence(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, Show show) {
-    List<DashboardStatsResponse.Sequence> sequences = new ArrayList<>();
+    List<DashboardStatsResponse.SequenceStat> sequences = new ArrayList<>();
 
     Map<String, List<Stat.VotingWin>> voteWinStatsGroupedBySequence = show.getStats().getVotingWin()
             .stream()
@@ -266,12 +273,12 @@ public class DashboardService {
             .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
             .collect(Collectors.groupingBy(Stat.VotingWin::getName));
 
-    voteWinStatsGroupedBySequence.forEach((sequence, stat) -> sequences.add(DashboardStatsResponse.Sequence.builder()
+    voteWinStatsGroupedBySequence.forEach((sequence, stat) -> sequences.add(DashboardStatsResponse.SequenceStat.builder()
             .total(stat.size())
             .name(sequence)
             .build()));
 
-    sequences.sort(Comparator.comparing(DashboardStatsResponse.Sequence::getTotal).reversed());
+    sequences.sort(Comparator.comparing(DashboardStatsResponse.SequenceStat::getTotal).reversed());
 
     return DashboardStatsResponse.Stat.builder()
             .sequences(sequences)
@@ -299,6 +306,54 @@ public class DashboardService {
 
     return pageStats.stream()
             .mapToInt(DashboardStatsResponse.Stat::getUnique)
+            .sum();
+  }
+
+  private Integer buildTotalRequestsLiveStat(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, String timezone, Show show, Boolean fillDays) {
+    List<DashboardStatsResponse.Stat> jukeboxStats = new ArrayList<>();
+
+    Map<LocalDate, List<Stat.Jukebox>> jukeboxStatsGroupedByDate = show.getStats().getJukebox()
+            .stream()
+            .filter(stat -> stat.getDateTime().isAfter(startDateAtZone.toLocalDateTime()))
+            .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
+            .collect(Collectors.groupingBy(stat -> stat.getDateTime().toLocalDate()));
+
+    if(fillDays) {
+      this.fillStatDateGaps(startDateAtZone, endDateAtZone, jukeboxStatsGroupedByDate);
+    }
+
+    jukeboxStatsGroupedByDate.forEach((date, stat) -> jukeboxStats.add(DashboardStatsResponse.Stat.builder()
+            .date(ZonedDateTime.of(date, date.atStartOfDay().toLocalTime(), ZoneId.of(timezone)).toInstant().toEpochMilli())
+            .total(stat.size())
+            .unique(stat.stream().collect(Collectors.groupingBy(Stat.Jukebox::getName)).size())
+            .build()));
+
+    return jukeboxStats.stream()
+            .mapToInt(DashboardStatsResponse.Stat::getTotal)
+            .sum();
+  }
+
+  private Integer buildTotalVotesLiveStat(ZonedDateTime startDateAtZone, ZonedDateTime endDateAtZone, String timezone, Show show, Boolean fillDays) {
+    List<DashboardStatsResponse.Stat> voteStats = new ArrayList<>();
+
+    Map<LocalDate, List<Stat.Voting>> voteStatsGroupedByDate = show.getStats().getVoting()
+            .stream()
+            .filter(stat -> stat.getDateTime().isAfter(startDateAtZone.toLocalDateTime()))
+            .filter(stat -> stat.getDateTime().isBefore(endDateAtZone.toLocalDateTime()))
+            .collect(Collectors.groupingBy(stat -> stat.getDateTime().toLocalDate()));
+
+    if(fillDays) {
+      this.fillStatDateGaps(startDateAtZone, endDateAtZone, voteStatsGroupedByDate);
+    }
+
+    voteStatsGroupedByDate.forEach((date, stat) -> voteStats.add(DashboardStatsResponse.Stat.builder()
+            .date(ZonedDateTime.of(date, date.atStartOfDay().toLocalTime(), ZoneId.of(timezone)).toInstant().toEpochMilli())
+            .total(stat.size())
+            .unique(stat.stream().collect(Collectors.groupingBy(Stat.Voting::getName)).size())
+            .build()));
+
+    return voteStats.stream()
+            .mapToInt(DashboardStatsResponse.Stat::getTotal)
             .sum();
   }
 

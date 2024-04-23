@@ -7,7 +7,7 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.remotefalcon.viewer.dto.TokenDTO;
-import com.remotefalcon.viewer.enums.StatusResponse;
+import com.remotefalcon.library.enums.StatusResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class AuthUtil {
-  @Value("${JWT_SIGN_KEY}")
+  @Value("${jwt.viewer}")
   String jwtSignKey;
 
   public TokenDTO tokenDTO;

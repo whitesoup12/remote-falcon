@@ -30,9 +30,6 @@ const CreateNewSequenceGroup = ({ handleClose }) => {
       ...show?.sequenceGroups,
       {
         name: groupName,
-        votes: 0,
-        lastVoteTime: '1999-01-01T00:00:00',
-        totalVotes: 0,
         visibilityCount: 0
       }
     ]);
