@@ -8,6 +8,14 @@
     <packaging>jar</packaging>
     <name>remote-falcon-library</name>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub whitesoup12 Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/whitesoup12/remote-falcon</url>
+        </repository>
+    </distributionManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -45,18 +53,6 @@
                 <directory>src/main/java</directory>
             </resource>
         </resources>
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.sonatype.central</groupId>-->
-<!--                <artifactId>central-publishing-maven-plugin</artifactId>-->
-<!--                <version>0.4.0</version>-->
-<!--                <extensions>true</extensions>-->
-<!--                <configuration>-->
-<!--                    <publishingServerId>central</publishingServerId>-->
-<!--                    <tokenAuth>true</tokenAuth>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
     </build>
 
 </project>

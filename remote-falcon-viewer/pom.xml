@@ -173,8 +173,6 @@
             <groupId>com.remotefalcon</groupId>
             <artifactId>remote-falcon-library</artifactId>
             <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../remote-falcon-library/target/remote-falcon-library.jar</systemPath>
         </dependency>
     </dependencies>
 
