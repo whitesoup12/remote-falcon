@@ -1,11 +1,11 @@
-name: Build and Publish Remote Falcon API
+name: Build and Push remote-falcon-control-panel
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'remote-falcon-api/**'
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'remote-falcon-control-panel/**'
 jobs:
   build:
     name: Build image and push
@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -26,6 +26,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./remote-falcon-api
+          context: ./remote-falcon-control-panel
           push: true
-          tags: whitesoup12/remote-falcon-api:${{ github.sha }}
+          tags: whitesoup12/remote-falcon-control-panel:${{ github.sha }}
